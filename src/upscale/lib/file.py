@@ -20,6 +20,10 @@ class File(Unpickle):
         self.path = path
         self.timestamp = 0
 
+    def setPath(self, path):
+        self.path = path
+        self.basename = os.path.basename(path) if path else None
+
 
 class InputFile(File):
 
@@ -47,5 +51,8 @@ class OutputFile(File):
         self.baseFile = baseFile
         self.operation = operation
 
-        self.origPath = path
+        if baseFile is not None:
+            self.origPath = baseFile.path
+        else:
+            self.origPath = path
         self.postprocess = postprocess

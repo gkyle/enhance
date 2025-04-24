@@ -2,14 +2,17 @@ from enum import Enum
 from typing import List, Any, Dict
 import jsonpickle
 import os
-import torch
 import GPUtil
 import sys
 
+# Use deferred loading for torch and modules that use torch to reduce startup latency.
+from deferred_import import deferred_import
+torch = deferred_import('torch')
+
 from upscale.lib.file import File, InputFile, OutputFile
 from upscale.lib.util import Observable
-from upscale.op.sharpen_sr import SharpenBasicSR
 
+sharpen_sr = deferred_import('upscale.op.sharpen_sr')
 
 class Operation(Enum):
     Sharpen = "Sharpen"
@@ -22,7 +25,15 @@ class App:
         self.baseFile: InputFile = None
         self.rawFiles: List[File] = []
         if len(sys.argv) > 1:
-            self.setBaseFile(sys.argv[1])
+            if os.path.exists(sys.argv[1]):
+                if os.path.isdir(sys.argv[1]):
+                    dirname = sys.argv[1]
+                    files = os.listdir(sys.argv[1])
+                    print("file:", dirname + "/" + files[0])
+                    self.setBaseFile(dirname + "/" + files[0])
+                else:
+                    print("file:", sys.argv[1])
+                    self.setBaseFile(sys.argv[1])
         if len(sys.argv) > 2:
             for i in range(2, len(sys.argv)):
                 self.appendFile(sys.argv[i])
@@ -43,10 +54,7 @@ class App:
         self.rawFiles = []
 
     def appendFile(self, path: str, baseFile: InputFile = None, operation: Operation = None) -> File:
-        if baseFile is not None:
-            file = OutputFile(path, baseFile, operation)
-        else:
-            file = InputFile(path)
+        file = OutputFile(path, baseFile, operation)
         self.rawFiles.append(file)
         return file
 
@@ -63,12 +71,12 @@ class App:
         return models
 
     def doSharpen(self, file: InputFile, modelName: str, doBlur: bool, blurKernelSize: int, doBlend: bool, blendFactor: float,  progressBar, useGpu: bool) -> OutputFile:
-        sharpenSR = SharpenBasicSR(modelName, useGpu)
+        sharpenSR = sharpen_sr.SharpenBasicSR(modelName, useGpu)
         sharpenSR.addObserver(progressBar)
         self.activeOperation = sharpenSR
         outpath = sharpenSR.sharpen(file.path, doBlur, blurKernelSize, doBlend, blendFactor)
         sharpenSR.removeObserver(progressBar)
-        outfile = self.appendFile(outpath, file, Operation.Sharpen)
+        outfile = self.appendFile(outpath, None, Operation.Sharpen)
         return outfile
 
     def doInterruptOperation(self):

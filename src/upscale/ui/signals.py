@@ -36,28 +36,19 @@ class Signals(QObject):
     selectBaseFile: Signal = Signal(File)
     selectCompareFile: Signal = Signal(File)
     updateIndicator: Signal = Signal(File, int)
-
     updateGPUStats: Signal = Signal()
-    # findBrightestFrame: Signal = Signal(File, int, int)
-
     updateFile: Signal = Signal(File)
     updateFileButton: Signal = Signal(File)
 
-    # makeButton: Signal = Signal(File, int)
     addFileButton: Signal = Signal(QWidget, QPushButton, bool)
     focusFile: Signal = Signal(File)
-    selectFile1: Signal = Signal(File)
-    selectFile2: Signal = Signal(File)
-    selectFile3: Signal = Signal(File)
-    selectFile4: Signal = Signal(File)
     updateThumbnails: Signal = Signal(QWidget)
     updateThumbnail: Signal = Signal(QFrame, QWidget)
     drawFileList: Signal = Signal(File)
     appendFile: Signal = Signal(File)
-    # drawOutputFileList: Signal = Signal(File)
 
     removeFile: Signal = Signal(File, QPushButton)
-    excludeFile: Signal = Signal(File, QPushButton)
+    saveFile: Signal = Signal(File, QPushButton)
 
     windowResized: Signal = Signal(QEvent)
     windowMoved: Signal = Signal(QEvent)

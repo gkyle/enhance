@@ -144,6 +144,11 @@ class FileStrip:
             button = self.buttons[file]
             button.updateIndicator(idx)
 
+    def getButton(self, file: File):
+        if file in self.buttons:
+            return self.buttons[file]
+        return None
+
 
 class IconLabel(QLabel):
     def __init__(self, file: File = None):
@@ -166,7 +171,19 @@ class IconLabel(QLabel):
             image = Image.open(file.path)
             image.thumbnail((FILE_IMAGE_SIZE, FILE_IMAGE_SIZE))
             qt_image = ImageQt(image)
-            self.pixmap = QPixmap.fromImage(qt_image)
+            pixmap = QPixmap.fromImage(qt_image)
+
+            self.pixmap = QPixmap(FILE_IMAGE_SIZE, FILE_IMAGE_SIZE)
+            self.pixmap.fill(QColor(128, 128, 128))
+            painter = QPainter(self.pixmap)
+            offset_x = 0
+            offset_y = 0
+            if pixmap.width() < FILE_IMAGE_SIZE:
+                offset_x = (FILE_IMAGE_SIZE - pixmap.width()) / 2
+            if pixmap.height() < FILE_IMAGE_SIZE:
+                offset_y = (FILE_IMAGE_SIZE - pixmap.height()) / 2
+            painter.drawPixmap(offset_x, offset_y, pixmap)
+            painter.end()
         except:
             pass
 
@@ -202,18 +219,20 @@ class FileButton(QPushButton):
         self.file = file
         self.signals = signals
         self.renderedThumbnail = False
+        self.draw()
 
+    def draw(self):
         self.iconLabel = IconLabel()
-        self.objectName = file.basename
+        self.objectName = self.file.basename
         placeHolder = QPixmap(FILE_IMAGE_SIZE, FILE_IMAGE_SIZE)
         placeHolder.fill(QColor(0, 0, 0, 0))
 
-        textLabel = QLabel(file.basename)
-        textLabel.setAlignment(Qt.AlignCenter)
-        textLabel.setFont(QFont("Arial", 9))
-        metrics = QFontMetrics(textLabel.font())
-        clippedText = metrics.elidedText(file.basename, Qt.TextElideMode.ElideMiddle, FILE_IMAGE_SIZE)
-        textLabel.setText(clippedText)
+        self.textLabel = QLabel(self.file.basename)
+        self.textLabel.setAlignment(Qt.AlignCenter)
+        self.textLabel.setFont(QFont("Arial", 9))
+        metrics = QFontMetrics(self.textLabel.font())
+        clippedText = metrics.elidedText(self.file.basename, Qt.TextElideMode.ElideMiddle, FILE_IMAGE_SIZE)
+        self.textLabel.setText(clippedText)
 
         layout = QVBoxLayout(self)
         self.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
@@ -221,7 +240,7 @@ class FileButton(QPushButton):
         layout.setContentsMargins(4, 9, 4, 9)
         layout.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.iconLabel)
-        layout.addWidget(textLabel)
+        layout.addWidget(self.textLabel)
 
         # timer to distinguish double / single clicks
         self.timer = QTimer(self)
@@ -229,6 +248,11 @@ class FileButton(QPushButton):
         self.timer.timeout.connect(lambda: self.delayedMousePressEvent(self.click_pending_event))
         self.click_pending = False
         self.click_pending_event = None
+
+    def updateTextLabel(self):
+        metrics = QFontMetrics(self.textLabel.font())
+        clippedText = metrics.elidedText(self.file.basename, Qt.TextElideMode.ElideMiddle, FILE_IMAGE_SIZE)
+        self.textLabel.setText(clippedText)
 
     def focusOutEvent(self, arg__1):
         return super().focusOutEvent(arg__1)
@@ -252,6 +276,8 @@ class FileButton(QPushButton):
             menu = QMenu(self)
             actionRemove = menu.addAction("Remove from Project")
             actionRemove.triggered.connect(self.actionRemove)
+            actionSave = menu.addAction("Save to File")
+            actionSave.triggered.connect(self.actionSaveFile)
 
             menu.exec_(e.globalPos())
         else:
@@ -305,3 +331,6 @@ class FileButton(QPushButton):
 
     def actionRemove(self):
         self.signals.removeFile.emit(self.file, self)
+
+    def actionSaveFile(self):
+        self.signals.saveFile.emit(self.file, self)

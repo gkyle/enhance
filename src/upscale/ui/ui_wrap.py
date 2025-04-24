@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from typing import Optional
 from PySide6.QtGui import (QPixmap, QGuiApplication)
@@ -11,7 +12,7 @@ import cv2
 from upscale.app import App, Operation
 from upscale.lib.file import File, InputFile, OutputFile, PostProcess, PostProcessOperation
 from upscale.ui.canvasLabel import CanvasLabel
-from upscale.ui.filestrip import FileStrip
+from upscale.ui.filestrip import FileButton, FileStrip
 from upscale.ui.progress import ProgressBarUpdater
 from upscale.ui.selectionManager import SelectionManager
 from upscale.ui.signals import AsyncWorker, emitLater, getSignals
@@ -112,6 +113,7 @@ class Ui_AppWindow(Ui_MainWindow):
 
         self.signals.incrementProgress.connect(self.slotIncrementProgressBar)
         self.signals.removeFile.connect(self.slotRemoveFile)
+        self.signals.saveFile.connect(self.slotSaveFile)
         self.signals.changeZoom.connect(self.slotChangeZoom)
         self.signals.showFiles.connect(self.showFiles)
 
@@ -181,6 +183,12 @@ class Ui_AppWindow(Ui_MainWindow):
         self.selectionManager.removeFile(file)
         self.fileStrip.removeButton(file)
 
+    def slotSaveFile(self, file: OutputFile, button: FileButton):
+        if file is not None:
+            targetDir = os.path.dirname(self.selectionManager.getBaseFile().path)
+            newPath = os.path.join(targetDir, os.path.basename(file.path))
+            shutil.copyfile(file.path, newPath)
+
     def slotUpdateGPUStats(self):
         cudaStats = self.app.getGpuStats()
         if cudaStats is None:
@@ -234,7 +242,7 @@ class Ui_AppWindow(Ui_MainWindow):
         compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
             if type(compareFile) == OutputFile and compareFile.operation == Operation.Sharpen:
-                baseFile = compareFile.baseFile
+                baseFile = self.selectionManager.getBaseFile()
                 blendFactor = self.horizontalSlider_blend.value() / 100
 
                 baseImg = cv2.imread(baseFile.path, cv2.IMREAD_UNCHANGED)
@@ -242,9 +250,10 @@ class Ui_AppWindow(Ui_MainWindow):
                 newImg = cv2.addWeighted(baseImg, blendFactor, compareImg, 1 - blendFactor, 0)
 
                 newPath = saveToCache(newImg, os.path.basename(baseFile.path))
-                compareFile.path = newPath
+                compareFile.setPath(newPath)
                 compareFile.postprocess[PostProcessOperation.Blend] = \
                     PostProcess(PostProcessOperation.Blend, {"blendFactor": blendFactor})
+                self.fileStrip.getButton(compareFile).updateTextLabel()
 
                 self.signals.showFiles.emit()
 

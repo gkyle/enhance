@@ -64,14 +64,14 @@ class CanvasLabel(QLabel):
             blankImg = np.zeros((h, w, 3), np.uint8)
             blankImg[0:h, 0:int(w * self.fraction)] = self.img1[0:h, 0:int(w * self.fraction)]
             blankImg[0:h, int(w * (self.fraction)):w] = self.img2[0:h, int(w * (self.fraction)):w]
-            blankImg[0:h, int(self.fraction * w) - 1:int(self.fraction * w) + 1] = (0, 255, 0)
+            blankImg[0:h, int(self.fraction * w) - 2:int(self.fraction * w) + 2] = (0, 255, 0)
             newPixmap = QPixmap.fromImage(QImage(blankImg.data, blankImg.shape[1], blankImg.shape[0],
                                                  blankImg.shape[1] * 3, QImage.Format_BGR888))
             self.setPixmap(newPixmap, True)
             self.repaint()
 
         elif self.renderMode == RenderMode.Grid:
-            # For grid view, we draw 4 pixmap for each paint operation. See paintGrid().
+            # For grid view, we redraw 4 pixmap for each paint operation. See paintGrid().
             pass
 
     # We load files here with 8bits/channel for consistent display via QPixmap. This doesn't impact how we work with channels in models.
@@ -105,7 +105,7 @@ class CanvasLabel(QLabel):
             self.setPixmap(QPixmap(), True)
 
         self.updateFraction(self.fraction * 100)
-        if resetView:
+        if resetView or len(self.selectionManager.compare) == 0:
             self.setZoomFactor(ZoomLevel.FIT)
         self.repaint()
 
@@ -118,7 +118,7 @@ class CanvasLabel(QLabel):
 
         if doResetZoomAndPosition:
             self.scale = None
-            self.updatePixMapDimensions()
+            #self.updatePixMapDimensions()
 
             # Presevering zoom / position after user actions, but need to perform at initial load
             if self.zoomFactor == 1:

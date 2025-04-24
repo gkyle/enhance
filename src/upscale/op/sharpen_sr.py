@@ -11,7 +11,7 @@ from upscale.lib.util import Observable
 from upscale.op.sharpen_sr_utils import TiledSRProcessor
 from upscale.ui.common import saveToCache
 
-DEFAULT_TILE_SIZE = 512
+DEFAULT_TILE_SIZE = 128
 
 
 # Sharpen via super resolution model based on BasicSR
@@ -34,7 +34,7 @@ class SharpenBasicSR(Observable):
         self.config = json.load(open(configPath, "r"))
 
         self.tileSize = DEFAULT_TILE_SIZE
-        self.halfPrecision = True
+        self.halfPrecision = False
         self.padToWindowSize = 0
 
     def sharpen(self, imgPath, doBlur: bool = True, blurKernelSize: int = 5, doBlend: bool = True, blendFactor: float = 0.5):
