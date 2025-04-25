@@ -1,3 +1,5 @@
+from upscale.lib.util import Observable
+from upscale.lib.file import File, InputFile, OutputFile
 from enum import Enum
 from typing import List, Any, Dict
 import jsonpickle
@@ -9,10 +11,9 @@ import sys
 from deferred_import import deferred_import
 torch = deferred_import('torch')
 
-from upscale.lib.file import File, InputFile, OutputFile
-from upscale.lib.util import Observable
 
 sharpen_sr = deferred_import('upscale.op.sharpen_sr')
+
 
 class Operation(Enum):
     Sharpen = "Sharpen"
@@ -29,10 +30,8 @@ class App:
                 if os.path.isdir(sys.argv[1]):
                     dirname = sys.argv[1]
                     files = os.listdir(sys.argv[1])
-                    print("file:", dirname + "/" + files[0])
                     self.setBaseFile(dirname + "/" + files[0])
                 else:
-                    print("file:", sys.argv[1])
                     self.setBaseFile(sys.argv[1])
         if len(sys.argv) > 2:
             for i in range(2, len(sys.argv)):
@@ -70,12 +69,15 @@ class App:
         models = sorted(models)
         return models
 
+    # TODO: Support variable tile size
     def doSharpen(self, file: InputFile, modelName: str, doBlur: bool, blurKernelSize: int, doBlend: bool, blendFactor: float,  progressBar, useGpu: bool) -> OutputFile:
-        sharpenSR = sharpen_sr.SharpenBasicSR(modelName, useGpu)
+        sharpenSR = sharpen_sr.SharpenBasicSR(modelName, 128, useGpu)
         sharpenSR.addObserver(progressBar)
         self.activeOperation = sharpenSR
         outpath = sharpenSR.sharpen(file.path, doBlur, blurKernelSize, doBlend, blendFactor)
         sharpenSR.removeObserver(progressBar)
+        if outpath is None:
+            return None
         outfile = self.appendFile(outpath, None, Operation.Sharpen)
         return outfile
 

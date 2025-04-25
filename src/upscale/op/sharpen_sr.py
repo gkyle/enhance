@@ -3,12 +3,12 @@ import cv2
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from basicsr.archs.srresnet_arch import MSRResNet
 from basicsr.archs.swinir_arch import SwinIR
-import time
 import json
-from PIL import Image
+import torch
 
+from upscale.models.fpn_inception import FPNInception
 from upscale.lib.util import Observable
-from upscale.op.sharpen_sr_utils import TiledSRProcessor
+from upscale.op.simple_tile_processor import TileProcessor
 from upscale.ui.common import saveToCache
 
 DEFAULT_TILE_SIZE = 128
@@ -16,7 +16,7 @@ DEFAULT_TILE_SIZE = 128
 
 # Sharpen via super resolution model based on BasicSR
 class SharpenBasicSR(Observable):
-    def __init__(self, modelPath: str, useGpu: bool):
+    def __init__(self, modelPath: str, tileSize: int, useGpu: bool):
         super().__init__()
         self.modelPath = modelPath
         self.useGpu = useGpu
@@ -24,22 +24,22 @@ class SharpenBasicSR(Observable):
             self.device = "cuda"
         else:
             self.device = "cpu"
+
         fileBaseName = os.path.basename(modelPath)
         fileBaseName, _ = os.path.splitext(fileBaseName)
         modelDir = os.path.dirname(modelPath)
         dirBaseName = os.path.basename(modelDir)
         dirBaseName, _ = os.path.splitext(dirBaseName)
         self.modelName = dirBaseName + "_" + fileBaseName
+
         configPath = os.path.join(modelDir, "config.json")
         self.config = json.load(open(configPath, "r"))
 
-        self.tileSize = DEFAULT_TILE_SIZE
+        self.tileSize = tileSize
         self.halfPrecision = False
         self.padToWindowSize = 0
 
-    def sharpen(self, imgPath, doBlur: bool = True, blurKernelSize: int = 5, doBlend: bool = True, blendFactor: float = 0.5):
-        model = None
-
+    def loadModel(self):
         if self.config["model_type"] == "RRDBNet":
             model = RRDBNet(**self.config["model_params"])
             scale = self.config["model_params"]["scale"]
@@ -52,24 +52,35 @@ class SharpenBasicSR(Observable):
             self.tileSize = self.config["model_params"]["img_size"]
             self.halfPrecision = False
             self.padToWindowSize = self.config["model_params"]["window_size"]
+        elif self.config["model_type"] == "FPNInception":
+            model = FPNInception(**self.config["model_params"])
+            scale = 1
+            self.padToWindowSize = 128
         else:
             raise ValueError("Unsupported model type: " + self.config["model_type"])
 
-        upsampler = TiledSRProcessor(
-            scale=scale,
-            model_path=self.modelPath,
+        if not model is None:
+            model.load_state_dict(torch.load(self.modelPath)['params'], strict=True)
+            model.eval()
+
+        return model, scale
+
+    def sharpen(self, imgPath, doBlur: bool = True, blurKernelSize: int = 5, doBlend: bool = True, blendFactor: float = 0.5):
+        model, scale = self.loadModel()
+
+        processor = TileProcessor(
             model=model,
-            tile=self.tileSize,
+            tile_size=self.tileSize,
             tile_pad=10,
-            pre_pad=0,
-            half=self.halfPrecision,
+            scale=scale,
             device=self.device,
-            pad_to_window_size=self.padToWindowSize,
+            observer=self,
         )
-        upsampler.setObserver(self)
 
         img = cv2.imread(imgPath, cv2.IMREAD_UNCHANGED)
-        output, _ = upsampler.enhance(img, outscale=scale)
+        output = processor.process_image(img)
+        if output is None:
+            return None
         pathExtra = "_" + self.modelName
 
         # Apply blur to upscaled image

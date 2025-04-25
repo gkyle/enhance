@@ -9,10 +9,12 @@ dependencies = [
     "deferred-import>=0.1.0",
     "exif",
     "gputil>=1.4.0",
+    "ipykernel>=6.29.5",
     "jsonpickle>=4.0.5",
     "numpy",
     "opencv-python-headless>=4.11.0.86",
-    "pillow",
+    "pillow>=11.2.1",
+    "pretrainedmodels>=0.7.4",
     "pyside6>=6.9.0",
     "realesrgan>=0.3.0",
 ]

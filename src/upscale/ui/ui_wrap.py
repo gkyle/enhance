@@ -99,6 +99,7 @@ class Ui_AppWindow(Ui_MainWindow):
         self.frame_postprocess_sharpen.hide()
 
         # Bind events
+        self.pushButton_cancelOp.clicked.connect(self.doCancelOp)
         self.pushButton_clear.clicked.connect(self.doClear)
         self.pushButton_open.clicked.connect(self.doOpen)
         self.pushButton_run.clicked.connect(self.doRun)
@@ -160,6 +161,8 @@ class Ui_AppWindow(Ui_MainWindow):
                         self.progressBar, self.label_progressBar, total=1, desc="Sharpen:")
                     result = self.app.doSharpen(file, selectedModel, doBlur,
                                                 blurKernelSize, doBlend, blendFactor, progressUpdater.tick, useGpu)
+                    if result is None:
+                        return
                     self.signals.appendFile.emit(result)
                     self.selectionManager.selectCompare(result)
 
