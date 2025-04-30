@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
         # timer for updating GPU stats
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.ui.slotUpdateGPUStats)
-        self.timer.start(10000)
+        self.timer.start(5000)
 
     def center(self):
         screen = QGuiApplication.primaryScreen().availableGeometry()
@@ -116,7 +116,7 @@ class Ui_AppWindow(Ui_MainWindow):
         self.signals.removeFile.connect(self.slotRemoveFile)
         self.signals.saveFile.connect(self.slotSaveFile)
         self.signals.changeZoom.connect(self.slotChangeZoom)
-        self.signals.showFiles.connect(self.showFiles)
+        self.signals.selectCompareFile.connect(self.renderPostProcess)
 
         self.fileStrip = FileStrip(self.frame_inputFile, self.frame_outputFiles, self.frame_filesContainer, self.app,
                                    self.selectionManager, self.signals.drawFileList)
@@ -164,7 +164,7 @@ class Ui_AppWindow(Ui_MainWindow):
                     if result is None:
                         return
                     self.signals.appendFile.emit(result)
-                    self.selectionManager.selectCompare(result)
+                    self.signals.selectCompareFile.emit(result)
 
             worker = AsyncWorker(partial(f))
             self.op_queue.start(worker)
@@ -202,9 +202,6 @@ class Ui_AppWindow(Ui_MainWindow):
     def slotChangeZoom(self, zoomFactor: float):
         self.pushButton_zoom.setText(str(int(zoomFactor * 100)) + "%")
 
-    def slotSetRenderMode(self, mode: RenderMode):
-        self.canvas_main.setRenderMode(mode)
-
     def showZoomMenu(self):
         menu = QMenu("Select Zoom")
         menu.addAction("FIT", lambda: self.canvas_main.setZoomFactor(ZoomLevel.FIT))
@@ -223,16 +220,16 @@ class Ui_AppWindow(Ui_MainWindow):
         self.persistentSettings["windowPosition"] = event.pos()
         self.app.updateWindowSettings(self.persistentSettings)
 
-    def showFiles(self):
+    def renderPostProcess(self, compareFile: OutputFile):
         self.frame_postprocess_sharpen.hide()
-        compareFile = self.selectionManager.getCompareFile(0)
+        if compareFile is None:
+            compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
             if type(compareFile) == OutputFile and compareFile.operation == Operation.Sharpen:
                 self.horizontalSlider_blend.setValue(0)
                 self.frame_postprocess_sharpen.show()
 
-                if compareFile.postprocess is not None and \
-                        PostProcessOperation.Blend in compareFile.postprocess:
+                if compareFile.postprocess is not None and PostProcessOperation.Blend in compareFile.postprocess:
                     if "blendFactor" in compareFile.postprocess[PostProcessOperation.Blend].parameters:
                         blendFactor = compareFile.postprocess[PostProcessOperation.Blend].parameters["blendFactor"]
                         self.horizontalSlider_blend.setValue(int(blendFactor * 100))
@@ -257,7 +254,6 @@ class Ui_AppWindow(Ui_MainWindow):
                 compareFile.postprocess[PostProcessOperation.Blend] = \
                     PostProcess(PostProcessOperation.Blend, {"blendFactor": blendFactor})
                 self.fileStrip.getButton(compareFile).updateTextLabel()
-
                 self.signals.showFiles.emit()
 
                 # TODO: Store metadata about post processing on the file

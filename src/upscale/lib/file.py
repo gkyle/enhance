@@ -45,7 +45,7 @@ class PostProcess():
 
 class OutputFile(File):
 
-    def __init__(self, path, baseFile: File, operation=None, postprocess: dict = {}):
+    def __init__(self, path, baseFile: File, operation=None, postprocess: dict=None):
         super().__init__(path)
 
         self.baseFile = baseFile
@@ -55,4 +55,7 @@ class OutputFile(File):
             self.origPath = baseFile.path
         else:
             self.origPath = path
+
         self.postprocess = postprocess
+        if self.postprocess is None:
+            self.postprocess = {}

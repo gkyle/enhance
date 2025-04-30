@@ -17,6 +17,7 @@ class SelectionManager:
 
         self.signals.selectCompareFile.connect(self.selectCompare)
         self.signals.selectBaseFile.connect(self.selectBase)
+        self.signals.setRenderMode.connect(self.setRenderMode)
 
     def selectBase(self, file):
         if file == self.base:
@@ -90,3 +91,6 @@ class SelectionManager:
         if idx >= len(self.compare):
             return ""
         return self.compare[idx].basename
+
+    def setRenderMode(self, mode: RenderMode):
+        self.renderMode = mode

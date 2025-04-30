@@ -34,9 +34,6 @@ class CanvasLabel(QLabel):
         self.signals.setRenderMode.connect(self.setRenderMode)
 
         self.antialias = False
-
-        self.scale: Optional[float] = None
-
         self.setAlignment(Qt.AlignCenter)
         self.setFont(QFont("Arial", 20, QFont.Bold))
 
@@ -67,7 +64,7 @@ class CanvasLabel(QLabel):
             blankImg[0:h, int(self.fraction * w) - 2:int(self.fraction * w) + 2] = (0, 255, 0)
             newPixmap = QPixmap.fromImage(QImage(blankImg.data, blankImg.shape[1], blankImg.shape[0],
                                                  blankImg.shape[1] * 3, QImage.Format_BGR888))
-            self.setPixmap(newPixmap, True)
+            self.setPixmap(newPixmap, False)
             self.repaint()
 
         elif self.renderMode == RenderMode.Grid:
@@ -117,9 +114,6 @@ class CanvasLabel(QLabel):
             self.setText("")
 
         if doResetZoomAndPosition:
-            self.scale = None
-            #self.updatePixMapDimensions()
-
             # Presevering zoom / position after user actions, but need to perform at initial load
             if self.zoomFactor == 1:
                 self.resetZoomAndPosition()
@@ -302,7 +296,6 @@ class CanvasLabel(QLabel):
                     renderWidth = int(imageWidth * self.zoomFactor)
                     renderHeight = int(imageHeight * self.zoomFactor)
 
-            self.scale = renderWidth / imageWidth
             return renderWidth, renderHeight
 
         return None, None
