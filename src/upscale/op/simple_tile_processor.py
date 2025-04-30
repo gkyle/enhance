@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import torch
 from torch.nn import functional as F
@@ -101,8 +102,8 @@ class TileProcessor:
         scaled_tile_size = actual_tile_size * self.scale
         scaled_tile_pad = self.tile_pad * self.scale
         b, c, h, w = self.img_tensor.shape
-        xtiles = w // actual_tile_size
-        ytiles = h // actual_tile_size
+        xtiles = math.ceil(w / actual_tile_size)
+        ytiles = math.ceil(h / actual_tile_size)
         if not self.observer is None:
             self.observer.startJob(xtiles * ytiles)
 
@@ -123,7 +124,16 @@ class TileProcessor:
 
                 px = x * scaled_tile_size
                 py = y * scaled_tile_size
-                output_tensor[:, :, py:py+scaled_tile_size, px:px+scaled_tile_size] = processed_tile
+
+                # Trim tiles that exceed the image boundary (right and bottom edges)
+                trimmed_scaled_tile_size_x = scaled_tile_size
+                trimmed_scaled_tile_size_y = scaled_tile_size
+                if px + scaled_tile_size > output_tensor.shape[3]:
+                    trimmed_scaled_tile_size_x = output_tensor.shape[3] - px
+                if py + scaled_tile_size > output_tensor.shape[2]:
+                    trimmed_scaled_tile_size_y = output_tensor.shape[2] - py
+                output_tensor[:, :, py:py+trimmed_scaled_tile_size_y, px:px+trimmed_scaled_tile_size_x] = \
+                    processed_tile[:, :, 0:trimmed_scaled_tile_size_y, 0:trimmed_scaled_tile_size_x]
 
                 if self.observer is not None:
                     self.observer.updateJob(1)
