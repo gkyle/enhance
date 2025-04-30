@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfaceVuzMUs.ui'
+## Form generated from reading UI file 'interfacejLHkJA.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -117,6 +117,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
         self.label_progressBar = QLabel(self.frame_progressBar)
         self.label_progressBar.setObjectName(u"label_progressBar")
+        font1 = QFont()
+        font1.setPointSize(12)
+        self.label_progressBar.setFont(font1)
 
         self.horizontalLayout_11.addWidget(self.label_progressBar)
 
@@ -124,9 +127,9 @@ class Ui_MainWindow(object):
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setMinimumSize(QSize(250, 30))
         self.progressBar.setMaximumSize(QSize(180, 16777215))
-        font1 = QFont()
-        font1.setPointSize(11)
-        self.progressBar.setFont(font1)
+        font2 = QFont()
+        font2.setPointSize(11)
+        self.progressBar.setFont(font2)
         self.progressBar.setValue(0)
 
         self.horizontalLayout_11.addWidget(self.progressBar)
@@ -135,9 +138,9 @@ class Ui_MainWindow(object):
         self.pushButton_cancelOp.setObjectName(u"pushButton_cancelOp")
         self.pushButton_cancelOp.setMinimumSize(QSize(30, 0))
         self.pushButton_cancelOp.setMaximumSize(QSize(30, 16777215))
-        font2 = QFont()
-        font2.setPointSize(9)
-        self.pushButton_cancelOp.setFont(font2)
+        font3 = QFont()
+        font3.setPointSize(9)
+        self.pushButton_cancelOp.setFont(font3)
         icon = QIcon()
         icon.addFile(u":/icons32/x.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_cancelOp.setIcon(icon)
@@ -195,9 +198,7 @@ class Ui_MainWindow(object):
         self.pushButton_zoom = QPushButton(self.frame_3)
         self.pushButton_zoom.setObjectName(u"pushButton_zoom")
         self.pushButton_zoom.setMinimumSize(QSize(0, 40))
-        font3 = QFont()
-        font3.setPointSize(12)
-        self.pushButton_zoom.setFont(font3)
+        self.pushButton_zoom.setFont(font1)
         icon4 = QIcon()
         icon4.addFile(u":/icons32/zoom-in.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_zoom.setIcon(icon4)

@@ -19,7 +19,10 @@ class SelectionManager:
         self.signals.selectBaseFile.connect(self.selectBase)
         self.signals.setRenderMode.connect(self.setRenderMode)
 
-    def selectBase(self, file):
+    def selectBase(self, file, clearCompare=False):
+        if clearCompare:
+            self.clear()
+
         if file == self.base:
             return
         if file in self.compare:
@@ -29,10 +32,11 @@ class SelectionManager:
 
         self.base = file
         self.signals.updateIndicator.emit(file, 0)
-        emitLater(self.signals.showFiles.emit)
 
         if len(self.compare) == 0:
-            self.signals.setRenderMode.emit(RenderMode.Single)
+            emitLater(self.signals.setRenderMode.emit, RenderMode.Single)
+
+        emitLater(self.signals.showFiles.emit)
 
     def selectCompare(self, file):
         if file == self.base:

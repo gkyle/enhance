@@ -139,7 +139,7 @@ class Ui_AppWindow(Ui_MainWindow):
             file = InputFile(path)
             self.app.setBaseFile(path)
             self.app.clearFileList()
-            self.signals.selectBaseFile.emit(file)
+            self.signals.selectBaseFile.emit(file, True)
             self.signals.drawFileList.emit(file)
 
     def doRun(self):

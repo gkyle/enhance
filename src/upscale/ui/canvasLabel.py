@@ -72,9 +72,9 @@ class CanvasLabel(QLabel):
             pass
 
     # We load files here with 8bits/channel for consistent display via QPixmap. This doesn't impact how we work with channels in models.
-
+    # TODO: Ensure img shapes match
     def showFiles(self, resetView=False):
-        baseFile = self.selectionManager.base
+        baseFile = self.selectionManager.getBaseFile()
         if baseFile is not None:
             self.img1 = cv2.imread(baseFile.path)
             if self.renderMode == RenderMode.Split or self.renderMode == RenderMode.Grid:
@@ -137,8 +137,6 @@ class CanvasLabel(QLabel):
             labelHeight = self.height()
             imageWidth = self.pixmap.width()
             imageHeight = self.pixmap.height()
-            labelWidth = self.width()
-            labelHeight = self.height()
 
             if imageWidth == 0 or imageHeight == 0:
                 return
@@ -291,7 +289,9 @@ class CanvasLabel(QLabel):
                     renderWidth = int(imageWidth * self.zoomFactor)
                     renderHeight = int(imageHeight * self.zoomFactor)
             else:
-                if renderWidth < labelWidth and renderHeight < labelHeight:
+                # if the rendered image is larger than the label, reset the zoom
+                # use a 1px fudge factor to accomodate rounding
+                if renderWidth < (labelWidth-1) and renderHeight < (labelHeight-1):
                     self.resetZoomAndPosition()
                     renderWidth = int(imageWidth * self.zoomFactor)
                     renderHeight = int(imageHeight * self.zoomFactor)

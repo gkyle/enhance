@@ -267,7 +267,7 @@ class FileButton(QPushButton):
             self.signals.selectCompareFile.emit(self.file)
 
             if e.modifiers() == Qt.ShiftModifier:
-                self.signals.selectBaseFile.emit(self.file)
+                self.signals.selectBaseFile.emit(self.file, False)
 
         if self.click_pending:
             self.click_pending = False
@@ -290,7 +290,7 @@ class FileButton(QPushButton):
             self.delayedMouseDoubleClickEvent()
 
     def delayedMouseDoubleClickEvent(self):
-        self.signals.selectBaseFile.emit(self.file)
+        self.signals.selectBaseFile.emit(self.file, False)
 
     def maybeDeferredRenderThumbnail(self, forceFocus=False):
         if self.isVisible() and not self.renderedThumbnail and not self.iconLabel.visibleRegion().isEmpty():
