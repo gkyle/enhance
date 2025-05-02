@@ -73,16 +73,27 @@ class TileProcessor:
                 tile_padY1 = self.tile_size-tile.shape[2]
             else:
                 tile_padY2 = self.tile_size-tile.shape[2]
+                if tile_padY2 > tile.shape[2]:
+                    tile_padY2 = tile.shape[2]-1
+                    
         if tile.shape[3] < self.tile_size:
             if x1 == 0:
                 tile_padX1 = self.tile_size-tile.shape[3]
             else:
                 tile_padX2 = self.tile_size-tile.shape[3]
+                if tile_padX2 > tile.shape[3]:
+                    tile_padX2 = tile.shape[3]-1
 
         tile = F.pad(tile, (tile_padX1, tile_padX2, tile_padY1, tile_padY2), 'reflect')
 
-        return tile
+        # Padding with 'reflect' fails when the padding size exceeds the tile size on a given dimension. So when padding size would be too large, pad the maximum size with relfection, then pad the rest with 'constant'.
+        if tile.shape[2] < self.tile_size or tile.shape[3] < self.tile_size:
+            tile_padY2 = self.tile_size-tile.shape[2]
+            tile_padX2 = self.tile_size-tile.shape[3]
+            tile = F.pad(tile, (tile_padX1, tile_padX2, tile_padY1, tile_padY2), 'constant')
 
+        return tile
+    
     def process_image(self, img):
         self.dtype = img.dtype
         self.img_tensor = self.img2tensor(img).to(self.device)
