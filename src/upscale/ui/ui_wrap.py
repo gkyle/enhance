@@ -249,7 +249,7 @@ class Ui_AppWindow(Ui_MainWindow):
                 compareImg = cv2.imread(compareFile.origPath, cv2.IMREAD_UNCHANGED)
                 newImg = cv2.addWeighted(baseImg, blendFactor, compareImg, 1 - blendFactor, 0)
 
-                newPath = saveToCache(newImg, os.path.basename(baseFile.path))
+                newPath = saveToCache(newImg, baseFile.path)
                 compareFile.setPath(newPath)
                 compareFile.postprocess[PostProcessOperation.Blend] = \
                     PostProcess(PostProcessOperation.Blend, {"blendFactor": blendFactor})

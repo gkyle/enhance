@@ -7,7 +7,6 @@ requires-python = "==3.12.*"
 dependencies = [
     "basicsr>=1.4.2",
     "deferred-import>=0.1.0",
-    "exif",
     "gputil>=1.4.0",
     "ipykernel>=6.29.5",
     "jsonpickle>=4.0.5",
@@ -17,6 +16,7 @@ dependencies = [
     "pretrainedmodels>=0.7.4",
     "pyside6>=6.9.0",
     "realesrgan>=0.3.0",
+    "tifftools>=1.6.0",
 ]
 
 

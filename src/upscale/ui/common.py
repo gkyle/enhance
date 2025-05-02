@@ -1,9 +1,31 @@
 from enum import Enum
 import os
 import time
-
 import cv2
+import numpy as np
+from PIL import Image
+import tifftools
 
+
+exif_fields = [
+    271,   # Make
+    272,   # Model
+    306,   # DateTime
+    700,   # XMLPacket
+    33723, # IPTC_NAA
+    34853, # GPSInfo
+    34858, # TimeZoneOffset
+    36867, # DateTimeOriginal
+    36868, # DateTimeDigitized
+    36880, # OffsetTime
+    36881, # OffsetTimeOriginal
+    36882, # OffsetTimeDigitized
+    37520, # SubSecTime
+    37521, # SubSecTimeOriginal
+    37522, # SubSecTimeDigitized
+    42033, # TimeZoneOffset
+    50971, # PreviewDateTime
+]
 
 class RenderMode(Enum):
     Single = 1
@@ -17,13 +39,60 @@ class ZoomLevel(Enum):
     FIT_HEIGHT = 3
 
 
-def saveToCache(img, baseName, pathExtra: str = ""):
+def saveToCache(img, basePath, pathExtra: str = ""):
+    baseName = os.path.basename(basePath)
     base, ext = os.path.splitext(baseName)
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     rootPath = os.getcwd() + "/.cache/"
     if not os.path.exists(rootPath):
         os.makedirs(rootPath)
-    outpath = os.path.join(rootPath,
-                           base + "_sharpened" + pathExtra + "_" + timestamp + ext)
-    cv2.imwrite(outpath, img, [cv2.IMWRITE_JPEG_QUALITY, 100])
+    outpath = os.path.join(rootPath, base + "_sharpened" + pathExtra + "_" + timestamp + ext)
+
+    print(f'Saving {img.dtype} image to cache...')
+    if img.dtype == np.uint16 or img.dtype == "uint16":
+        write16bitTiff(img, basePath, outpath)
+    else:
+        write8bitFile(img, basePath, outpath)
+
     return outpath
+
+# Use PIL to save image and EXIF data for 8bit JPEG and TIF images.
+def write8bitFile(img, basePath, outpath):
+    img = img[:, :, ::-1] # bgr2rgb
+    dstImg = Image.fromarray(img)
+
+    # Copy EXIF fields
+    try:
+        srcImg = Image.open(basePath)
+        srcExif = srcImg.getexif()
+        dstExif = Image.Exif()
+
+        if srcExif:
+            for tag, value in srcExif.items():
+                if tag in exif_fields:
+                    dstExif[tag] = value
+
+    except Exception as e:
+        print(f"Unable to copy EXIF fields: {e}")
+
+    dstImg.save(outpath, exif=dstExif, quality=100)
+
+# Since PIL doesn't support 16bit RGB images, use OpenCV to save the file, the reopen, copy, and resave the file with EXIF data using tifftools.
+def write16bitTiff(img, basePath, outpath):
+    # Save 16bit image data
+    cv2.imwrite(outpath, img, [cv2.IMWRITE_TIFF_COMPRESSION, 1])
+
+    # Copy EXIF fields
+    srcExif = tifftools.read_tiff(basePath)
+    dstExif = tifftools.read_tiff(outpath)
+
+    try:
+        for tag in exif_fields:
+            if tag in srcExif['ifds'][0]['tags']:
+                dstExif['ifds'][0]['tags'][tag] = srcExif['ifds'][0]['tags'][tag]
+
+        # Save again with EXIF data
+        tifftools.write_tiff(dstExif, outpath, allowExisting=True)
+    except Exception as e:
+        print(f"Unable to copy EXIF fields: {e}")
+

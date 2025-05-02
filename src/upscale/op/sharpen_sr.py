@@ -91,18 +91,6 @@ class SharpenBasicSR(Observable):
         else:
             downscale = cv2.resize(output, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_AREA)
 
-        outpath = saveToCache(downscale, os.path.basename(imgPath), pathExtra)
-
-        # Copy EXIF data from base image
-        # TODO: Fails for TIF images exported from LR with custom fields
-        """
-        try:
-            exifBaseImg = Image.open(imgPath)
-            exif = exifBaseImg.getexif()
-            exifOutImage = Image.open(outpath)
-            exifOutImage.save(outpath, exifBaseImg.format, exif=exif)
-        except Exception as e:
-            print("Error copying EXIF data:", e)
-        """
+        outpath = saveToCache(downscale, imgPath, pathExtra)
 
         return outpath
