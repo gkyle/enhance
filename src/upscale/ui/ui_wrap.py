@@ -1,16 +1,13 @@
 import os
 import shutil
-import sys
 from typing import Optional
-from PySide6.QtGui import (QPixmap, QGuiApplication)
-from PySide6.QtCore import QThreadPool, QTimer, QPoint
+from PySide6.QtGui import (QPixmap, QGuiApplication, QFontMetrics)
+from PySide6.QtCore import QThreadPool, QTimer, QPoint, Qt
 from PySide6.QtWidgets import QWidget, QFileDialog, QMainWindow, QDialog, QApplication, QMenu
 from functools import partial
-import time
-import cv2
 
 from upscale.app import App, Operation
-from upscale.lib.file import File, InputFile, OutputFile, PostProcess, PostProcessOperation
+from upscale.lib.file import BlendOperation, DownscaleOperation, File, InputFile, OutputFile
 from upscale.ui.canvasLabel import CanvasLabel
 from upscale.ui.filestrip import FileButton, FileStrip
 from upscale.ui.progress import ProgressBarUpdater
@@ -226,13 +223,22 @@ class Ui_AppWindow(Ui_MainWindow):
             compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
             if type(compareFile) == OutputFile and compareFile.operation == Operation.Sharpen:
+                metrics = QFontMetrics(self.label_filename.font())
+                clippedText = metrics.elidedText(compareFile.basename, Qt.TextElideMode.ElideMiddle, 200)
+                self.label_filename.setText(clippedText)
+                self.label_opname.setText(compareFile.operation.value)
+                self.label_modelname.setText(compareFile.model)
+
                 self.horizontalSlider_blend.setValue(0)
                 self.frame_postprocess_sharpen.show()
 
-                if compareFile.postprocess is not None and PostProcessOperation.Blend in compareFile.postprocess:
-                    if "blendFactor" in compareFile.postprocess[PostProcessOperation.Blend].parameters:
-                        blendFactor = compareFile.postprocess[PostProcessOperation.Blend].parameters["blendFactor"]
-                        self.horizontalSlider_blend.setValue(int(blendFactor * 100))
+                for postop in compareFile.postops:
+                    if isinstance(postop, DownscaleOperation):
+                        scale = str(int(1/postop.scale))+"X"
+                        self.lineEdit_scale.setText(scale)
+                    if isinstance(postop, BlendOperation):
+                        factor = postop.factor
+                        self.horizontalSlider_blend.setValue(factor * 100)
 
     def onChangeBlendAmount(self, value):
         self.label_blend_amt.setText(str(value) + "%")
@@ -242,22 +248,20 @@ class Ui_AppWindow(Ui_MainWindow):
         compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
             if type(compareFile) == OutputFile and compareFile.operation == Operation.Sharpen:
-                baseFile = self.selectionManager.getBaseFile()
                 blendFactor = self.horizontalSlider_blend.value() / 100
 
-                baseImg = cv2.imread(baseFile.path, cv2.IMREAD_UNCHANGED)
-                compareImg = cv2.imread(compareFile.origPath, cv2.IMREAD_UNCHANGED)
-                newImg = cv2.addWeighted(baseImg, blendFactor, compareImg, 1 - blendFactor, 0)
+                hasBlendOp = False
+                for postop in compareFile.postops:
+                    if isinstance(postop, BlendOperation):
+                        postop.factor = blendFactor
+                        hasBlendOp = True
+                if not hasBlendOp:
+                    compareFile.postops.append(BlendOperation(blendFactor))
 
-                newPath = saveToCache(newImg, baseFile.path)
-                compareFile.setPath(newPath)
-                compareFile.postprocess[PostProcessOperation.Blend] = \
-                    PostProcess(PostProcessOperation.Blend, {"blendFactor": blendFactor})
+                compareFile.applyPostProcessAndSave()
+
                 self.fileStrip.getButton(compareFile).updateTextLabel()
                 self.signals.showFiles.emit()
-
-                # TODO: Store metadata about post processing on the file
-                # TODO: Consider moving files to a cache
 
 
 def replaceWidget(placeHolder: QWidget, newWidget: QWidget):

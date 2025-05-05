@@ -74,12 +74,12 @@ class App:
         sharpenSR = sharpen_sr.SharpenBasicSR(modelName, 128, useGpu)
         sharpenSR.addObserver(progressBar)
         self.activeOperation = sharpenSR
-        outpath = sharpenSR.sharpen(file.path, doBlur, blurKernelSize, doBlend, blendFactor)
+        outputFile = sharpenSR.sharpen(file)
         sharpenSR.removeObserver(progressBar)
-        if outpath is None:
+        if outputFile is None:
             return None
-        outfile = self.appendFile(outpath, None, Operation.Sharpen)
-        return outfile
+        self.rawFiles.append(outputFile)
+        return outputFile
 
     def doInterruptOperation(self):
         if self.activeOperation:
