@@ -1,0 +1,15 @@
+{
+    "model_type": "DAT",
+    "model_params": {
+        "upscale": 4,
+        "in_chans": 3,
+        "img_size": 64,
+        "img_range": 1.0,
+        "split_size": [8,32],
+        "depth": [6,6,6,6,6,6],
+        "embed_dim": 180,
+        "num_heads": [6,6,6,6,6,6],
+        "expansion_factor": 4,
+        "resi_connection": "1conv"
+    }
+}
