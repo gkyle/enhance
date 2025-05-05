@@ -1,0 +1,11 @@
+{
+    "model_type": "SPAN",
+    "model_params": {
+        "num_in_ch": 3,
+        "num_out_ch": 3,
+        "feature_channels": 52,
+        "upscale": 4,
+        "img_range": 255.0,
+        "rgb_mean": [0.4488, 0.4371, 0.404]
+    }
+}
