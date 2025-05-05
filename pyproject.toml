@@ -17,6 +17,7 @@ dependencies = [
     "pyside6>=6.9.0",
     "realesrgan>=0.3.0",
     "tifftools>=1.6.0",
+    "timm>=1.0.15",
 ]
 
 
