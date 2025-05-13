@@ -1,9 +1,7 @@
 from enum import Enum
-import os
-import time
 import cv2
-import numpy as np
 from PIL import Image
+from PIL import ExifTags
 import tifftools
 
 
@@ -25,6 +23,17 @@ exif_fields = [
     37522, # SubSecTimeDigitized
     42033, # TimeZoneOffset
     50971, # PreviewDateTime
+
+    42034, # LensSpecification
+    42035, # LensMake
+    42036, # LensModel
+    42037, # LensSerialNumber
+    41989, # FocalLengthIn35mmFilm
+    37386, # FocalLength
+    37379, # BrightnessValue
+    37380, # ExposureBiasValue
+    37385, # Flash
+    34867 # ISOSpeed
 ]
 
 class RenderMode(Enum):
@@ -38,23 +47,6 @@ class ZoomLevel(Enum):
     FIT_WIDTH = 2
     FIT_HEIGHT = 3
 
-
-def saveToCache(img, basePath, pathExtra: str = ""):
-    baseName = os.path.basename(basePath)
-    base, ext = os.path.splitext(baseName)
-    timestamp = time.strftime("%Y%m%d-%H%M%S")
-    rootPath = os.getcwd() + "/.cache/"
-    if not os.path.exists(rootPath):
-        os.makedirs(rootPath)
-    outpath = os.path.join(rootPath, base + "_sharpened" + pathExtra + "_" + timestamp + ext)
-
-    print(f'Saving {img.dtype} image to cache...')
-    if img.dtype == np.uint16 or img.dtype == "uint16":
-        write16bitTiff(img, basePath, outpath)
-    else:
-        write8bitFile(img, basePath, outpath)
-
-    return outpath
 
 # Use PIL to save image and EXIF data for 8bit JPEG and TIF images.
 def write8bitFile(img, basePath, outpath):
