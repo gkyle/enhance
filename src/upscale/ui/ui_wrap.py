@@ -15,7 +15,7 @@ from upscale.ui.selectionManager import SelectionManager
 from upscale.ui.signals import AsyncWorker, emitLater, getSignals
 from upscale.ui.ui_dialog_model_wrap import DialogModel
 from upscale.ui.ui_interface import Ui_MainWindow
-from upscale.ui.common import RenderMode, ZoomLevel, saveToCache
+from upscale.ui.common import RenderMode, ZoomLevel
 
 
 class MainWindow(QMainWindow):
@@ -67,20 +67,7 @@ class Ui_AppWindow(Ui_MainWindow):
         screen_resolution = QGuiApplication.primaryScreen().availableGeometry()
         width = screen_resolution.width()
         height = screen_resolution.height()
-        """
-        if "windowSize" in self.persistentSettings and self.persistentSettings["windowSize"] is not None:
-            MainWindow.resize(self.persistentSettings["windowSize"])
-            if "windowPosition" in self.persistentSettings:
-                MainWindow.move(self.persistentSettings["windowPosition"])
-            else:
-                MainWindow.center()
-        else:
-            if width > 2000 and height > 1200:
-                MainWindow.resize(width*0.6, height*0.6)
-            else:
-                MainWindow.resize(width*0.90, height*0.90)
-            MainWindow.center()
-        """
+
         MainWindow.resize(width*0.80, height*0.90)
         MainWindow.center()
 
@@ -90,7 +77,7 @@ class Ui_AppWindow(Ui_MainWindow):
         # Replace placeholders
         self.canvas_main: CanvasLabel = replaceWidget(
             self.canvas_main,
-            CanvasLabel(self.selectionManager, QPixmap(MainWindow.size())))
+            CanvasLabel(self.selectionManager))
 
         # Hide optional panels
         self.frame_postprocess_sharpen.hide()
@@ -132,7 +119,7 @@ class Ui_AppWindow(Ui_MainWindow):
 
     def doOpen(self):
         path, _ = QFileDialog.getOpenFileName(filter="Image Files (*.jpg *.jpeg *.tif *.tiff, *.png)")
-        if path is not None:
+        if path is not None and len(path) > 0:
             file = InputFile(path)
             self.app.setBaseFile(path)
             self.app.clearFileList()
