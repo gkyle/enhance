@@ -35,7 +35,7 @@ class CanvasLabel(QLabel):
         self.setAlignment(Qt.AlignCenter)
         self.setFont(QFont("Arial", 20, QFont.Bold))
 
-        self.img = None  # Canvas img used for single and split modes
+        self.canvasImg = None  # Canvas img used for single and split modes
         self.img1 = None # Seperate imgs used for grid mode
         self.img2 = None
         self.img3 = None
@@ -47,12 +47,14 @@ class CanvasLabel(QLabel):
 
     def updateFraction(self, value: int) -> None:
         self.fraction = value / 100
-        self.img = None
+        self.canvasImg = None
+
+        # For single and split modes, update the canvasImg based on the fraction.
         if self.renderMode == RenderMode.Single:
             h, w, _ = np.shape(self.img1)
             newImg = np.zeros((h, w, 3), np.uint8)
             newImg[0:h, 0:int(w)] = self.img1[0:h, 0:int(w)]
-            self.img = newImg
+            self.canvasImg = newImg
             self.update(False)
             self.repaint()
 
@@ -62,12 +64,12 @@ class CanvasLabel(QLabel):
             newImg[0:h, 0:int(w * self.fraction)] = self.img1[0:h, 0:int(w * self.fraction)]
             newImg[0:h, int(w * (self.fraction)):w] = self.img2[0:h, int(w * (self.fraction)):w]
             newImg[0:h, int(self.fraction * w) - 2:int(self.fraction * w) + 2] = (0, 255, 0)
-            self.img = newImg
+            self.canvasImg = newImg
             self.update(False)
             self.repaint()
 
+        # For grid mode, we redraw 4 pixmap for each paint operation. See paintGrid().
         elif self.renderMode == RenderMode.Grid:
-            # For grid view, we redraw 4 pixmap for each paint operation. See paintGrid().
             pass
 
     # We load files here with 8bits/channel for consistent display via QPixmap. This doesn't impact how we work with channels in models.
@@ -106,10 +108,10 @@ class CanvasLabel(QLabel):
         self.repaint()
 
     def update(self, doResetZoomAndPosition: bool = True) -> None:
-        if self.img is None:
+        if self.canvasImg is None:
             self.setText("No images selected")
         else:
-            h,w,c = self.img.shape
+            h,w,c = self.canvasImg.shape
             if h == 0 or w == 0:
                 self.setText("No images selected")
             else:
@@ -134,11 +136,11 @@ class CanvasLabel(QLabel):
         self.zoomFactor = zoomFactor
 
         # Center the pixmap within the QLabel
-        if self.img is not None and self.img.shape[0] > 0 and self.img.shape[1] > 0:
+        if self.canvasImg is not None and self.canvasImg.shape[0] > 0 and self.canvasImg.shape[1] > 0:
             labelWidth = self.width()
             labelHeight = self.height()
-            imageWidth = self.img.shape[1]
-            imageHeight = self.img.shape[0]
+            imageWidth = self.canvasImg.shape[1]
+            imageHeight = self.canvasImg.shape[0]
 
             if imageWidth == 0 or imageHeight == 0:
                 return
@@ -206,9 +208,9 @@ class CanvasLabel(QLabel):
             self.dragX = ev.position().x() - self.posX
             self.dragY = ev.position().y() - self.posY
 
-        if ev.button() == Qt.LeftButton:
+        if ev.button() == Qt.LeftButton and self.canvasImg is not None:
             x = int((ev.position().x() - self.posX) / self.zoomFactor)
-            width = self.img.shape[1]
+            width = self.canvasImg.shape[1]
             fraction = x / width
             self.updateFraction(int(100 * fraction))
 
@@ -224,9 +226,9 @@ class CanvasLabel(QLabel):
             self.repaint()
 
         # Sliding
-        if ev.buttons() == Qt.LeftButton:
+        if ev.buttons() == Qt.LeftButton and self.canvasImg is not None:
             x = int((ev.position().x() - self.posX) / self.zoomFactor)
-            width = self.img.shape[1]
+            width = self.canvasImg.shape[1]
             fraction = x / width
             self.updateFraction(int(100 * fraction))
             self.repaint()
@@ -273,9 +275,9 @@ class CanvasLabel(QLabel):
         self.repaint()
 
     def updatePixMapDimensions(self):
-        if self.img is not None and self.img.shape[0] > 0 and self.img.shape[1] > 0:
-            imageWidth: int = self.img1.shape[1]
-            imageHeight: int = self.img1.shape[0]
+        if self.canvasImg is not None and self.canvasImg.shape[0] > 0 and self.canvasImg.shape[1] > 0:
+            imageWidth: int = self.canvasImg.shape[1]
+            imageHeight: int = self.canvasImg.shape[0]
             labelWidth: int = self.width()
             labelHeight: int = self.height()
 
@@ -308,15 +310,15 @@ class CanvasLabel(QLabel):
         if self.renderMode == RenderMode.Grid:
             self.paintGrid()
 
-        elif self.img is not None and self.img.shape[0] > 0 and self.img.shape[1] > 0:
+        elif self.canvasImg is not None and self.canvasImg.shape[0] > 0 and self.canvasImg.shape[1] > 0:
             renderWidth, renderHeight = self.updatePixMapDimensions()
             if renderWidth is None or renderHeight is None:
                 return
 
             # Use opencv to resize the image for better quality, particularly on Windows
-            if self.img is not None:
+            if self.canvasImg is not None:
                 interpolation = cv2.INTER_AREA if self.zoomFactor < 1 else cv2.INTER_CUBIC
-                scaledPImg = cv2.resize(self.img, (renderWidth, renderHeight), interpolation=interpolation)
+                scaledPImg = cv2.resize(self.canvasImg, (renderWidth, renderHeight), interpolation=interpolation)
                 newPixmap = QPixmap.fromImage(QImage(scaledPImg.data, scaledPImg.shape[1], scaledPImg.shape[0],
                                                     scaledPImg.shape[1] * 3, QImage.Format_BGR888))
 
@@ -347,8 +349,6 @@ class CanvasLabel(QLabel):
         return [(x - self.posX) / self.zoomFactor / scale, (y - self.posY) / self.zoomFactor / scale]
 
     def paintGrid(self):
-        renderWidth, renderHeight = self.updatePixMapDimensions()
-
         pixmapWidth = self.width() // 2
         pixmapHeight = self.height() // 2
         x = self.posX * -1
@@ -362,10 +362,10 @@ class CanvasLabel(QLabel):
         fname3 = self.selectionManager.getCompareFilename(1)
         fname4 = self.selectionManager.getCompareFilename(2)
 
-        pixmapQ1 = self.makeScaledPixmap(self.img1, x, y, pixmapWidth, pixmapHeight, renderWidth, renderHeight, fname1)
-        pixmapQ2 = self.makeScaledPixmap(self.img2, x, y, pixmapWidth, pixmapHeight, renderWidth, renderHeight, fname2)
-        pixmapQ3 = self.makeScaledPixmap(self.img3, x, y, pixmapWidth, pixmapHeight, renderWidth, renderHeight, fname3)
-        pixmapQ4 = self.makeScaledPixmap(self.img4, x, y, pixmapWidth, pixmapHeight, renderWidth, renderHeight, fname4)
+        pixmapQ1 = self.makeScaledPixmap(self.img1, x, y, pixmapWidth, pixmapHeight, fname1)
+        pixmapQ2 = self.makeScaledPixmap(self.img2, x, y, pixmapWidth, pixmapHeight, fname2)
+        pixmapQ3 = self.makeScaledPixmap(self.img3, x, y, pixmapWidth, pixmapHeight, fname3)
+        pixmapQ4 = self.makeScaledPixmap(self.img4, x, y, pixmapWidth, pixmapHeight, fname4)
 
         painter = QPainter(self)
         painter.drawPixmap(padX, padY, pixmapQ1)
@@ -381,9 +381,12 @@ class CanvasLabel(QLabel):
 
 
     # make a pixmap for a quadrant
-    def makeScaledPixmap(self, img, x, y, w, h, renderWidth, renderHeight, fname):
+    def makeScaledPixmap(self, img, x, y, w, h, fname):
         if img is None:
             return QPixmap(w, h)
+        
+        renderWidth = int(img.shape[1] * self.zoomFactor)
+        renderHeight = int(img.shape[0] * self.zoomFactor)
 
         interpolation = cv2.INTER_AREA if self.zoomFactor < 1 else cv2.INTER_CUBIC
         scaledImg = cv2.resize(img, (renderWidth, renderHeight), interpolation=interpolation)
@@ -393,12 +396,12 @@ class CanvasLabel(QLabel):
         # crop
         pixmap = pixmap.copy(x, y, w, h)
 
+        # labels
         painter = QPainter(pixmap)
         font = QFont("Arial", 12)
         painter.setFont(font)
         pen = QPen(QColor(255, 255, 255))
         painter.setPen(pen)
-
         painter.drawText(0, pixmap.height()-25, pixmap.width()-5, 20, Qt.AlignRight | Qt.AlignBottom, fname)
         painter.end()
 
