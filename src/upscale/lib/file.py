@@ -31,6 +31,9 @@ class File(Unpickle):
         self.path = path
         self.basename = os.path.basename(path) if path else None
 
+    def loadUnchanged(self):
+        return cv2.imread(self.path, cv2.IMREAD_UNCHANGED)
+
 
 class InputFile(File):
 
