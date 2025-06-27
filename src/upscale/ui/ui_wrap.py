@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from typing import Optional
 from PySide6.QtGui import (QPixmap, QGuiApplication, QFontMetrics)
@@ -80,6 +81,8 @@ class Ui_AppWindow(Ui_MainWindow):
             CanvasLabel(self.selectionManager))
 
         # Hide optional panels
+        self.frame_compare.hide()
+        self.frame_postprocess.hide()
         self.frame_postprocess_sharpen.hide()
 
         # Bind events
@@ -132,10 +135,6 @@ class Ui_AppWindow(Ui_MainWindow):
         result = dialog.exec()
         if result == QDialog.Accepted:
             selectedModel = dialog.ui.listWidget.currentItem().text()
-            doBlur = dialog.ui.checkBox_blur.isChecked()
-            doBlend = dialog.ui.checkBox_blend.isChecked()
-            blendFactor = dialog.ui.horizontalSlider_blend.value() / 100
-            blurKernelSize = dialog.ui.horizontalSlider_blur.value()
             useGpu = dialog.ui.checkBox_gpu.isChecked()
 
             def f():
@@ -143,8 +142,7 @@ class Ui_AppWindow(Ui_MainWindow):
                 if file is not None:
                     progressUpdater = ProgressBarUpdater(
                         self.progressBar, self.label_progressBar, total=1, desc="Sharpen:")
-                    result = self.app.doSharpen(file, selectedModel, doBlur,
-                                                blurKernelSize, doBlend, blendFactor, progressUpdater.tick, useGpu)
+                    result = self.app.doSharpen(file, selectedModel, progressUpdater.tick, useGpu)
                     if result is None:
                         return
                     self.signals.appendFile.emit(result)
@@ -205,6 +203,8 @@ class Ui_AppWindow(Ui_MainWindow):
         self.app.updateWindowSettings(self.persistentSettings)
 
     def renderPostProcess(self, compareFile: OutputFile):
+        self.frame_compare.hide()
+        self.frame_postprocess.hide()
         self.frame_postprocess_sharpen.hide()
         if compareFile is None:
             compareFile = self.selectionManager.getCompareFile(0)
@@ -213,19 +213,38 @@ class Ui_AppWindow(Ui_MainWindow):
                 metrics = QFontMetrics(self.label_filename.font())
                 clippedText = metrics.elidedText(compareFile.basename, Qt.TextElideMode.ElideMiddle, 200)
                 self.label_filename.setText(clippedText)
+                self.label_filename.setStyleSheet("color: #aaa;")
                 self.label_opname.setText(compareFile.operation.value)
+                self.label_opname.setStyleSheet("color: #aaa;")
                 self.label_modelname.setText(compareFile.model)
+                self.label_modelname.setStyleSheet("color: #aaa;")
+
+                compareImg = compareFile.loadUnchanged()
+                h, w, _ = compareImg.shape
+                dt = compareImg.dtype.name
+                dtn = re.findall(r'\d+', dt)
+                self.label_shape.setText(f"{h}H X {w}W  {int(dtn[0])}-bit")
+                self.label_shape.setStyleSheet("color: #aaa;")
 
                 self.horizontalSlider_blend.setValue(0)
-                self.frame_postprocess_sharpen.show()
 
+                hasScaleOp = False
                 for postop in compareFile.postops:
                     if isinstance(postop, DownscaleOperation):
+                        hasScaleOp = True
                         scale = str(int(1/postop.scale))+"X"
                         self.lineEdit_scale.setText(scale)
-                    if isinstance(postop, BlendOperation):
-                        factor = postop.factor
-                        self.horizontalSlider_blend.setValue(factor * 100)
+
+                self.frame_blur.hide()
+                if not hasScaleOp:
+                    self.frame_scale.hide()
+                else:
+                    self.frame_scale.show()
+                self.frame_blend.show()
+
+                self.frame_compare.show()
+                self.frame_postprocess.show()
+                self.frame_postprocess_sharpen.show()
 
     def onChangeBlendAmount(self, value):
         self.label_blend_amt.setText(str(value) + "%")

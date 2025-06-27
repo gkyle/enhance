@@ -70,7 +70,7 @@ class App:
         return models
 
     # TODO: Support variable tile size
-    def doSharpen(self, file: InputFile, modelName: str, doBlur: bool, blurKernelSize: int, doBlend: bool, blendFactor: float,  progressBar, useGpu: bool) -> OutputFile:
+    def doSharpen(self, file: InputFile, modelName: str, progressBar, useGpu: bool) -> OutputFile:
         sharpenSR = sharpen_sr.SharpenBasicSR(modelName, 128, useGpu)
         sharpenSR.addObserver(progressBar)
         self.activeOperation = sharpenSR

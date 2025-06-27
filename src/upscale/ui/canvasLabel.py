@@ -36,7 +36,7 @@ class CanvasLabel(QLabel):
         self.setFont(QFont("Arial", 20, QFont.Bold))
 
         self.canvasImg = None  # Canvas img used for single and split modes
-        self.img1 = None # Seperate imgs used for grid mode
+        self.img1 = None  # Seperate imgs used for grid mode
         self.img2 = None
         self.img3 = None
         self.img4 = None
@@ -111,7 +111,7 @@ class CanvasLabel(QLabel):
         if self.canvasImg is None:
             self.setText("No images selected")
         else:
-            h,w,c = self.canvasImg.shape
+            h, w, c = self.canvasImg.shape
             if h == 0 or w == 0:
                 self.setText("No images selected")
             else:
@@ -320,7 +320,7 @@ class CanvasLabel(QLabel):
                 interpolation = cv2.INTER_AREA if self.zoomFactor < 1 else cv2.INTER_CUBIC
                 scaledPImg = cv2.resize(self.canvasImg, (renderWidth, renderHeight), interpolation=interpolation)
                 newPixmap = QPixmap.fromImage(QImage(scaledPImg.data, scaledPImg.shape[1], scaledPImg.shape[0],
-                                                    scaledPImg.shape[1] * 3, QImage.Format_BGR888))
+                                                     scaledPImg.shape[1] * 3, QImage.Format_BGR888))
 
             x: int = self.posX
             y: int = self.posY
@@ -379,12 +379,12 @@ class CanvasLabel(QLabel):
 
         painter.end()
 
+    # Make a pixmap for a quadrant
 
-    # make a pixmap for a quadrant
     def makeScaledPixmap(self, img, x, y, w, h, fname):
         if img is None:
             return QPixmap(w, h)
-        
+
         renderWidth = int(img.shape[1] * self.zoomFactor)
         renderHeight = int(img.shape[0] * self.zoomFactor)
 
