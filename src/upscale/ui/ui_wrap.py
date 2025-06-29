@@ -234,6 +234,9 @@ class Ui_AppWindow(Ui_MainWindow):
                         hasScaleOp = True
                         scale = str(int(1/postop.scale))+"X"
                         self.lineEdit_scale.setText(scale)
+                    if isinstance(postop, BlendOperation):
+                        factor = postop.factor
+                        self.horizontalSlider_blend.setValue(factor * 100)
 
                 self.frame_blur.hide()
                 if not hasScaleOp:
