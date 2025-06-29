@@ -90,7 +90,6 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_clear.clicked.connect(self.doClear)
         self.pushButton_open.clicked.connect(self.doOpen)
         self.pushButton_run.clicked.connect(self.doRun)
-        self.checkBox_antialias.stateChanged.connect(self.canvas_main.setAntialias)
         self.pushButton_zoom.clicked.connect(self.showZoomMenu)
         self.pushButton_single.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Single))
         self.pushButton_split.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Split))
@@ -114,6 +113,8 @@ class Ui_AppWindow(Ui_MainWindow):
         for i in range(1, min(len(self.app.getFileList()), 4)):
             self.selectionManager.selectCompare(self.app.getFileList()[i])
 
+        self.renderBaseFile()
+
     def doClear(self):
         self.app.setBaseFile(None)
         self.app.clearFileList()
@@ -128,6 +129,7 @@ class Ui_AppWindow(Ui_MainWindow):
             self.app.clearFileList()
             self.signals.selectBaseFile.emit(file, True)
             self.signals.drawFileList.emit(file)
+            self.renderBaseFile()
 
     def doRun(self):
         isGPuPresent = self.app.getGpuPresent()
@@ -202,6 +204,14 @@ class Ui_AppWindow(Ui_MainWindow):
         self.persistentSettings["windowPosition"] = event.pos()
         self.app.updateWindowSettings(self.persistentSettings)
 
+    def renderBaseFile(self):
+        file = self.selectionManager.getBaseFile()
+        if file is not None:
+            self.drawLabelText(self.label_filename_base, file.basename, maybeElide=True)
+
+            baseImg = file.loadUnchanged()
+            self.drawLabelShape(self.label_shape_base, baseImg)
+
     def renderPostProcess(self, compareFile: OutputFile):
         self.frame_compare.hide()
         self.frame_postprocess.hide()
@@ -210,21 +220,12 @@ class Ui_AppWindow(Ui_MainWindow):
             compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
             if type(compareFile) == OutputFile and compareFile.operation == Operation.Sharpen:
-                metrics = QFontMetrics(self.label_filename.font())
-                clippedText = metrics.elidedText(compareFile.basename, Qt.TextElideMode.ElideMiddle, 200)
-                self.label_filename.setText(clippedText)
-                self.label_filename.setStyleSheet("color: #aaa;")
-                self.label_opname.setText(compareFile.operation.value)
-                self.label_opname.setStyleSheet("color: #aaa;")
-                self.label_modelname.setText(compareFile.model)
-                self.label_modelname.setStyleSheet("color: #aaa;")
+                self.drawLabelText(self.label_filename, compareFile.basename, maybeElide=True)
+                self.drawLabelText(self.label_opname, compareFile.operation.value)
+                self.drawLabelText(self.label_modelname, compareFile.model, maybeElide=True)
 
                 compareImg = compareFile.loadUnchanged()
-                h, w, _ = compareImg.shape
-                dt = compareImg.dtype.name
-                dtn = re.findall(r'\d+', dt)
-                self.label_shape.setText(f"{h}H X {w}W  {int(dtn[0])}-bit")
-                self.label_shape.setStyleSheet("color: #aaa;")
+                self.drawLabelShape(self.label_shape, compareImg)
 
                 self.horizontalSlider_blend.setValue(0)
 
@@ -233,7 +234,7 @@ class Ui_AppWindow(Ui_MainWindow):
                     if isinstance(postop, DownscaleOperation):
                         hasScaleOp = True
                         scale = str(int(1/postop.scale))+"X"
-                        self.lineEdit_scale.setText(scale)
+                        self.drawLabelText(self.label_scale, scale)
                     if isinstance(postop, BlendOperation):
                         factor = postop.factor
                         self.horizontalSlider_blend.setValue(factor * 100)
@@ -271,6 +272,24 @@ class Ui_AppWindow(Ui_MainWindow):
 
                 self.fileStrip.getButton(compareFile).updateTextLabel()
                 self.signals.showFiles.emit()
+
+    def drawLabelText(self, label, text, maybeElide=False):
+        if maybeElide:
+            metrics = QFontMetrics(label.font())
+            clippedText = metrics.elidedText(text, Qt.TextElideMode.ElideMiddle, 200)
+            label.setText(clippedText)
+        else:
+            label.setText(text)
+        label.setStyleSheet("color: #aaa;")
+
+    def drawLabelShape(self, label, img):
+        text = ""
+        if img is not None:
+            h, w, _ = img.shape
+            dt = img.dtype.name
+            dtn = re.findall(r'\d+', dt)
+            text = f"{h}H X {w}W  {int(dtn[0])}-bit"
+        self.drawLabelText(label, text, maybeElide=False)
 
 
 def replaceWidget(placeHolder: QWidget, newWidget: QWidget):

@@ -31,7 +31,6 @@ class CanvasLabel(QLabel):
         self.signals.showFiles.connect(self.showFiles)
         self.signals.setRenderMode.connect(self.setRenderMode)
 
-        self.antialias = False
         self.setAlignment(Qt.AlignCenter)
         self.setFont(QFont("Arial", 20, QFont.Bold))
 
@@ -127,10 +126,6 @@ class CanvasLabel(QLabel):
     def setRenderMode(self, renderMode: RenderMode) -> None:
         self.renderMode = renderMode
         self.showFiles()
-
-    def setAntialias(self, antialias: bool) -> None:
-        self.antialias = antialias
-        self.repaint()
 
     def resetZoomAndPosition(self, zoomFactor=1) -> None:
         self.zoomFactor = zoomFactor
