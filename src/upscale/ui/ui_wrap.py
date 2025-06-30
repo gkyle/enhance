@@ -81,9 +81,8 @@ class Ui_AppWindow(Ui_MainWindow):
             CanvasLabel(self.selectionManager))
 
         # Hide optional panels
-        self.frame_compare.hide()
-        self.frame_postprocess.hide()
-        self.frame_postprocess_sharpen.hide()
+        self.group_compare.hide()
+        self.group_postprocess.hide()
 
         # Bind events
         self.pushButton_cancelOp.clicked.connect(self.doCancelOp)
@@ -213,9 +212,9 @@ class Ui_AppWindow(Ui_MainWindow):
             self.drawLabelShape(self.label_shape_base, baseImg)
 
     def renderPostProcess(self, compareFile: OutputFile):
-        self.frame_compare.hide()
-        self.frame_postprocess.hide()
-        self.frame_postprocess_sharpen.hide()
+        self.group_compare.hide()
+        self.group_postprocess.hide()
+        self.group_postprocess.hide()
         if compareFile is None:
             compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
@@ -246,9 +245,8 @@ class Ui_AppWindow(Ui_MainWindow):
                     self.frame_scale.show()
                 self.frame_blend.show()
 
-                self.frame_compare.show()
-                self.frame_postprocess.show()
-                self.frame_postprocess_sharpen.show()
+                self.group_compare.show()
+                self.group_postprocess.show()
 
     def onChangeBlendAmount(self, value):
         self.label_blend_amt.setText(str(value) + "%")
