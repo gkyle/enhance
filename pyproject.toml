@@ -1,7 +1,7 @@
 [project]
 name = "upscale"
 version = "0.1.0"
-description = "Add your description here"
+description = "Enhance AI"
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
@@ -15,7 +15,6 @@ dependencies = [
     "pillow>=11.2.1",
     "pretrainedmodels>=0.7.4",
     "pyside6>=6.9.0",
-    "realesrgan>=0.3.0",
     "spandrel>=0.4.1",
     "spandrel-extra-arches>=0.2.0",
     "tifftools>=1.6.0",

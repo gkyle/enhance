@@ -1,3 +1,4 @@
+import os
 import cv2
 from upscale.app import Operation
 from upscale.lib.file import DownscaleOperation, File, OutputFile
@@ -6,16 +7,22 @@ from upscale.op.simple_tile_processor import TileProcessor
 
 from spandrel import ImageModelDescriptor, ModelLoader
 import spandrel_extra_arches
-
+spandrel_extra_arches.install()
 
 # Sharpen via super resolution model based on BasicSR
 class SharpenBasicSR(Observable):
     def __init__(self, modelPath: str, tileSize: int, tilePadding: int, useGpu: bool):
         super().__init__()
-        spandrel_extra_arches.install()
 
         self.modelPath = modelPath
         self.device = "cuda" if useGpu else "cpu"
+
+        fileBaseName = os.path.basename(modelPath)
+        fileBaseName, _ = os.path.splitext(fileBaseName)
+        modelDir = os.path.dirname(modelPath)
+        dirBaseName = os.path.basename(modelDir)
+        dirBaseName, _ = os.path.splitext(dirBaseName)
+        self.modelName = dirBaseName + "_" + fileBaseName
 
         self.tileSize = tileSize
         self.tilePadding = tilePadding
@@ -23,8 +30,6 @@ class SharpenBasicSR(Observable):
     def sharpen(self, inFile: File):
         model = ModelLoader().load_from_file(self.modelPath)
         assert isinstance(model, ImageModelDescriptor)
-        modelName = model.architecture.name
-        print(f"Using model: {modelName} with scale {model.scale}")
 
         processor = TileProcessor(
             model=model,
@@ -42,12 +47,10 @@ class SharpenBasicSR(Observable):
             return None
 
         # TODO: Fix this signature
-        outputFile = OutputFile(None, inFile, Operation.Sharpen, modelName)
+        outputFile = OutputFile(None, inFile, Operation.Sharpen, self.modelName)
         outputFile.saveImage(output)
-
         if model.scale > 1:
             outputFile.postops.append(DownscaleOperation(1/model.scale))
-
         outputFile.applyPostProcessAndSave()  # Apply any postprocess ops and save
 
         return outputFile
