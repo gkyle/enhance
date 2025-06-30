@@ -5,8 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
-    "basicsr>=1.4.2",
     "deferred-import>=0.1.0",
+    "einops",
     "gputil>=1.4.0",
     "ipykernel>=6.29.5",
     "jsonpickle>=4.0.5",
@@ -16,6 +16,8 @@ dependencies = [
     "pretrainedmodels>=0.7.4",
     "pyside6>=6.9.0",
     "realesrgan>=0.3.0",
+    "spandrel>=0.4.1",
+    "spandrel-extra-arches>=0.2.0",
     "tifftools>=1.6.0",
     "timm>=1.0.15",
 ]
@@ -50,6 +52,7 @@ torch = [
   { index = "pytorch-cu118", extra = "cu118" },
   { index = "pytorch-cu124", extra = "cu124" },
 ]
+clip = { git = "https://github.com/openai/CLIP.git" }
 
 [[tool.uv.index]]
 name = "pytorch-cpu"

@@ -8,18 +8,18 @@ from upscale.lib.util import Observable
 
 class TileProcessor:
 
-    def __init__(self, model, tile_size=128, tile_pad=10, scale=1, device=None, observer: Observable = None):
+    def __init__(self, model, tileSize, tilePad, scale, device=None, observer: Observable = None):
         self.model = model
-        self.tile_size = tile_size
-        self.tile_pad = tile_pad
+        self.tileSize = tileSize
+        self.tilePad = tilePad
 
         self.device = "cpu" if device is None else device
         self.model.to(self.device)
 
         self.dtype = None
         self.img_tensor = None
-        self.img_x_pad = 0
-        self.img_y_pad = 0
+        self.imgXPad = 0
+        self.imgYPad = 0
 
         self.scale = scale
 
@@ -29,12 +29,12 @@ class TileProcessor:
         # img size should be a multiple of tile size
         # pad image with reflection
         b, c, h, w = self.img_tensor.shape
-        self.img_x_pad = (self.tile_size - (w % self.tile_size)) % self.tile_size
-        self.img_y_pad = (self.tile_size - (h % self.tile_size)) % self.tile_size
-        x1 = self.img_x_pad // 2
-        x2 = self.img_x_pad - x1
-        y1 = self.img_y_pad // 2
-        y2 = self.img_y_pad - y1
+        self.imgXPad = (self.tileSize - (w % self.tileSize)) % self.tileSize
+        self.imgYPad = (self.tileSize - (h % self.tileSize)) % self.tileSize
+        x1 = self.imgXPad // 2
+        x2 = self.imgXPad - x1
+        y1 = self.imgYPad // 2
+        y2 = self.imgYPad - y1
 
         self.img_tensor = F.pad(self.img_tensor, (x1, x2, y1, y2), 'reflect')
 
@@ -42,22 +42,22 @@ class TileProcessor:
         # remove padding
         b, c, h, w = img_tensor.shape
 
-        x1 = (self.img_x_pad // 2) * self.scale
-        x2 = self.img_x_pad * self.scale - x1
-        y1 = (self.img_y_pad // 2) * self.scale
-        y2 = self.img_y_pad * self.scale - y1
+        x1 = (self.imgXPad // 2) * self.scale
+        x2 = self.imgXPad * self.scale - x1
+        y1 = (self.imgYPad // 2) * self.scale
+        y2 = self.imgYPad * self.scale - y1
 
         result = img_tensor[:, :, y1:h - y2, x1:w - x2]
 
         return result
 
     def preprocess_tile(self, y, x):
-        actual_tile_size = self.tile_size - (self.tile_pad * 2)
+        actualTileSize = self.tileSize - (self.tilePad * 2)
 
-        y1 = max(y * actual_tile_size - self.tile_pad, 0)
-        y2 = (y + 1) * actual_tile_size + self.tile_pad
-        x1 = max(x * actual_tile_size - self.tile_pad, 0)
-        x2 = (x + 1) * actual_tile_size + self.tile_pad
+        y1 = max(y * actualTileSize - self.tilePad, 0)
+        y2 = (y + 1) * actualTileSize + self.tilePad
+        x1 = max(x * actualTileSize - self.tilePad, 0)
+        x2 = (x + 1) * actualTileSize + self.tilePad
 
         tile = self.img_tensor[:, :, y1:y2, x1:x2]
 
@@ -68,19 +68,19 @@ class TileProcessor:
         tile_padX2 = 0
 
         # Shape is B, C, H, W
-        if tile.shape[2] < self.tile_size:
+        if tile.shape[2] < self.tileSize:
             if y1 == 0:
-                tile_padY1 = self.tile_size-tile.shape[2]
+                tile_padY1 = self.tileSize-tile.shape[2]
             else:
-                tile_padY2 = self.tile_size-tile.shape[2]
+                tile_padY2 = self.tileSize-tile.shape[2]
                 if tile_padY2 > tile.shape[2]:
                     tile_padY2 = tile.shape[2]-1
 
-        if tile.shape[3] < self.tile_size:
+        if tile.shape[3] < self.tileSize:
             if x1 == 0:
-                tile_padX1 = self.tile_size-tile.shape[3]
+                tile_padX1 = self.tileSize-tile.shape[3]
             else:
-                tile_padX2 = self.tile_size-tile.shape[3]
+                tile_padX2 = self.tileSize-tile.shape[3]
                 if tile_padX2 > tile.shape[3]:
                     tile_padX2 = tile.shape[3]-1
 
@@ -88,11 +88,11 @@ class TileProcessor:
 
         # Padding with 'reflect' fails when the padding size exceeds the tile size on a given dimension. So when padding size would be too large, pad the maximum size with relfection, then pad the rest with 'constant'.
         # Applies to remainder at right at bottom edges.
-        if tile.shape[2] < self.tile_size or tile.shape[3] < self.tile_size:
+        if tile.shape[2] < self.tileSize or tile.shape[3] < self.tileSize:
             tile_padY1 = 0
             tile_padX1 = 0
-            tile_padY2 = self.tile_size-tile.shape[2]
-            tile_padX2 = self.tile_size-tile.shape[3]
+            tile_padY2 = self.tileSize-tile.shape[2]
+            tile_padX2 = self.tileSize-tile.shape[3]
             tile = F.pad(tile, (tile_padX1, tile_padX2, tile_padY1, tile_padY2), 'constant')
 
         return tile
@@ -112,9 +112,9 @@ class TileProcessor:
 
     @torch.no_grad()
     def process_tiles(self):
-        actual_tile_size = self.tile_size - (self.tile_pad * 2)
+        actual_tile_size = self.tileSize - (self.tilePad * 2)
         scaled_tile_size = actual_tile_size * self.scale
-        scaled_tile_pad = self.tile_pad * self.scale
+        scaled_tile_pad = self.tilePad * self.scale
         b, c, h, w = self.img_tensor.shape
         xtiles = math.ceil(w / actual_tile_size)
         ytiles = math.ceil(h / actual_tile_size)
