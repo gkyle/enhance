@@ -510,12 +510,24 @@
           </size>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Plain</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <widget class="QPushButton" name="pushButton_open">
             <property name="text">
@@ -532,6 +544,12 @@
           </item>
           <item>
            <widget class="Line" name="line">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(92, 92, 92);</string>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -546,6 +564,12 @@
           </item>
           <item>
            <widget class="Line" name="line_3">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(92, 92, 92);</string>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -553,6 +577,20 @@
           </item>
           <item>
            <widget class="QGroupBox" name="group_base">
+            <property name="styleSheet">
+             <string notr="true">QGroupBox {
+border: 1px solid rgb(92, 92, 92);
+margin-top: 15px;
+padding-top:10px;
+}
+QGroupBox::title {
+subcontrol-origin: margin;
+subcontrol-position: top left;
+left: 10px;
+padding:0 5px;
+margin-top:5px;
+}</string>
+            </property>
             <property name="title">
              <string>Base File</string>
             </property>
@@ -662,6 +700,20 @@
           </item>
           <item>
            <widget class="QGroupBox" name="group_compare">
+            <property name="styleSheet">
+             <string notr="true">QGroupBox {
+border: 1px solid rgb(92, 92, 92);
+margin-top: 15px;
+padding-top:10px;
+}
+QGroupBox::title {
+subcontrol-origin: margin;
+subcontrol-position: top left;
+left: 10px;
+padding:0 5px;
+margin-top:5px;
+}</string>
+            </property>
             <property name="title">
              <string>Compare File</string>
             </property>
@@ -841,6 +893,20 @@
           </item>
           <item>
            <widget class="QGroupBox" name="group_postprocess">
+            <property name="styleSheet">
+             <string notr="true">QGroupBox {
+border: 1px solid rgb(92, 92, 92);
+margin-top: 15px;
+padding-top:10px;
+}
+QGroupBox::title {
+subcontrol-origin: margin;
+subcontrol-position: top left;
+left: 10px;
+padding:0 5px;
+margin-top:5px;
+}</string>
+            </property>
             <property name="title">
              <string>Post Processing</string>
             </property>
@@ -937,6 +1003,12 @@
                 </item>
                 <item>
                  <widget class="Line" name="line_2">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(92, 92, 92);</string>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Plain</enum>
+                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -951,7 +1023,7 @@
                 <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
+                <enum>QFrame::Plain</enum>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_8">
                 <property name="leftMargin">
@@ -1018,6 +1090,12 @@
                 </item>
                 <item>
                  <widget class="Line" name="line_5">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(92, 92, 92);</string>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Plain</enum>
+                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -1106,6 +1184,12 @@
                 </item>
                 <item>
                  <widget class="Line" name="line_6">
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(92, 92, 92);</string>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Plain</enum>
+                  </property>
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfaceCznZug.ui'
+## Form generated from reading UI file 'interfacejlajPa.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -252,10 +252,11 @@ class Ui_MainWindow(object):
         self.frame_sidebar.setSizePolicy(sizePolicy5)
         self.frame_sidebar.setMinimumSize(QSize(244, 0))
         self.frame_sidebar.setMaximumSize(QSize(100, 16777215))
-        self.frame_sidebar.setFrameShape(QFrame.StyledPanel)
-        self.frame_sidebar.setFrameShadow(QFrame.Raised)
+        self.frame_sidebar.setFrameShape(QFrame.NoFrame)
+        self.frame_sidebar.setFrameShadow(QFrame.Plain)
         self.verticalLayout_3 = QVBoxLayout(self.frame_sidebar)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(2, 2, 2, 2)
         self.pushButton_open = QPushButton(self.frame_sidebar)
         self.pushButton_open.setObjectName(u"pushButton_open")
 
@@ -268,8 +269,9 @@ class Ui_MainWindow(object):
 
         self.line = QFrame(self.frame_sidebar)
         self.line.setObjectName(u"line")
+        self.line.setStyleSheet(u"color: rgb(92, 92, 92);")
+        self.line.setFrameShadow(QFrame.Plain)
         self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
 
         self.verticalLayout_3.addWidget(self.line)
 
@@ -280,13 +282,26 @@ class Ui_MainWindow(object):
 
         self.line_3 = QFrame(self.frame_sidebar)
         self.line_3.setObjectName(u"line_3")
+        self.line_3.setStyleSheet(u"color: rgb(92, 92, 92);")
+        self.line_3.setFrameShadow(QFrame.Plain)
         self.line_3.setFrameShape(QFrame.HLine)
-        self.line_3.setFrameShadow(QFrame.Sunken)
 
         self.verticalLayout_3.addWidget(self.line_3)
 
         self.group_base = QGroupBox(self.frame_sidebar)
         self.group_base.setObjectName(u"group_base")
+        self.group_base.setStyleSheet(u"QGroupBox {\n"
+"border: 1px solid rgb(92, 92, 92);\n"
+"margin-top: 15px;\n"
+"padding-top:10px;\n"
+"}\n"
+"QGroupBox::title {\n"
+"subcontrol-origin: margin;\n"
+"subcontrol-position: top left;\n"
+"left: 10px;\n"
+"padding:0 5px;\n"
+"margin-top:5px;\n"
+"}")
         self.group_base.setFlat(False)
         self.group_base.setCheckable(False)
         self.verticalLayout_18 = QVBoxLayout(self.group_base)
@@ -339,6 +354,18 @@ class Ui_MainWindow(object):
 
         self.group_compare = QGroupBox(self.frame_sidebar)
         self.group_compare.setObjectName(u"group_compare")
+        self.group_compare.setStyleSheet(u"QGroupBox {\n"
+"border: 1px solid rgb(92, 92, 92);\n"
+"margin-top: 15px;\n"
+"padding-top:10px;\n"
+"}\n"
+"QGroupBox::title {\n"
+"subcontrol-origin: margin;\n"
+"subcontrol-position: top left;\n"
+"left: 10px;\n"
+"padding:0 5px;\n"
+"margin-top:5px;\n"
+"}")
         self.verticalLayout_19 = QVBoxLayout(self.group_compare)
         self.verticalLayout_19.setSpacing(6)
         self.verticalLayout_19.setObjectName(u"verticalLayout_19")
@@ -429,6 +456,18 @@ class Ui_MainWindow(object):
 
         self.group_postprocess = QGroupBox(self.frame_sidebar)
         self.group_postprocess.setObjectName(u"group_postprocess")
+        self.group_postprocess.setStyleSheet(u"QGroupBox {\n"
+"border: 1px solid rgb(92, 92, 92);\n"
+"margin-top: 15px;\n"
+"padding-top:10px;\n"
+"}\n"
+"QGroupBox::title {\n"
+"subcontrol-origin: margin;\n"
+"subcontrol-position: top left;\n"
+"left: 10px;\n"
+"padding:0 5px;\n"
+"margin-top:5px;\n"
+"}")
         self.verticalLayout_20 = QVBoxLayout(self.group_postprocess)
         self.verticalLayout_20.setObjectName(u"verticalLayout_20")
         self.verticalLayout_20.setContentsMargins(6, 6, 6, 6)
@@ -470,8 +509,9 @@ class Ui_MainWindow(object):
 
         self.line_2 = QFrame(self.frame_blur)
         self.line_2.setObjectName(u"line_2")
+        self.line_2.setStyleSheet(u"color: rgb(92, 92, 92);")
+        self.line_2.setFrameShadow(QFrame.Plain)
         self.line_2.setFrameShape(QFrame.HLine)
-        self.line_2.setFrameShadow(QFrame.Sunken)
 
         self.verticalLayout_7.addWidget(self.line_2)
 
@@ -481,7 +521,7 @@ class Ui_MainWindow(object):
         self.frame_scale = QFrame(self.group_postprocess)
         self.frame_scale.setObjectName(u"frame_scale")
         self.frame_scale.setFrameShape(QFrame.NoFrame)
-        self.frame_scale.setFrameShadow(QFrame.Raised)
+        self.frame_scale.setFrameShadow(QFrame.Plain)
         self.verticalLayout_8 = QVBoxLayout(self.frame_scale)
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.verticalLayout_8.setContentsMargins(0, 0, 0, 9)
@@ -509,8 +549,9 @@ class Ui_MainWindow(object):
 
         self.line_5 = QFrame(self.frame_scale)
         self.line_5.setObjectName(u"line_5")
+        self.line_5.setStyleSheet(u"color: rgb(92, 92, 92);")
+        self.line_5.setFrameShadow(QFrame.Plain)
         self.line_5.setFrameShape(QFrame.HLine)
-        self.line_5.setFrameShadow(QFrame.Sunken)
 
         self.verticalLayout_8.addWidget(self.line_5)
 
@@ -555,8 +596,9 @@ class Ui_MainWindow(object):
 
         self.line_6 = QFrame(self.frame_blend)
         self.line_6.setObjectName(u"line_6")
+        self.line_6.setStyleSheet(u"color: rgb(92, 92, 92);")
+        self.line_6.setFrameShadow(QFrame.Plain)
         self.line_6.setFrameShape(QFrame.HLine)
-        self.line_6.setFrameShadow(QFrame.Sunken)
 
         self.verticalLayout_9.addWidget(self.line_6)
 
