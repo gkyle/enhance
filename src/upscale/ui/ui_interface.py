@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacejlajPa.ui'
+## Form generated from reading UI file 'interfacersusOB.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -82,11 +82,11 @@ class Ui_MainWindow(object):
         self.frame_4.setMinimumSize(QSize(244, 0))
         self.frame_4.setMaximumSize(QSize(244, 16777215))
         self.frame_4.setFrameShape(QFrame.NoFrame)
-        self.frame_4.setFrameShadow(QFrame.Raised)
+        self.frame_4.setFrameShadow(QFrame.Plain)
         self.horizontalLayout_7 = QHBoxLayout(self.frame_4)
         self.horizontalLayout_7.setSpacing(6)
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.horizontalLayout_7.setContentsMargins(9, -1, 0, -1)
+        self.horizontalLayout_7.setContentsMargins(12, -1, 0, -1)
         self.label_cuda = QLabel(self.frame_4)
         self.label_cuda.setObjectName(u"label_cuda")
 
@@ -292,13 +292,13 @@ class Ui_MainWindow(object):
         self.group_base.setObjectName(u"group_base")
         self.group_base.setStyleSheet(u"QGroupBox {\n"
 "border: 1px solid rgb(92, 92, 92);\n"
-"margin-top: 15px;\n"
+"margin-top: 14px;\n"
 "padding-top:10px;\n"
 "}\n"
 "QGroupBox::title {\n"
 "subcontrol-origin: margin;\n"
 "subcontrol-position: top left;\n"
-"left: 10px;\n"
+"left: 8px;\n"
 "padding:0 5px;\n"
 "margin-top:5px;\n"
 "}")
@@ -356,13 +356,13 @@ class Ui_MainWindow(object):
         self.group_compare.setObjectName(u"group_compare")
         self.group_compare.setStyleSheet(u"QGroupBox {\n"
 "border: 1px solid rgb(92, 92, 92);\n"
-"margin-top: 15px;\n"
+"margin-top: 14px;\n"
 "padding-top:10px;\n"
 "}\n"
 "QGroupBox::title {\n"
 "subcontrol-origin: margin;\n"
 "subcontrol-position: top left;\n"
-"left: 10px;\n"
+"left: 8px;\n"
 "padding:0 5px;\n"
 "margin-top:5px;\n"
 "}")
@@ -458,13 +458,13 @@ class Ui_MainWindow(object):
         self.group_postprocess.setObjectName(u"group_postprocess")
         self.group_postprocess.setStyleSheet(u"QGroupBox {\n"
 "border: 1px solid rgb(92, 92, 92);\n"
-"margin-top: 15px;\n"
+"margin-top: 14px;\n"
 "padding-top:10px;\n"
 "}\n"
 "QGroupBox::title {\n"
 "subcontrol-origin: margin;\n"
 "subcontrol-position: top left;\n"
-"left: 10px;\n"
+"left: 8px;\n"
 "padding:0 5px;\n"
 "margin-top:5px;\n"
 "}")

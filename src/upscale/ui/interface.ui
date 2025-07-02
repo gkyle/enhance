@@ -133,14 +133,14 @@
           <enum>QFrame::NoFrame</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Plain</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <property name="spacing">
            <number>6</number>
           </property>
           <property name="leftMargin">
-           <number>9</number>
+           <number>12</number>
           </property>
           <property name="rightMargin">
            <number>0</number>
@@ -580,13 +580,13 @@
             <property name="styleSheet">
              <string notr="true">QGroupBox {
 border: 1px solid rgb(92, 92, 92);
-margin-top: 15px;
+margin-top: 14px;
 padding-top:10px;
 }
 QGroupBox::title {
 subcontrol-origin: margin;
 subcontrol-position: top left;
-left: 10px;
+left: 8px;
 padding:0 5px;
 margin-top:5px;
 }</string>
@@ -703,13 +703,13 @@ margin-top:5px;
             <property name="styleSheet">
              <string notr="true">QGroupBox {
 border: 1px solid rgb(92, 92, 92);
-margin-top: 15px;
+margin-top: 14px;
 padding-top:10px;
 }
 QGroupBox::title {
 subcontrol-origin: margin;
 subcontrol-position: top left;
-left: 10px;
+left: 8px;
 padding:0 5px;
 margin-top:5px;
 }</string>
@@ -896,13 +896,13 @@ margin-top:5px;
             <property name="styleSheet">
              <string notr="true">QGroupBox {
 border: 1px solid rgb(92, 92, 92);
-margin-top: 15px;
+margin-top: 14px;
 padding-top:10px;
 }
 QGroupBox::title {
 subcontrol-origin: margin;
 subcontrol-position: top left;
-left: 10px;
+left: 8px;
 padding:0 5px;
 margin-top:5px;
 }</string>
