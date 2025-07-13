@@ -9,13 +9,14 @@ from spandrel import ImageModelDescriptor, ModelLoader
 import spandrel_extra_arches
 spandrel_extra_arches.install()
 
+
 # Sharpen via super resolution model based on BasicSR
 class SharpenBasicSR(Observable):
-    def __init__(self, modelPath: str, tileSize: int, tilePadding: int, useGpu: bool):
+    def __init__(self, modelPath: str, tileSize: int, tilePadding: int, maintainScale: bool, device: str):
         super().__init__()
 
         self.modelPath = modelPath
-        self.device = "cuda" if useGpu else "cpu"
+        self.device = device if device is not None else "cpu"
 
         fileBaseName = os.path.basename(modelPath)
         fileBaseName, _ = os.path.splitext(fileBaseName)
@@ -26,6 +27,7 @@ class SharpenBasicSR(Observable):
 
         self.tileSize = tileSize
         self.tilePadding = tilePadding
+        self.maintainScale = maintainScale
 
     def sharpen(self, inFile: File):
         model = ModelLoader().load_from_file(self.modelPath)
@@ -49,7 +51,7 @@ class SharpenBasicSR(Observable):
         # TODO: Fix this signature
         outputFile = OutputFile(None, inFile, Operation.Sharpen, self.modelName)
         outputFile.saveImage(output)
-        if model.scale > 1:
+        if self.maintainScale and model.scale > 1:
             outputFile.postops.append(DownscaleOperation(1/model.scale))
         outputFile.applyPostProcessAndSave()  # Apply any postprocess ops and save
 

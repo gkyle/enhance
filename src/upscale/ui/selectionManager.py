@@ -36,7 +36,7 @@ class SelectionManager:
         if len(self.compare) == 0:
             emitLater(self.signals.setRenderMode.emit, RenderMode.Single)
 
-        emitLater(self.signals.showFiles.emit)
+        emitLater(self.signals.showFiles.emit, True)
 
     def selectCompare(self, file):
         if file == self.base:
@@ -52,7 +52,7 @@ class SelectionManager:
 
         for idx, f in enumerate(self.compare):
             self.signals.updateIndicator.emit(f, idx+1)
-        emitLater(self.signals.showFiles.emit)
+        emitLater(self.signals.showFiles.emit, False)
 
         if self.renderMode == RenderMode.Single:
             self.signals.setRenderMode.emit(RenderMode.Split)
@@ -65,7 +65,7 @@ class SelectionManager:
             self.compare.remove(file)
             self.signals.updateIndicator.emit(file, CLEAR)
 
-        emitLater(self.signals.showFiles.emit)
+        emitLater(self.signals.showFiles.emit, True)
 
     def clear(self):
         if self.base is not None:
@@ -76,7 +76,7 @@ class SelectionManager:
             self.signals.updateIndicator.emit(file, CLEAR)
         self.compare.clear()
 
-        emitLater(self.signals.showFiles.emit)
+        emitLater(self.signals.showFiles.emit, True)
 
     def getBaseFile(self) -> File:
         return self.base

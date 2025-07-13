@@ -4,7 +4,6 @@ from enum import Enum
 from typing import List, Any, Dict
 import jsonpickle
 import os
-import GPUtil
 import sys
 
 # Use deferred loading for torch and modules that use torch to reduce startup latency.
@@ -60,18 +59,21 @@ class App:
     def removeFile(self, file: File) -> None:
         self.rawFiles.remove(file)
 
-    def listModels(self) -> List[str]:
+    def listModels(self, excludefilters=[]) -> List[str]:
         models = []
         for root, dirs, files in os.walk("models"):
             for file in files:
                 if file.endswith(".pth"):
+                    path = os.path.join(root, file)
+                    if any(filter in path for filter in excludefilters):
+                        continue
                     models.append(os.path.join(root, file))
         models = sorted(models)
         return models
 
     # TODO: Support variable tile size
-    def doSharpen(self, file: InputFile, modelName: str, progressBar, useGpu: bool) -> OutputFile:
-        sharpenSR = sharpen_sr.SharpenBasicSR(modelName, 512, 32, useGpu)
+    def doSharpen(self, file: InputFile, modelName: str, progressBar, tileSize: int, tilePadding: int, maintainScale: bool, device: str) -> OutputFile:
+        sharpenSR = sharpen_sr.SharpenBasicSR(modelName, tileSize, tilePadding, maintainScale, device)
         sharpenSR.addObserver(progressBar)
         self.activeOperation = sharpenSR
         outputFile = sharpenSR.sharpen(file)
@@ -85,11 +87,24 @@ class App:
         if self.activeOperation:
             self.activeOperation.requestInterrupt()
 
+    def getGpuNames(self):
+        try:
+            if torch.backends.mps.is_available():
+                return [["mps", "Apple Silicon GPU (MPS)"]]
+            if torch.cuda.is_available():
+                return [[f"cuda:{i}", torch.cuda.get_device_name(i)] for i in range(torch.cuda.device_count())]
+        except Exception as e:
+            pass
+        return []
+
     def getGpuStats(self):
         try:
+            if torch.backends.mps.is_available():
+                # MPS does not provide memory stats
+                return None
             if torch.cuda.is_available():
-                gpu = GPUtil.getGPUs()
-                return int(toGB(gpu[0].memoryFree)), int(toGB(gpu[0].memoryTotal))
+                free_bytes, total_bytes = torch.cuda.mem_get_info()
+                return int(toGB(free_bytes)), int(toGB(total_bytes))
         except Exception as e:
             pass
         return None
@@ -104,4 +119,4 @@ class App:
 
 
 def toGB(bytes):
-    return bytes / (1024)
+    return bytes / (1024 * 1024 * 1024)

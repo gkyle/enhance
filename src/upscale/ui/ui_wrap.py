@@ -89,6 +89,7 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_clear.clicked.connect(self.doClear)
         self.pushButton_open.clicked.connect(self.doOpen)
         self.pushButton_run.clicked.connect(self.doRun)
+        self.pushButton_upscale.clicked.connect(self.doUpscale)
         self.pushButton_zoom.clicked.connect(self.showZoomMenu)
         self.pushButton_single.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Single))
         self.pushButton_split.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Split))
@@ -130,20 +131,28 @@ class Ui_AppWindow(Ui_MainWindow):
             self.signals.drawFileList.emit(file)
             self.renderBaseFile()
 
-    def doRun(self):
-        isGPuPresent = self.app.getGpuPresent()
-        dialog = DialogModel(self.app, isGPuPresent)
+    def doRun(self, doUpscale=False):
+        dialog = DialogModel(self.app, doUpscale)
         result = dialog.exec()
         if result == QDialog.Accepted:
             selectedModel = dialog.ui.listWidget.currentItem().text()
-            useGpu = dialog.ui.checkBox_gpu.isChecked()
+            tileSize = int(dialog.ui.tileSize_combobox.currentText())
+            tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
+            gpuId = dialog.ui.device_combobox.currentData()
+            maintainScale = not doUpscale
+            print(f"Selected model: {selectedModel}, GPU ID: {gpuId}")
+
+            desc = "Enhance:"
+            if doUpscale:
+                desc = "Upscale:"
 
             def f():
                 file = self.selectionManager.getBaseFile()
                 if file is not None:
                     progressUpdater = ProgressBarUpdater(
-                        self.progressBar, self.label_progressBar, total=1, desc="Sharpen:")
-                    result = self.app.doSharpen(file, selectedModel, progressUpdater.tick, useGpu)
+                        self.progressBar, self.label_progressBar, total=1, desc=desc)
+                    result = self.app.doSharpen(file, selectedModel, progressUpdater.tick,
+                                                tileSize, tilePadding, maintainScale, gpuId)
                     if result is None:
                         return
                     self.signals.appendFile.emit(result)
@@ -151,6 +160,9 @@ class Ui_AppWindow(Ui_MainWindow):
 
             worker = AsyncWorker(partial(f))
             self.op_queue.start(worker)
+
+    def doUpscale(self):
+        self.doRun(doUpscale=True)
 
     def doCancelOp(self):
         self.app.doInterruptOperation()
@@ -269,7 +281,7 @@ class Ui_AppWindow(Ui_MainWindow):
                 compareFile.applyPostProcessAndSave()
 
                 self.fileStrip.getButton(compareFile).updateTextLabel()
-                self.signals.showFiles.emit()
+                self.signals.showFiles.emit(False)
 
     def drawLabelText(self, label, text, maybeElide=False):
         if maybeElide:

@@ -538,7 +538,14 @@
           <item>
            <widget class="QPushButton" name="pushButton_run">
             <property name="text">
-             <string>Run</string>
+             <string>Enhance</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_upscale">
+            <property name="text">
+             <string>Upscale</string>
             </property>
            </widget>
           </item>

@@ -78,6 +78,8 @@ class OutputFile(File):
     def saveImage(self, img):
         # Determine path based on applied operations
         rootPath = os.getcwd() + "/.cache/"
+        if not os.path.exists(rootPath):
+            os.makedirs(rootPath)
         baseName = os.path.basename(self.baseFile.path)
         base, ext = os.path.splitext(baseName)
         timestamp = time.strftime("%Y%m%d-%H%M%S")

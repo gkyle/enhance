@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacersusOB.ui'
+## Form generated from reading UI file 'interfaceRSUxWl.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -266,6 +266,11 @@ class Ui_MainWindow(object):
         self.pushButton_run.setObjectName(u"pushButton_run")
 
         self.verticalLayout_3.addWidget(self.pushButton_run)
+
+        self.pushButton_upscale = QPushButton(self.frame_sidebar)
+        self.pushButton_upscale.setObjectName(u"pushButton_upscale")
+
+        self.verticalLayout_3.addWidget(self.pushButton_upscale)
 
         self.line = QFrame(self.frame_sidebar)
         self.line.setObjectName(u"line")
@@ -767,7 +772,8 @@ class Ui_MainWindow(object):
         self.pushButton_zoom.setText(QCoreApplication.translate("MainWindow", u"100%", None))
         self.canvas_main.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"Open", None))
-        self.pushButton_run.setText(QCoreApplication.translate("MainWindow", u"Run", None))
+        self.pushButton_run.setText(QCoreApplication.translate("MainWindow", u"Enhance", None))
+        self.pushButton_upscale.setText(QCoreApplication.translate("MainWindow", u"Upscale", None))
         self.pushButton_clear.setText(QCoreApplication.translate("MainWindow", u"Clear", None))
         self.group_base.setTitle(QCoreApplication.translate("MainWindow", u"Base File", None))
         self.label_13.setText(QCoreApplication.translate("MainWindow", u"Filename:", None))

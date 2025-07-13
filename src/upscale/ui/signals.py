@@ -31,7 +31,7 @@ class Signals(QObject):
     startProgress: Signal = Signal(int, str)
     incrementProgress: Signal = Signal(object, int, int, int, bool, object)
 
-    showFiles: Signal = Signal()
+    showFiles: Signal = Signal(bool)
     setRenderMode: Signal = Signal(RenderMode)
     selectBaseFile: Signal = Signal(File, bool)
     selectCompareFile: Signal = Signal(File)
