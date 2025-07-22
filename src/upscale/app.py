@@ -10,8 +10,11 @@ import sys
 from deferred_import import deferred_import
 torch = deferred_import('torch')
 
-
+import upscale.op.masks as generate_masks  # noqa
+import upscale.op.florence as detect_subjects  # noqa
 sharpen_sr = deferred_import('upscale.op.sharpen_sr')
+# generate_masks = deferred_import('upscale.op.masks')
+# detect_subjects = deferred_import('upscale.op.florence')
 
 
 class Operation(Enum):
@@ -37,6 +40,15 @@ class App:
                 self.appendFile(sys.argv[i])
 
         self.activeOperation: Observable = None
+
+        # environment settings
+        # use bfloat16
+        torch.autocast(device_type="cuda", dtype=torch.bfloat16).__enter__()
+
+        if torch.cuda.get_device_properties(0).major >= 8:
+            # turn on tfloat32 for Ampere GPUs (https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices)
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
 
     def setBaseFile(self, path: str) -> InputFile:
         self.baseFile = InputFile(path)
@@ -82,6 +94,23 @@ class App:
             return None
         self.rawFiles.append(outputFile)
         return outputFile
+
+    def doMasks(self, file: InputFile, progressBar):
+        device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
+        generateMasksOp = generate_masks.GenerateMasks(device)
+        generateMasksOp.addObserver(progressBar)
+        self.activeOperation = generateMasksOp
+        success = generateMasksOp.run(file)
+        generateMasksOp.removeObserver(progressBar)
+
+    def doDetectSubjects(self, file: InputFile, progressBar):
+        device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
+        detectSubjects = detect_subjects.GenerateLabels(device)
+        detectSubjects.addObserver(progressBar)
+        self.activeOperation = detectSubjects
+        result = detectSubjects.detect(file)
+        detectSubjects.removeObserver(progressBar)
+        return result
 
     def doInterruptOperation(self):
         if self.activeOperation:

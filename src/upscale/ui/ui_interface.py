@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfaceRSUxWl.ui'
+## Form generated from reading UI file 'interfacesEBTrm.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -15,10 +15,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QGridLayout,
-    QGroupBox, QHBoxLayout, QLabel, QLayout,
-    QMainWindow, QProgressBar, QPushButton, QScrollArea,
-    QSizePolicy, QSlider, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QCheckBox, QFrame,
+    QGridLayout, QGroupBox, QHBoxLayout, QLabel,
+    QLayout, QMainWindow, QProgressBar, QPushButton,
+    QScrollArea, QSizePolicy, QSlider, QVBoxLayout,
+    QWidget)
 import icons_rc
 
 class Ui_MainWindow(object):
@@ -262,10 +263,36 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.pushButton_open)
 
+        self.line_7 = QFrame(self.frame_sidebar)
+        self.line_7.setObjectName(u"line_7")
+        self.line_7.setStyleSheet(u"color: rgb(92, 92, 92);")
+        self.line_7.setFrameShadow(QFrame.Plain)
+        self.line_7.setFrameShape(QFrame.HLine)
+
+        self.verticalLayout_3.addWidget(self.line_7)
+
+        self.pushButton_mask = QPushButton(self.frame_sidebar)
+        self.pushButton_mask.setObjectName(u"pushButton_mask")
+
+        self.verticalLayout_3.addWidget(self.pushButton_mask)
+
+        self.line_8 = QFrame(self.frame_sidebar)
+        self.line_8.setObjectName(u"line_8")
+        self.line_8.setStyleSheet(u"color: rgb(92, 92, 92);")
+        self.line_8.setFrameShadow(QFrame.Plain)
+        self.line_8.setFrameShape(QFrame.HLine)
+
+        self.verticalLayout_3.addWidget(self.line_8)
+
         self.pushButton_run = QPushButton(self.frame_sidebar)
         self.pushButton_run.setObjectName(u"pushButton_run")
 
         self.verticalLayout_3.addWidget(self.pushButton_run)
+
+        self.pushButton_denoise = QPushButton(self.frame_sidebar)
+        self.pushButton_denoise.setObjectName(u"pushButton_denoise")
+
+        self.verticalLayout_3.addWidget(self.pushButton_denoise)
 
         self.pushButton_upscale = QPushButton(self.frame_sidebar)
         self.pushButton_upscale.setObjectName(u"pushButton_upscale")
@@ -353,6 +380,41 @@ class Ui_MainWindow(object):
 
 
         self.verticalLayout_18.addWidget(self.frame_label_shape_base)
+
+        self.label_4 = QLabel(self.group_base)
+        self.label_4.setObjectName(u"label_4")
+
+        self.verticalLayout_18.addWidget(self.label_4)
+
+        self.frame_label_subjects = QFrame(self.group_base)
+        self.frame_label_subjects.setObjectName(u"frame_label_subjects")
+        self.frame_label_subjects.setFrameShape(QFrame.NoFrame)
+        self.frame_label_subjects.setFrameShadow(QFrame.Plain)
+        self.horizontalLayout_16 = QHBoxLayout(self.frame_label_subjects)
+        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
+        self.horizontalLayout_16.setContentsMargins(12, 0, 0, 0)
+        self.label_subjects = QLabel(self.frame_label_subjects)
+        self.label_subjects.setObjectName(u"label_subjects")
+
+        self.horizontalLayout_16.addWidget(self.label_subjects)
+
+
+        self.verticalLayout_18.addWidget(self.frame_label_subjects)
+
+        self.frame_8 = QFrame(self.group_base)
+        self.frame_8.setObjectName(u"frame_8")
+        self.frame_8.setFrameShape(QFrame.NoFrame)
+        self.frame_8.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_15 = QHBoxLayout(self.frame_8)
+        self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
+        self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
+        self.checkBox_render_masks = QCheckBox(self.frame_8)
+        self.checkBox_render_masks.setObjectName(u"checkBox_render_masks")
+
+        self.horizontalLayout_15.addWidget(self.checkBox_render_masks)
+
+
+        self.verticalLayout_18.addWidget(self.frame_8)
 
 
         self.verticalLayout_3.addWidget(self.group_base)
@@ -772,7 +834,9 @@ class Ui_MainWindow(object):
         self.pushButton_zoom.setText(QCoreApplication.translate("MainWindow", u"100%", None))
         self.canvas_main.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"Open", None))
+        self.pushButton_mask.setText(QCoreApplication.translate("MainWindow", u"Mask", None))
         self.pushButton_run.setText(QCoreApplication.translate("MainWindow", u"Enhance", None))
+        self.pushButton_denoise.setText(QCoreApplication.translate("MainWindow", u"Denoise", None))
         self.pushButton_upscale.setText(QCoreApplication.translate("MainWindow", u"Upscale", None))
         self.pushButton_clear.setText(QCoreApplication.translate("MainWindow", u"Clear", None))
         self.group_base.setTitle(QCoreApplication.translate("MainWindow", u"Base File", None))
@@ -780,6 +844,9 @@ class Ui_MainWindow(object):
         self.label_filename_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
         self.label_14.setText(QCoreApplication.translate("MainWindow", u"Shape:", None))
         self.label_shape_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p/></body></html>", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Subjects:", None))
+        self.label_subjects.setText("")
+        self.checkBox_render_masks.setText(QCoreApplication.translate("MainWindow", u"Render Masks", None))
         self.group_compare.setTitle(QCoreApplication.translate("MainWindow", u"Compare File", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Filename:", None))
         self.label_filename.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))

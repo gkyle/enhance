@@ -33,6 +33,7 @@ class Signals(QObject):
 
     showFiles: Signal = Signal(bool)
     setRenderMode: Signal = Signal(RenderMode)
+    setShowMasks: Signal = Signal(bool)
     selectBaseFile: Signal = Signal(File, bool)
     selectCompareFile: Signal = Signal(File)
     updateIndicator: Signal = Signal(File, int)

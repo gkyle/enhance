@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget, QFileDialog, QMainWindow, QDialog, QAppli
 from functools import partial
 
 from upscale.app import App, Operation
-from upscale.lib.file import BlendOperation, DownscaleOperation, File, InputFile, OutputFile
+from upscale.lib.file import BlendOperation, DownscaleOperation, File, InputFile, Label, OutputFile
 from upscale.ui.canvasLabel import CanvasLabel
 from upscale.ui.filestrip import FileButton, FileStrip
 from upscale.ui.progress import ProgressBarUpdater
@@ -90,10 +90,13 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_open.clicked.connect(self.doOpen)
         self.pushButton_run.clicked.connect(self.doRun)
         self.pushButton_upscale.clicked.connect(self.doUpscale)
+        self.pushButton_mask.clicked.connect(self.doMasks)
         self.pushButton_zoom.clicked.connect(self.showZoomMenu)
         self.pushButton_single.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Single))
         self.pushButton_split.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Split))
         self.pushButton_quad.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Grid))
+        self.checkBox_render_masks.stateChanged.connect(
+            lambda state: self.canvas_main.setShowMasks(state != 0))
 
         self.horizontalSlider_blend.valueChanged.connect(self.onChangeBlendAmount)
         self.pushButton_postprocess_apply.clicked.connect(self.doApplyPostProcess)
@@ -114,6 +117,7 @@ class Ui_AppWindow(Ui_MainWindow):
             self.selectionManager.selectCompare(self.app.getFileList()[i])
 
         self.renderBaseFile()
+        self.doDetectSubjects()
 
     def doClear(self):
         self.app.setBaseFile(None)
@@ -130,6 +134,7 @@ class Ui_AppWindow(Ui_MainWindow):
             self.signals.selectBaseFile.emit(file, True)
             self.signals.drawFileList.emit(file)
             self.renderBaseFile()
+            self.doDetectSubjects()
 
     def doRun(self, doUpscale=False):
         dialog = DialogModel(self.app, doUpscale)
@@ -163,6 +168,38 @@ class Ui_AppWindow(Ui_MainWindow):
 
     def doUpscale(self):
         self.doRun(doUpscale=True)
+
+    def doMasks(self):
+        file = self.selectionManager.getBaseFile()
+
+        def f():
+            if file is not None:
+                progressUpdater = ProgressBarUpdater(
+                    self.progressBar, self.label_progressBar, total=1, desc="Generating Masks")
+                self.app.doMasks(file, progressUpdater.tick)
+                self.signals.showFiles.emit(False)
+                self.checkBox_render_masks.setChecked(True)
+
+        worker = AsyncWorker(partial(f))
+        self.op_queue.start(worker)
+
+    def doDetectSubjects(self):
+        file = self.selectionManager.getBaseFile()
+
+        def f():
+            if file is not None:
+                progressUpdater = ProgressBarUpdater(
+                    self.progressBar, self.label_progressBar, total=1, desc="Detecting Subjects")
+                result = self.app.doDetectSubjects(file, progressUpdater.tick)
+                if result is not None:
+                    for idx, label in enumerate(result['labels']):
+                        box = result['bboxes'][idx]
+                        file.labels.append(Label(label, box))
+                self.renderBaseFile()
+                self.signals.showFiles.emit(False)
+
+        worker = AsyncWorker(partial(f))
+        self.op_queue.start(worker)
 
     def doCancelOp(self):
         self.app.doInterruptOperation()
@@ -222,6 +259,10 @@ class Ui_AppWindow(Ui_MainWindow):
 
             baseImg = file.loadUnchanged()
             self.drawLabelShape(self.label_shape_base, baseImg)
+
+            if file.labels is not None:
+                self.drawLabelText(self.label_subjects, ", ".join(
+                    [label.label for label in file.labels]), maybeElide=True)
 
     def renderPostProcess(self, compareFile: OutputFile):
         self.group_compare.hide()

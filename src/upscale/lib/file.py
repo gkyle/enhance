@@ -35,10 +35,25 @@ class File(Unpickle):
         return cv2.imread(self.path, cv2.IMREAD_UNCHANGED)
 
 
-class InputFile(File):
+class Mask():
+    def __init__(self, score: float, label: str, mask: np.ndarray, box: tuple):
+        self.score = score
+        self.label = label
+        self.mask = mask
+        self.box = box
 
+
+class Label():
+    def __init__(self, label: str, box: tuple):
+        self.label = label
+        self.box = box
+
+
+class InputFile(File):
     def __init__(self, path):
         super().__init__(path)
+        self.masks: list[Mask] = []
+        self.labels: list[Label] = []
 
 
 class PostProcessOperationDeprecated(Enum):

@@ -13,6 +13,17 @@ from upscale.ui.signals import Signals, getSignals
 from upscale.ui.common import RenderMode, ZoomLevel
 
 
+MASK_COLORS = [
+    [255, 0, 255],  # Magenta
+    [0, 255, 255],  # Cyan
+    [0, 255, 0],  # Green
+    [255, 0, 0],  # Red
+    [0, 0, 255],  # Blue
+    [255, 255, 0],  # Yellow
+    [255, 165, 0]   # Orange
+]
+
+
 class CanvasLabel(QLabel):
 
     def __init__(self, selectionManager: SelectionManager, parent: Optional[QWidget] = None):
@@ -41,6 +52,7 @@ class CanvasLabel(QLabel):
         self.img4 = None
         self.fraction = 0.5
         self.renderMode: RenderMode = RenderMode.Single
+        self.renderMasks: bool = False
 
         self.setScaledContents(False)
         self.setStatusMessage()
@@ -59,6 +71,9 @@ class CanvasLabel(QLabel):
         baseFile = self.selectionManager.getBaseFile()
         if baseFile is not None:
             self.img1 = cv2.imread(baseFile.path)
+            if self.renderMasks:
+                self.img1 = self.applyMasks(baseFile, self.img1)
+
             if self.renderMode == RenderMode.Split or self.renderMode == RenderMode.Grid:
                 compareFile = self.selectionManager.getCompareFile(0)
                 if compareFile is not None:
@@ -87,6 +102,25 @@ class CanvasLabel(QLabel):
         if resetView:
             self.setZoomFactor(ZoomLevel.FIT)
         self.repaint()
+
+    def applyMasks(self, file, img):
+        if len(file.masks) > 0:
+            for idx, mask in enumerate(file.masks):
+                # If there are masks, we can use the first one to set the size of the image
+                box = mask.box
+                color = MASK_COLORS[idx % len(MASK_COLORS)]
+                color.reverse()
+                img = cv2.rectangle(img, (int(box[0]), int(
+                    box[1])), (int(box[2]), int(box[3])), color, 2)
+                img = cv2.putText(img, mask.label,
+                                  (int(box[0]), int(box[1]) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+                mask_img = mask.mask
+                if mask_img is not None and len(mask_img.shape) == 2:
+                    mask_img = np.array(mask_img * 255).astype(np.uint8)
+                    color_mask_img = np.zeros((mask_img.shape[0], mask_img.shape[1], 3), dtype=np.uint8)
+                    color_mask_img[mask_img == 255] = color
+                    img = cv2.addWeighted(img, 1.0, color_mask_img, 0.33, 0)
+        return img
 
     def setStatusMessage(self) -> None:
         if self.img1 is None:
@@ -154,6 +188,11 @@ class CanvasLabel(QLabel):
 
         self.repaint()
         self.signals.changeZoom.emit(self.zoomFactor)
+
+    def setShowMasks(self, showMasks: bool) -> None:
+        self.renderMasks = showMasks
+        self.showFiles(False)
+        self.repaint()
 
     def wheelEvent(self, event: QWheelEvent) -> None:
         delta: int = event.angleDelta().y()
