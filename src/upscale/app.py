@@ -10,12 +10,16 @@ import sys
 from deferred_import import deferred_import
 torch = deferred_import('torch')
 
-import upscale.op.masks as generate_masks  # noqa
-import upscale.op.florence as detect_subjects  # noqa
 sharpen_sr = deferred_import('upscale.op.sharpen_sr')
-# generate_masks = deferred_import('upscale.op.masks')
-# detect_subjects = deferred_import('upscale.op.florence')
 
+# Conditionally import mask generation and subject detection modules
+DO_DETECT = False
+try:
+    import upscale.op.masks as generate_masks
+    import upscale.op.florence as detect_subjects
+    DO_DETECT = True
+except ImportError as e:
+    pass
 
 class Operation(Enum):
     Sharpen = "Sharpen"
@@ -27,6 +31,7 @@ class App:
     def __init__(self):
         self.baseFile: InputFile = None
         self.rawFiles: List[File] = []
+        self.doDetect = DO_DETECT
         if len(sys.argv) > 1:
             if os.path.exists(sys.argv[1]):
                 if os.path.isdir(sys.argv[1]):
@@ -96,21 +101,23 @@ class App:
         return outputFile
 
     def doMasks(self, file: InputFile, progressBar):
-        device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
-        generateMasksOp = generate_masks.GenerateMasks(device)
-        generateMasksOp.addObserver(progressBar)
-        self.activeOperation = generateMasksOp
-        success = generateMasksOp.run(file)
-        generateMasksOp.removeObserver(progressBar)
+        if self.doDetect:
+            device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
+            generateMasksOp = generate_masks.GenerateMasks(device)
+            generateMasksOp.addObserver(progressBar)
+            self.activeOperation = generateMasksOp
+            success = generateMasksOp.run(file)
+            generateMasksOp.removeObserver(progressBar)
 
     def doDetectSubjects(self, file: InputFile, progressBar):
-        device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
-        detectSubjects = detect_subjects.GenerateLabels(device)
-        detectSubjects.addObserver(progressBar)
-        self.activeOperation = detectSubjects
-        result = detectSubjects.detect(file)
-        detectSubjects.removeObserver(progressBar)
-        return result
+        if self.doDetect:
+            device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
+            detectSubjects = detect_subjects.GenerateLabels(device)
+            detectSubjects.addObserver(progressBar)
+            self.activeOperation = detectSubjects
+            result = detectSubjects.detect(file)
+            detectSubjects.removeObserver(progressBar)
+            return result
 
     def doInterruptOperation(self):
         if self.activeOperation:

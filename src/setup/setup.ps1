@@ -1,3 +1,6 @@
+# Optionally enable subject detection and masking. Requires build / installation of flash-attn.
+$do_detect = $false
+
 try {
     Set-ExecutionPolicy RemoteSigned -scope CurrentUser
     Write-Host "Checking for uv..."
@@ -16,4 +19,9 @@ if ($torch_variant -eq "cpu") {
     Write-Host "Install did not find a CUDA compatible GPU. Install will continue with CPU-only dependencies. You can re-run install.bat after installing drivers or CUDA Toolkit to enable GPU support."
 }
 
-Invoke-Expression -Command "uv sync --extra $torch_variant"
+$extra_args = "--extra $torch_variant"
+if ($do_detect) {
+    $extra_args += " --extra detect"
+}
+
+Invoke-Expression -Command "uv sync $extra_args"

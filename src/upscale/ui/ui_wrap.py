@@ -117,7 +117,10 @@ class Ui_AppWindow(Ui_MainWindow):
             self.selectionManager.selectCompare(self.app.getFileList()[i])
 
         self.renderBaseFile()
-        self.doDetectSubjects()
+        if self.app.doDetect:
+            self.doDetectSubjects()
+        else:
+            self.pushButton_mask.setVisible(False)
 
     def doClear(self):
         self.app.setBaseFile(None)
