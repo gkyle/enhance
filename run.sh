@@ -18,8 +18,8 @@ if [ "$torch_variant" = "cpu" ]; then
 fi;
 
 # Sync with final GPU configuration
-uv sync --extra $torch_variant
+uv sync --extra $torch_variant --extra detect
 
 # Run
 echo "Starting Enhance AI..."
-uv run src/main.py
+uv run src/main.py $*

@@ -60,7 +60,7 @@ sam-2 = { git = "https://github.com/facebookresearch/sam2.git", rev = "c2ec8e14a
 # For windows, prefer a prebuilt flash_attn wheel. https://huggingface.co/lldacing/flash-attention-windows-wheel/tree/main
 flash-attn = [
   {url = "https://huggingface.co/lldacing/flash-attention-windows-wheel/resolve/main/flash_attn-2.7.4%2Bcu126torch2.6.0cxx11abiFALSE-cp312-cp312-win_amd64.whl?download=true", marker = "platform_system == 'Windows'"},
-  {git = "https://github.com/Dao-AILab/flash-attention", tag = "v2.7.4", marker = "platform_system != 'Windows'"}
+  {git = "https://github.com/Dao-AILab/flash-attention.git", tag = "v2.8.1", marker = "platform_system != 'Windows'"}
 ]
 
 [[tool.uv.index]]
