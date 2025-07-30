@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'dialog_modeljQfmIA.ui'
+## Form generated from reading UI file 'dialog_modelLHMJnz.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -17,14 +17,14 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog,
     QDialogButtonBox, QFrame, QGridLayout, QHBoxLayout,
-    QLabel, QListWidget, QListWidgetItem, QSizePolicy,
-    QVBoxLayout, QWidget)
+    QLabel, QListWidget, QListWidgetItem, QPushButton,
+    QSizePolicy, QVBoxLayout, QWidget)
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(400, 500)
+        Dialog.resize(1098, 500)
         Dialog.setMinimumSize(QSize(0, 400))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -124,12 +124,39 @@ class Ui_Dialog(object):
 
         self.verticalLayout.addWidget(self.frame_2)
 
-        self.buttonBox = QDialogButtonBox(Dialog)
+        self.frame_6 = QFrame(Dialog)
+        self.frame_6.setObjectName(u"frame_6")
+        self.frame_6.setFrameShape(QFrame.NoFrame)
+        self.frame_6.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.frame_6)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.frame_7 = QFrame(self.frame_6)
+        self.frame_7.setObjectName(u"frame_7")
+        self.frame_7.setFrameShape(QFrame.NoFrame)
+        self.frame_7.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_5 = QHBoxLayout(self.frame_7)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_modelManager = QPushButton(self.frame_7)
+        self.pushButton_modelManager.setObjectName(u"pushButton_modelManager")
+        icon = QIcon(QIcon.fromTheme(u"list-add"))
+        self.pushButton_modelManager.setIcon(icon)
+
+        self.horizontalLayout_5.addWidget(self.pushButton_modelManager)
+
+
+        self.horizontalLayout_4.addWidget(self.frame_7)
+
+        self.buttonBox = QDialogButtonBox(self.frame_6)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
 
-        self.verticalLayout.addWidget(self.buttonBox)
+        self.horizontalLayout_4.addWidget(self.buttonBox)
+
+
+        self.verticalLayout.addWidget(self.frame_6)
 
 
         self.retranslateUi(Dialog)
@@ -140,10 +167,11 @@ class Ui_Dialog(object):
     # setupUi
 
     def retranslateUi(self, Dialog):
-        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Dialog", None))
+        Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Run Model", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"Choose Model:", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Device:", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"Tile Size:", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"Tile Padding:", None))
+        self.pushButton_modelManager.setText(QCoreApplication.translate("Dialog", u"Add and Manage Models", None))
     # retranslateUi
 

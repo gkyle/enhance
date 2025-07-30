@@ -1,29 +1,34 @@
+from glob import glob
+import json
 from upscale.lib.util import Observable
 from upscale.lib.file import File, InputFile, OutputFile
 from enum import Enum
-from typing import List, Any, Dict
-import jsonpickle
+from typing import List
 import os
 import sys
+from huggingface_hub import HfApi
 
 # Use deferred loading for torch and modules that use torch to reduce startup latency.
 from deferred_import import deferred_import
-torch = deferred_import('torch')
 
-sharpen_sr = deferred_import('upscale.op.sharpen_sr')
+torch = deferred_import("torch")
+modelRunner = deferred_import("upscale.op.model_runner")
 
 # Conditionally import mask generation and subject detection modules
 DO_DETECT = False
 try:
     import upscale.op.masks as generate_masks
     import upscale.op.florence as detect_subjects
+
     DO_DETECT = True
 except ImportError as e:
     pass
 
+
 class Operation(Enum):
-    Sharpen = "Sharpen"
-    Upscale = "Upscale"
+    Sharpen = "sharpen"
+    Denoise = "denoise"
+    Upscale = "upscale"
 
 
 class App:
@@ -68,7 +73,9 @@ class App:
     def clearFileList(self) -> None:
         self.rawFiles = []
 
-    def appendFile(self, path: str, baseFile: InputFile = None, operation: Operation = None) -> File:
+    def appendFile(
+        self, path: str, baseFile: InputFile = None, operation: Operation = None
+    ) -> File:
         file = OutputFile(path, baseFile, operation)
         self.rawFiles.append(file)
         return file
@@ -76,31 +83,33 @@ class App:
     def removeFile(self, file: File) -> None:
         self.rawFiles.remove(file)
 
-    def listModels(self, excludefilters=[]) -> List[str]:
-        models = []
-        for root, dirs, files in os.walk("models"):
-            for file in files:
-                if file.endswith(".pth"):
-                    path = os.path.join(root, file)
-                    if any(filter in path for filter in excludefilters):
-                        continue
-                    models.append(os.path.join(root, file))
-        models = sorted(models)
-        return models
-
-    # TODO: Support variable tile size
-    def doSharpen(self, file: InputFile, modelName: str, progressBar, tileSize: int, tilePadding: int, maintainScale: bool, device: str) -> OutputFile:
-        sharpenSR = sharpen_sr.SharpenBasicSR(modelName, tileSize, tilePadding, maintainScale, device)
-        sharpenSR.addObserver(progressBar)
-        self.activeOperation = sharpenSR
-        outputFile = sharpenSR.sharpen(file)
-        sharpenSR.removeObserver(progressBar)
+    def runModel(
+        self,
+        file: InputFile,
+        modelName: str,
+        progressBar,
+        tileSize: int,
+        tilePadding: int,
+        maintainScale: bool,
+        device: str,
+    ) -> OutputFile:
+        runner = modelRunner.ModelRunner(
+            self.getModelPath() + modelName,
+            tileSize,
+            tilePadding,
+            maintainScale,
+            device,
+        )
+        runner.addObserver(progressBar)
+        self.activeOperation = runner
+        outputFile = runner.run(file)
+        runner.removeObserver(progressBar)
         if outputFile is None:
             return None
         self.rawFiles.append(outputFile)
         return outputFile
 
-    def doMasks(self, file: InputFile, progressBar):
+    def runAutoMask(self, file: InputFile, progressBar):
         if self.doDetect:
             device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
             generateMasksOp = generate_masks.GenerateMasks(device)
@@ -109,7 +118,7 @@ class App:
             success = generateMasksOp.run(file)
             generateMasksOp.removeObserver(progressBar)
 
-    def doDetectSubjects(self, file: InputFile, progressBar):
+    def runDetectSubjects(self, file: InputFile, progressBar):
         if self.doDetect:
             device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
             detectSubjects = detect_subjects.GenerateLabels(device)
@@ -119,7 +128,7 @@ class App:
             detectSubjects.removeObserver(progressBar)
             return result
 
-    def doInterruptOperation(self):
+    def interruptOperation(self):
         if self.activeOperation:
             self.activeOperation.requestInterrupt()
 
@@ -128,7 +137,10 @@ class App:
             if torch.backends.mps.is_available():
                 return [["mps", "Apple Silicon GPU (MPS)"]]
             if torch.cuda.is_available():
-                return [[f"cuda:{i}", torch.cuda.get_device_name(i)] for i in range(torch.cuda.device_count())]
+                return [
+                    [f"cuda:{i}", torch.cuda.get_device_name(i)]
+                    for i in range(torch.cuda.device_count())
+                ]
         except Exception as e:
             pass
         return []
@@ -152,6 +164,37 @@ class App:
         except Exception as e:
             pass
         return False
+
+    def getModelPath(self) -> str:
+        return os.path.join("models/")
+
+    def getModels(self, installed=False):
+        modelListPath = self.getModelPath() + "models.json"
+        with open(modelListPath, "r") as f:
+            models = json.load(f)
+        if installed:
+            models = {
+                path: model for path, model in models.items() if model.get("installed")
+            }
+        return models
+
+    def storeModels(self, models):
+        modelListPath = self.getModelPath() + "models.json"
+        with open(modelListPath, "w") as f:
+            json.dump(models, f, indent=4)
+
+    def fetchModel(self, path):
+        modelInstallPath = self.getModelPath()
+        hf_api_client = HfApi()
+        hf_api_client.list_repo_files("gkyle/enhance")
+        hf_api_client.hf_hub_download(
+            repo_id="gkyle/enhance", filename=path, local_dir=modelInstallPath
+        )
+        # Save the updated local models list
+        models = self.getModels()
+        if path in models:
+            models[path]["installed"] = True
+            self.storeModels(models)
 
 
 def toGB(bytes):

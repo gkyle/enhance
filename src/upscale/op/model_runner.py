@@ -7,12 +7,19 @@ from upscale.op.simple_tile_processor import TileProcessor
 
 from spandrel import ImageModelDescriptor, ModelLoader
 import spandrel_extra_arches
+
 spandrel_extra_arches.install()
 
 
-# Sharpen via super resolution model based on BasicSR
-class SharpenBasicSR(Observable):
-    def __init__(self, modelPath: str, tileSize: int, tilePadding: int, maintainScale: bool, device: str):
+class ModelRunner(Observable):
+    def __init__(
+        self,
+        modelPath: str,
+        tileSize: int,
+        tilePadding: int,
+        maintainScale: bool,
+        device: str,
+    ):
         super().__init__()
 
         self.modelPath = modelPath
@@ -29,7 +36,7 @@ class SharpenBasicSR(Observable):
         self.tilePadding = tilePadding
         self.maintainScale = maintainScale
 
-    def sharpen(self, inFile: File):
+    def run(self, inFile: File):
         model = ModelLoader().load_from_file(self.modelPath)
         assert isinstance(model, ImageModelDescriptor)
 
@@ -52,7 +59,7 @@ class SharpenBasicSR(Observable):
         outputFile = OutputFile(None, inFile, Operation.Sharpen, self.modelName)
         outputFile.saveImage(output)
         if self.maintainScale and model.scale > 1:
-            outputFile.postops.append(DownscaleOperation(1/model.scale))
+            outputFile.postops.append(DownscaleOperation(1 / model.scale))
         outputFile.applyPostProcessAndSave()  # Apply any postprocess ops and save
 
         return outputFile

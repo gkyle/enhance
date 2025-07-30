@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacesEBTrm.ui'
+## Form generated from reading UI file 'interfacemXtmTQ.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -26,12 +26,13 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1600, 1200)
+        MainWindow.resize(1622, 1326)
         sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
+        MainWindow.setBaseSize(QSize(1600, 1200))
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -263,18 +264,10 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.pushButton_open)
 
-        self.line_7 = QFrame(self.frame_sidebar)
-        self.line_7.setObjectName(u"line_7")
-        self.line_7.setStyleSheet(u"color: rgb(92, 92, 92);")
-        self.line_7.setFrameShadow(QFrame.Plain)
-        self.line_7.setFrameShape(QFrame.HLine)
+        self.pushButton_clear = QPushButton(self.frame_sidebar)
+        self.pushButton_clear.setObjectName(u"pushButton_clear")
 
-        self.verticalLayout_3.addWidget(self.line_7)
-
-        self.pushButton_mask = QPushButton(self.frame_sidebar)
-        self.pushButton_mask.setObjectName(u"pushButton_mask")
-
-        self.verticalLayout_3.addWidget(self.pushButton_mask)
+        self.verticalLayout_3.addWidget(self.pushButton_clear)
 
         self.line_8 = QFrame(self.frame_sidebar)
         self.line_8.setObjectName(u"line_8")
@@ -307,10 +300,10 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.line)
 
-        self.pushButton_clear = QPushButton(self.frame_sidebar)
-        self.pushButton_clear.setObjectName(u"pushButton_clear")
+        self.pushButton_modelManager = QPushButton(self.frame_sidebar)
+        self.pushButton_modelManager.setObjectName(u"pushButton_modelManager")
 
-        self.verticalLayout_3.addWidget(self.pushButton_clear)
+        self.verticalLayout_3.addWidget(self.pushButton_modelManager)
 
         self.line_3 = QFrame(self.frame_sidebar)
         self.line_3.setObjectName(u"line_3")
@@ -401,7 +394,15 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_18.addWidget(self.frame_label_subjects)
 
-        self.frame_8 = QFrame(self.group_base)
+
+        self.verticalLayout_3.addWidget(self.group_base)
+
+        self.pushButton_mask = QPushButton(self.frame_sidebar)
+        self.pushButton_mask.setObjectName(u"pushButton_mask")
+
+        self.verticalLayout_3.addWidget(self.pushButton_mask)
+
+        self.frame_8 = QFrame(self.frame_sidebar)
         self.frame_8.setObjectName(u"frame_8")
         self.frame_8.setFrameShape(QFrame.NoFrame)
         self.frame_8.setFrameShadow(QFrame.Raised)
@@ -414,10 +415,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_15.addWidget(self.checkBox_render_masks)
 
 
-        self.verticalLayout_18.addWidget(self.frame_8)
-
-
-        self.verticalLayout_3.addWidget(self.group_base)
+        self.verticalLayout_3.addWidget(self.frame_8)
 
         self.group_compare = QGroupBox(self.frame_sidebar)
         self.group_compare.setObjectName(u"group_compare")
@@ -779,7 +777,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.frame_outputFiles_scroll = QWidget()
         self.frame_outputFiles_scroll.setObjectName(u"frame_outputFiles_scroll")
-        self.frame_outputFiles_scroll.setGeometry(QRect(0, 0, 1390, 200))
+        self.frame_outputFiles_scroll.setGeometry(QRect(0, 0, 1412, 200))
         sizePolicy2.setHeightForWidth(self.frame_outputFiles_scroll.sizePolicy().hasHeightForWidth())
         self.frame_outputFiles_scroll.setSizePolicy(sizePolicy2)
         self.frame_outputFiles_scroll.setMinimumSize(QSize(0, 0))
@@ -834,11 +832,11 @@ class Ui_MainWindow(object):
         self.pushButton_zoom.setText(QCoreApplication.translate("MainWindow", u"100%", None))
         self.canvas_main.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"Open", None))
-        self.pushButton_mask.setText(QCoreApplication.translate("MainWindow", u"Mask", None))
-        self.pushButton_run.setText(QCoreApplication.translate("MainWindow", u"Enhance", None))
+        self.pushButton_clear.setText(QCoreApplication.translate("MainWindow", u"Clear", None))
+        self.pushButton_run.setText(QCoreApplication.translate("MainWindow", u"Sharpen", None))
         self.pushButton_denoise.setText(QCoreApplication.translate("MainWindow", u"Denoise", None))
         self.pushButton_upscale.setText(QCoreApplication.translate("MainWindow", u"Upscale", None))
-        self.pushButton_clear.setText(QCoreApplication.translate("MainWindow", u"Clear", None))
+        self.pushButton_modelManager.setText(QCoreApplication.translate("MainWindow", u"Model Manager", None))
         self.group_base.setTitle(QCoreApplication.translate("MainWindow", u"Base File", None))
         self.label_13.setText(QCoreApplication.translate("MainWindow", u"Filename:", None))
         self.label_filename_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
@@ -846,6 +844,7 @@ class Ui_MainWindow(object):
         self.label_shape_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p/></body></html>", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Subjects:", None))
         self.label_subjects.setText("")
+        self.pushButton_mask.setText(QCoreApplication.translate("MainWindow", u"Auto Mask", None))
         self.checkBox_render_masks.setText(QCoreApplication.translate("MainWindow", u"Render Masks", None))
         self.group_compare.setTitle(QCoreApplication.translate("MainWindow", u"Compare File", None))
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Filename:", None))

@@ -2,18 +2,32 @@ import os
 import re
 import shutil
 from typing import Optional
-from PySide6.QtGui import (QPixmap, QGuiApplication, QFontMetrics)
+from PySide6.QtGui import QGuiApplication, QFontMetrics
 from PySide6.QtCore import QThreadPool, QTimer, QPoint, Qt
-from PySide6.QtWidgets import QWidget, QFileDialog, QMainWindow, QDialog, QApplication, QMenu
+from PySide6.QtWidgets import (
+    QWidget,
+    QFileDialog,
+    QMainWindow,
+    QDialog,
+    QMenu,
+)
 from functools import partial
 
 from upscale.app import App, Operation
-from upscale.lib.file import BlendOperation, DownscaleOperation, File, InputFile, Label, OutputFile
+from upscale.lib.file import (
+    BlendOperation,
+    DownscaleOperation,
+    File,
+    InputFile,
+    Label,
+    OutputFile,
+)
 from upscale.ui.canvasLabel import CanvasLabel
 from upscale.ui.filestrip import FileButton, FileStrip
 from upscale.ui.progress import ProgressBarUpdater
 from upscale.ui.selectionManager import SelectionManager
 from upscale.ui.signals import AsyncWorker, emitLater, getSignals
+from upscale.ui.ui_dialog_model_manager_wrap import DialogModelManager
 from upscale.ui.ui_dialog_model_wrap import DialogModel
 from upscale.ui.ui_interface import Ui_MainWindow
 from upscale.ui.common import RenderMode, ZoomLevel
@@ -28,7 +42,7 @@ class MainWindow(QMainWindow):
 
         # timer for updating GPU stats
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.ui.slotUpdateGPUStats)
+        self.timer.timeout.connect(self.ui.updateGPUStats)
         self.timer.start(5000)
 
     def center(self):
@@ -47,7 +61,7 @@ class MainWindow(QMainWindow):
         return super().moveEvent(event)
 
     def closeEvent(self, event):
-        self.ui.doCancelOp()
+        self.ui.cancelOp()
         self.timer.stop()
         event.accept()
 
@@ -69,7 +83,7 @@ class Ui_AppWindow(Ui_MainWindow):
         width = screen_resolution.width()
         height = screen_resolution.height()
 
-        MainWindow.resize(width*0.80, height*0.90)
+        MainWindow.resize(width * 0.80, height * 0.90)
         MainWindow.center()
 
         self.signals = getSignals()
@@ -77,38 +91,53 @@ class Ui_AppWindow(Ui_MainWindow):
 
         # Replace placeholders
         self.canvas_main: CanvasLabel = replaceWidget(
-            self.canvas_main,
-            CanvasLabel(self.selectionManager))
+            self.canvas_main, CanvasLabel(self.selectionManager)
+        )
 
         # Hide optional panels
         self.group_compare.hide()
         self.group_postprocess.hide()
 
         # Bind events
-        self.pushButton_cancelOp.clicked.connect(self.doCancelOp)
-        self.pushButton_clear.clicked.connect(self.doClear)
-        self.pushButton_open.clicked.connect(self.doOpen)
-        self.pushButton_run.clicked.connect(self.doRun)
-        self.pushButton_upscale.clicked.connect(self.doUpscale)
-        self.pushButton_mask.clicked.connect(self.doMasks)
+        self.pushButton_cancelOp.clicked.connect(self.cancelOp)
+        self.pushButton_clear.clicked.connect(self.clear)
+        self.pushButton_open.clicked.connect(self.showOpenDialog)
+        self.pushButton_run.clicked.connect(self.showSharpen)
+        self.pushButton_upscale.clicked.connect(self.showUpscale)
+        self.pushButton_denoise.clicked.connect(self.showDenoise)
+        self.pushButton_mask.clicked.connect(self.runAutoMask)
+        self.pushButton_modelManager.clicked.connect(lambda: self.showModelManager())
         self.pushButton_zoom.clicked.connect(self.showZoomMenu)
-        self.pushButton_single.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Single))
-        self.pushButton_split.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Split))
-        self.pushButton_quad.clicked.connect(lambda: self.canvas_main.setRenderMode(RenderMode.Grid))
+        self.pushButton_single.clicked.connect(
+            lambda: self.canvas_main.setRenderMode(RenderMode.Single)
+        )
+        self.pushButton_split.clicked.connect(
+            lambda: self.canvas_main.setRenderMode(RenderMode.Split)
+        )
+        self.pushButton_quad.clicked.connect(
+            lambda: self.canvas_main.setRenderMode(RenderMode.Grid)
+        )
         self.checkBox_render_masks.stateChanged.connect(
-            lambda state: self.canvas_main.setShowMasks(state != 0))
+            lambda state: self.canvas_main.setShowMasks(state != 0)
+        )
 
         self.horizontalSlider_blend.valueChanged.connect(self.onChangeBlendAmount)
-        self.pushButton_postprocess_apply.clicked.connect(self.doApplyPostProcess)
+        self.pushButton_postprocess_apply.clicked.connect(self.applyPostProcess)
 
-        self.signals.incrementProgress.connect(self.slotIncrementProgressBar)
-        self.signals.removeFile.connect(self.slotRemoveFile)
-        self.signals.saveFile.connect(self.slotSaveFile)
-        self.signals.changeZoom.connect(self.slotChangeZoom)
+        self.signals.incrementProgress.connect(self.incrementProgressBar)
+        self.signals.removeFile.connect(self.removeFile)
+        self.signals.saveFile.connect(self.saveFile)
+        self.signals.changeZoom.connect(self.changeZoom)
         self.signals.selectCompareFile.connect(self.renderPostProcess)
 
-        self.fileStrip = FileStrip(self.frame_inputFile, self.frame_outputFiles, self.frame_filesContainer, self.app,
-                                   self.selectionManager, self.signals.drawFileList)
+        self.fileStrip = FileStrip(
+            self.frame_inputFile,
+            self.frame_outputFiles,
+            self.frame_filesContainer,
+            self.app,
+            self.selectionManager,
+            self.signals.drawFileList,
+        )
 
         if self.app.baseFile is not None:
             self.selectionManager.selectBase(self.app.baseFile)
@@ -118,18 +147,20 @@ class Ui_AppWindow(Ui_MainWindow):
 
         self.renderBaseFile()
         if self.app.doDetect:
-            self.doDetectSubjects()
+            self.runDetectSubjects()
         else:
             self.pushButton_mask.setVisible(False)
 
-    def doClear(self):
+    def clear(self):
         self.app.setBaseFile(None)
         self.app.clearFileList()
         self.signals.drawFileList.emit(None)
         self.selectionManager.clear()
 
-    def doOpen(self):
-        path, _ = QFileDialog.getOpenFileName(filter="Image Files (*.jpg *.jpeg *.tif *.tiff, *.png)")
+    def showOpenDialog(self):
+        path, _ = QFileDialog.getOpenFileName(
+            filter="Image Files (*.jpg *.jpeg *.tif *.tiff, *.png)"
+        )
         if path is not None and len(path) > 0:
             file = InputFile(path)
             self.app.setBaseFile(path)
@@ -137,30 +168,40 @@ class Ui_AppWindow(Ui_MainWindow):
             self.signals.selectBaseFile.emit(file, True)
             self.signals.drawFileList.emit(file)
             self.renderBaseFile()
-            self.doDetectSubjects()
+            self.runDetectSubjects()
 
-    def doRun(self, doUpscale=False):
-        dialog = DialogModel(self.app, doUpscale)
+    def showModelDialog(self, operation):
+        dialog = DialogModel(self.app, [operation])
         result = dialog.exec()
         if result == QDialog.Accepted:
             selectedModel = dialog.ui.listWidget.currentItem().text()
             tileSize = int(dialog.ui.tileSize_combobox.currentText())
             tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
             gpuId = dialog.ui.device_combobox.currentData()
-            maintainScale = not doUpscale
+            maintainScale = operation != Operation.Upscale
             print(f"Selected model: {selectedModel}, GPU ID: {gpuId}")
 
             desc = "Enhance:"
-            if doUpscale:
+            if operation == Operation.Upscale:
                 desc = "Upscale:"
+            elif operation == Operation.Denoise:
+                desc = "Denoise:"
 
             def f():
                 file = self.selectionManager.getBaseFile()
                 if file is not None:
                     progressUpdater = ProgressBarUpdater(
-                        self.progressBar, self.label_progressBar, total=1, desc=desc)
-                    result = self.app.doSharpen(file, selectedModel, progressUpdater.tick,
-                                                tileSize, tilePadding, maintainScale, gpuId)
+                        self.progressBar, self.label_progressBar, total=1, desc=desc
+                    )
+                    result = self.app.runModel(
+                        file,
+                        selectedModel,
+                        progressUpdater.tick,
+                        tileSize,
+                        tilePadding,
+                        maintainScale,
+                        gpuId,
+                    )
                     if result is None:
                         return
                     self.signals.appendFile.emit(result)
@@ -169,34 +210,52 @@ class Ui_AppWindow(Ui_MainWindow):
             worker = AsyncWorker(partial(f))
             self.op_queue.start(worker)
 
-    def doUpscale(self):
-        self.doRun(doUpscale=True)
+    def showSharpen(self):
+        self.showModelDialog(Operation.Sharpen.value)
 
-    def doMasks(self):
+    def showUpscale(self):
+        self.showModelDialog(Operation.Upscale.value)
+
+    def showDenoise(self):
+        self.showModelDialog(Operation.Denoise.value)
+
+    def runAutoMask(self):
         file = self.selectionManager.getBaseFile()
 
         def f():
             if file is not None:
                 progressUpdater = ProgressBarUpdater(
-                    self.progressBar, self.label_progressBar, total=1, desc="Generating Masks")
-                self.app.doMasks(file, progressUpdater.tick)
+                    self.progressBar,
+                    self.label_progressBar,
+                    total=1,
+                    desc="Generating Masks",
+                )
+                self.app.runAutoMask(file, progressUpdater.tick)
                 self.signals.showFiles.emit(False)
                 self.checkBox_render_masks.setChecked(True)
 
         worker = AsyncWorker(partial(f))
         self.op_queue.start(worker)
 
-    def doDetectSubjects(self):
+    def showModelManager(self):
+        dialog = DialogModelManager(self.app)
+        result = dialog.exec()
+
+    def runDetectSubjects(self):
         file = self.selectionManager.getBaseFile()
 
         def f():
             if file is not None:
                 progressUpdater = ProgressBarUpdater(
-                    self.progressBar, self.label_progressBar, total=1, desc="Detecting Subjects")
-                result = self.app.doDetectSubjects(file, progressUpdater.tick)
+                    self.progressBar,
+                    self.label_progressBar,
+                    total=1,
+                    desc="Detecting Subjects",
+                )
+                result = self.app.runDetectSubjects(file, progressUpdater.tick)
                 if result is not None:
-                    for idx, label in enumerate(result['labels']):
-                        box = result['bboxes'][idx]
+                    for idx, label in enumerate(result["labels"]):
+                        box = result["bboxes"][idx]
                         file.labels.append(Label(label, box))
                 self.renderBaseFile()
                 self.signals.showFiles.emit(False)
@@ -204,10 +263,18 @@ class Ui_AppWindow(Ui_MainWindow):
         worker = AsyncWorker(partial(f))
         self.op_queue.start(worker)
 
-    def doCancelOp(self):
-        self.app.doInterruptOperation()
+    def cancelOp(self):
+        self.app.interruptOperation()
 
-    def slotIncrementProgressBar(self, progressUpdater: ProgressBarUpdater, total: int, increment: int, count: int, done: bool, data: Optional[File]):
+    def incrementProgressBar(
+        self,
+        progressUpdater: ProgressBarUpdater,
+        total: int,
+        increment: int,
+        count: int,
+        done: bool,
+        data: Optional[File],
+    ):
         progressUpdater.total = total
         progressUpdater.update(increment)
         if data is not None:
@@ -216,36 +283,42 @@ class Ui_AppWindow(Ui_MainWindow):
             else:
                 raise ValueError("Unknown data type")
 
-    def slotRemoveFile(self, file: File, button: QWidget):
+    def removeFile(self, file: File, button: QWidget):
         self.app.removeFile(file)
         self.selectionManager.removeFile(file)
         self.fileStrip.removeButton(file)
 
-    def slotSaveFile(self, file: OutputFile, button: FileButton):
+    def saveFile(self, file: OutputFile, button: FileButton):
         if file is not None:
             targetDir = os.path.dirname(self.selectionManager.getBaseFile().path)
             newPath = os.path.join(targetDir, os.path.basename(file.path))
             shutil.copyfile(file.path, newPath)
 
-    def slotUpdateGPUStats(self):
+    def updateGPUStats(self):
         cudaStats = self.app.getGpuStats()
         if cudaStats is None:
             self.label_cuda.setText("NO GPU")
         else:
             self.label_cuda.setText("GPU: Free: {}GB | Total: {}GB".format(*cudaStats))
 
-    def slotChangeZoom(self, zoomFactor: float):
+    def changeZoom(self, zoomFactor: float):
         self.pushButton_zoom.setText(str(int(zoomFactor * 100)) + "%")
 
     def showZoomMenu(self):
         menu = QMenu("Select Zoom")
         menu.addAction("FIT", lambda: self.canvas_main.setZoomFactor(ZoomLevel.FIT))
-        menu.addAction("FIT WIDTH", lambda: self.canvas_main.setZoomFactor(ZoomLevel.FIT_WIDTH))
-        menu.addAction("FIT HEIGHT", lambda: self.canvas_main.setZoomFactor(ZoomLevel.FIT_HEIGHT))
+        menu.addAction(
+            "FIT WIDTH", lambda: self.canvas_main.setZoomFactor(ZoomLevel.FIT_WIDTH)
+        )
+        menu.addAction(
+            "FIT HEIGHT", lambda: self.canvas_main.setZoomFactor(ZoomLevel.FIT_HEIGHT)
+        )
         menu.addAction("100%", lambda: self.canvas_main.setZoomFactor("100%"))
         menu.addAction("200%", lambda: self.canvas_main.setZoomFactor("200%"))
         menu.addAction("400%", lambda: self.canvas_main.setZoomFactor("400%"))
-        menu.exec(self.pushButton_zoom.mapToGlobal(self.pushButton_zoom.rect().bottomLeft()))
+        menu.exec(
+            self.pushButton_zoom.mapToGlobal(self.pushButton_zoom.rect().bottomLeft())
+        )
 
     def observeResizeEvent(self, event):
         self.persistentSettings["windowSize"] = event.size()
@@ -264,8 +337,11 @@ class Ui_AppWindow(Ui_MainWindow):
             self.drawLabelShape(self.label_shape_base, baseImg)
 
             if file.labels is not None:
-                self.drawLabelText(self.label_subjects, ", ".join(
-                    [label.label for label in file.labels]), maybeElide=True)
+                self.drawLabelText(
+                    self.label_subjects,
+                    ", ".join([label.label for label in file.labels]),
+                    maybeElide=True,
+                )
 
     def renderPostProcess(self, compareFile: OutputFile):
         self.group_compare.hide()
@@ -274,10 +350,17 @@ class Ui_AppWindow(Ui_MainWindow):
         if compareFile is None:
             compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
-            if type(compareFile) == OutputFile and compareFile.operation == Operation.Sharpen:
-                self.drawLabelText(self.label_filename, compareFile.basename, maybeElide=True)
+            if (
+                type(compareFile) == OutputFile
+                and compareFile.operation == Operation.Sharpen
+            ):
+                self.drawLabelText(
+                    self.label_filename, compareFile.basename, maybeElide=True
+                )
                 self.drawLabelText(self.label_opname, compareFile.operation.value)
-                self.drawLabelText(self.label_modelname, compareFile.model, maybeElide=True)
+                self.drawLabelText(
+                    self.label_modelname, compareFile.model, maybeElide=True
+                )
 
                 compareImg = compareFile.loadUnchanged()
                 self.drawLabelShape(self.label_shape, compareImg)
@@ -288,7 +371,7 @@ class Ui_AppWindow(Ui_MainWindow):
                 for postop in compareFile.postops:
                     if isinstance(postop, DownscaleOperation):
                         hasScaleOp = True
-                        scale = str(int(1/postop.scale))+"X"
+                        scale = str(int(1 / postop.scale)) + "X"
                         self.drawLabelText(self.label_scale, scale)
                     if isinstance(postop, BlendOperation):
                         factor = postop.factor
@@ -308,10 +391,13 @@ class Ui_AppWindow(Ui_MainWindow):
         self.label_blend_amt.setText(str(value) + "%")
 
     # TODO: Move implementation to op
-    def doApplyPostProcess(self):
+    def applyPostProcess(self):
         compareFile = self.selectionManager.getCompareFile(0)
         if compareFile is not None:
-            if type(compareFile) == OutputFile and compareFile.operation == Operation.Sharpen:
+            if (
+                type(compareFile) == OutputFile
+                and compareFile.operation == Operation.Sharpen
+            ):
                 blendFactor = self.horizontalSlider_blend.value() / 100
 
                 hasBlendOp = False
@@ -341,7 +427,7 @@ class Ui_AppWindow(Ui_MainWindow):
         if img is not None:
             h, w, _ = img.shape
             dt = img.dtype.name
-            dtn = re.findall(r'\d+', dt)
+            dtn = re.findall(r"\d+", dt)
             text = f"{h}H X {w}W  {int(dtn[0])}-bit"
         self.drawLabelText(label, text, maybeElide=False)
 
