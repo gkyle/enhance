@@ -51,50 +51,62 @@ class UI_DialogModelManager(Ui_Dialog):
         operations = set()
         subjects = set()
 
-        modelListPath = self.app.getModelPath() + "/models.json"
-        with open(modelListPath, "r") as f:
-            modelList = json.load(f)
-            self.tableWidget.setRowCount(0)
-            for modelName in modelList:
-                row = self.tableWidget.rowCount()
-                model = modelList[modelName]
+        modelList = self.app.getModels()
+        self.tableWidget.setRowCount(0)
+        for modelName in modelList:
+            row = self.tableWidget.rowCount()
+            model = modelList[modelName]
 
-                operations.add(model["operation"][0])
-                subjects.add(model["subject"][0]) if "subject" in model else None
+            operation = None
+            if (
+                "operation" in model
+                and isinstance(model["operation"], list)
+                and len(model["operation"]) > 0
+            ):
+                operation = model["operation"][0]
+                operations.add(operation)
 
-                if (
-                    self.selectedOperation != "All"
-                    and model["operation"][0] != self.selectedOperation
-                ):
-                    continue
+            if (
+                "subject" in model
+                and isinstance(model["subject"], list)
+                and len(model["subject"]) > 0
+            ):
+                subjects.add(model["subject"][0])
 
-                if self.selectedSubject != "All" and (
-                    "subject" not in model
-                    or model["subject"][0] != self.selectedSubject
-                ):
-                    continue
+            if self.selectedOperation != "All" and operation != self.selectedOperation:
+                continue
 
-                self.tableWidget.insertRow(row)
+            if self.selectedSubject != "All" and (
+                "subject" not in model or model["subject"][0] != self.selectedSubject
+            ):
+                continue
+
+            self.tableWidget.insertRow(row)
+            if operation is not None:
                 self.tableWidget.setItem(
                     row, 0, QTableWidgetItem(", ".join(model["operation"]))
                 )
-                self.tableWidget.setItem(row, 1, QTableWidgetItem(model["name"]))
-                if "subject" in model:
-                    self.tableWidget.setItem(
-                        row, 2, QTableWidgetItem(", ".join(model["subject"]))
-                    )
-                if model.get("installed"):
-                    item = QTableWidgetItem("Installed")
-                    item.setTextAlignment(Qt.AlignCenter)
-                    self.tableWidget.setItem(row, 3, item)
-                else:
-                    installButton = QPushButton("Install")
-                    installButton.clicked.connect(
-                        lambda checked, path=modelName: self.doInstall(path)
-                    )
-                    self.tableWidget.setCellWidget(row, 3, installButton)
-                self.tableWidget.setItem(row, 4, QTableWidgetItem(model["author"]))
-                self.tableWidget.setItem(row, 5, QTableWidgetItem(model["description"]))
+
+            self.tableWidget.setItem(row, 1, QTableWidgetItem(model["name"]))
+
+            if "subject" in model:
+                self.tableWidget.setItem(
+                    row, 2, QTableWidgetItem(", ".join(model["subject"]))
+                )
+
+            if model.get("installed"):
+                item = QTableWidgetItem("Installed")
+                item.setTextAlignment(Qt.AlignCenter)
+                self.tableWidget.setItem(row, 3, item)
+            else:
+                installButton = QPushButton("Install")
+                installButton.clicked.connect(
+                    lambda checked, path=modelName: self.doInstall(path)
+                )
+                self.tableWidget.setCellWidget(row, 3, installButton)
+
+            self.tableWidget.setItem(row, 4, QTableWidgetItem(model["author"]))
+            self.tableWidget.setItem(row, 5, QTableWidgetItem(model["description"]))
 
         # Populate the filter combo boxes once
         if init:
@@ -121,5 +133,5 @@ class UI_DialogModelManager(Ui_Dialog):
         self.drawModelList()
 
     def doRefresh(self):
-        self.app.fetchModel("models.json")
+        self.app.refreshModelList()
         self.drawModelList()

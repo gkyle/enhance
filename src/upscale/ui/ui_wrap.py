@@ -179,7 +179,6 @@ class Ui_AppWindow(Ui_MainWindow):
             tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
             gpuId = dialog.ui.device_combobox.currentData()
             maintainScale = operation != Operation.Upscale
-            print(f"Selected model: {selectedModel}, GPU ID: {gpuId}")
 
             desc = "Enhance:"
             if operation == Operation.Upscale:

@@ -24,6 +24,8 @@ try:
 except ImportError as e:
     pass
 
+HF_REPO_ID = "gkyle/enhance"
+MODEL_CONFIG = "models.json"
 
 class Operation(Enum):
     Sharpen = "sharpen"
@@ -169,7 +171,7 @@ class App:
         return os.path.join("models/")
 
     def getModels(self, installed=False):
-        modelListPath = self.getModelPath() + "models.json"
+        modelListPath = self.getModelPath() + MODEL_CONFIG
         with open(modelListPath, "r") as f:
             models = json.load(f)
         if installed:
@@ -179,22 +181,39 @@ class App:
         return models
 
     def storeModels(self, models):
-        modelListPath = self.getModelPath() + "models.json"
+        modelListPath = self.getModelPath() + MODEL_CONFIG
         with open(modelListPath, "w") as f:
             json.dump(models, f, indent=4)
 
-    def fetchModel(self, path):
+    def fetchFile(self, path):
         modelInstallPath = self.getModelPath()
         hf_api_client = HfApi()
-        hf_api_client.list_repo_files("gkyle/enhance")
+        hf_api_client.list_repo_files(HF_REPO_ID)
         hf_api_client.hf_hub_download(
-            repo_id="gkyle/enhance", filename=path, local_dir=modelInstallPath
+            repo_id=HF_REPO_ID, filename=path, local_dir=modelInstallPath
         )
+
+    def fetchModel(self, path):
+        self.fetchFile(path)
+
         # Save the updated local models list
         models = self.getModels()
         if path in models:
             models[path]["installed"] = True
             self.storeModels(models)
+
+    def refreshModelList(self):
+        existingModels = self.getModels()
+        self.fetchFile(MODEL_CONFIG)
+        refreshedModels = self.getModels()
+        for modelName, modelData in refreshedModels.items():
+            if modelName not in existingModels:
+                modelData["installed"] = True
+            else:
+                modelData["installed"] = existingModels[modelName].get(
+                    "installed", False
+                )
+        self.storeModels(refreshedModels)
 
 
 def toGB(bytes):
