@@ -1,4 +1,5 @@
 from functools import partial
+import time
 from PySide6.QtCore import QObject, Signal, QThreadPool, QEvent
 from PySide6.QtWidgets import QWidget, QPushButton, QFrame
 from PySide6.QtCore import QThread, QRunnable
@@ -7,15 +8,37 @@ from upscale.lib.file import File
 from upscale.ui.common import RenderMode
 
 
+WorkerHistory = []
+
+
+class WorkerStatus:
+    def __init__(self, label, status, scheduleTime, latency=None):
+        self.label = label
+        self.status = status
+        self.scheduleTime = scheduleTime
+        self.latency = latency
+        if self.label is not None:
+            WorkerHistory.append(self)
+
+
 class AsyncWorker(QRunnable):
-    def __init__(self, work, parent=None):
+
+    def __init__(self, work, parent=None, label=None):
         super().__init__(parent)
         self.signals = getSignals()
         self.work = work
+        self.status = WorkerStatus(label, "scheduled", time.time())
 
     def run(self):
         if not QThread.currentThread().isInterruptionRequested():
+            self.status.status = "running"
+            startTime = time.time()
             self.work()
+            endTime = time.time()
+            self.status.latency = endTime - startTime
+            self.status.status = "finished"
+        else:
+            self.status.status = "interrupted"
 
 
 class Singleton(type):
@@ -55,6 +78,8 @@ class Signals(QObject):
     windowMoved: Signal = Signal(QEvent)
 
     changeZoom: Signal = Signal(float)
+
+    taskCompleted: Signal = Signal()
 
 
 lowpri_threadpool = QThreadPool()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacemXtmTQ.ui'
+## Form generated from reading UI file 'interfacevIvJCV.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -125,16 +125,40 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_11.addWidget(self.label_progressBar)
 
-        self.progressBar = QProgressBar(self.frame_progressBar)
+        self.frame_9 = QFrame(self.frame_progressBar)
+        self.frame_9.setObjectName(u"frame_9")
+        self.frame_9.setMinimumSize(QSize(280, 0))
+        self.frame_9.setMaximumSize(QSize(280, 16777215))
+        self.frame_9.setFrameShape(QFrame.NoFrame)
+        self.frame_9.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_17 = QHBoxLayout(self.frame_9)
+        self.horizontalLayout_17.setSpacing(0)
+        self.horizontalLayout_17.setObjectName(u"horizontalLayout_17")
+        self.horizontalLayout_17.setContentsMargins(0, 0, 0, 0)
+        self.progressBar = QProgressBar(self.frame_9)
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setMinimumSize(QSize(250, 30))
-        self.progressBar.setMaximumSize(QSize(180, 16777215))
+        self.progressBar.setMaximumSize(QSize(250, 16777215))
         font2 = QFont()
         font2.setPointSize(11)
         self.progressBar.setFont(font2)
         self.progressBar.setValue(0)
 
-        self.horizontalLayout_11.addWidget(self.progressBar)
+        self.horizontalLayout_17.addWidget(self.progressBar)
+
+        self.pushButton_taskQueue = QPushButton(self.frame_9)
+        self.pushButton_taskQueue.setObjectName(u"pushButton_taskQueue")
+        self.pushButton_taskQueue.setMinimumSize(QSize(30, 30))
+        self.pushButton_taskQueue.setMaximumSize(QSize(30, 30))
+        icon = QIcon()
+        icon.addFile(u":/icons32/chevron-down.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_taskQueue.setIcon(icon)
+        self.pushButton_taskQueue.setIconSize(QSize(32, 32))
+
+        self.horizontalLayout_17.addWidget(self.pushButton_taskQueue)
+
+
+        self.horizontalLayout_11.addWidget(self.frame_9)
 
         self.pushButton_cancelOp = QPushButton(self.frame_progressBar)
         self.pushButton_cancelOp.setObjectName(u"pushButton_cancelOp")
@@ -143,9 +167,9 @@ class Ui_MainWindow(object):
         font3 = QFont()
         font3.setPointSize(9)
         self.pushButton_cancelOp.setFont(font3)
-        icon = QIcon()
-        icon.addFile(u":/icons32/x.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.pushButton_cancelOp.setIcon(icon)
+        icon1 = QIcon()
+        icon1.addFile(u":/icons32/x.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_cancelOp.setIcon(icon1)
         self.pushButton_cancelOp.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_11.addWidget(self.pushButton_cancelOp)
@@ -164,9 +188,9 @@ class Ui_MainWindow(object):
         self.pushButton_single = QPushButton(self.frame_3)
         self.pushButton_single.setObjectName(u"pushButton_single")
         self.pushButton_single.setMinimumSize(QSize(40, 40))
-        icon1 = QIcon()
-        icon1.addFile(u":/icons32/square.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.pushButton_single.setIcon(icon1)
+        icon2 = QIcon()
+        icon2.addFile(u":/icons32/square.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_single.setIcon(icon2)
         self.pushButton_single.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_10.addWidget(self.pushButton_single)
@@ -174,9 +198,9 @@ class Ui_MainWindow(object):
         self.pushButton_split = QPushButton(self.frame_3)
         self.pushButton_split.setObjectName(u"pushButton_split")
         self.pushButton_split.setMinimumSize(QSize(40, 40))
-        icon2 = QIcon()
-        icon2.addFile(u":/icons32/columns.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.pushButton_split.setIcon(icon2)
+        icon3 = QIcon()
+        icon3.addFile(u":/icons32/columns.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_split.setIcon(icon3)
         self.pushButton_split.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_10.addWidget(self.pushButton_split)
@@ -184,9 +208,9 @@ class Ui_MainWindow(object):
         self.pushButton_quad = QPushButton(self.frame_3)
         self.pushButton_quad.setObjectName(u"pushButton_quad")
         self.pushButton_quad.setMinimumSize(QSize(40, 40))
-        icon3 = QIcon()
-        icon3.addFile(u":/icons32/grid.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.pushButton_quad.setIcon(icon3)
+        icon4 = QIcon()
+        icon4.addFile(u":/icons32/grid.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_quad.setIcon(icon4)
         self.pushButton_quad.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_10.addWidget(self.pushButton_quad)
@@ -195,9 +219,9 @@ class Ui_MainWindow(object):
         self.pushButton_zoom.setObjectName(u"pushButton_zoom")
         self.pushButton_zoom.setMinimumSize(QSize(0, 40))
         self.pushButton_zoom.setFont(font1)
-        icon4 = QIcon()
-        icon4.addFile(u":/icons32/zoom-in.svg", QSize(), QIcon.Normal, QIcon.Off)
-        self.pushButton_zoom.setIcon(icon4)
+        icon5 = QIcon()
+        icon5.addFile(u":/icons32/zoom-in.svg", QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_zoom.setIcon(icon5)
         self.pushButton_zoom.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_10.addWidget(self.pushButton_zoom)
@@ -825,6 +849,7 @@ class Ui_MainWindow(object):
         self.label_title.setText(QCoreApplication.translate("MainWindow", u"Enhance AI", None))
         self.label_cuda.setText("")
         self.label_progressBar.setText("")
+        self.pushButton_taskQueue.setText("")
         self.pushButton_cancelOp.setText("")
         self.pushButton_single.setText("")
         self.pushButton_split.setText("")

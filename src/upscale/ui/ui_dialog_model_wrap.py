@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import List
-from PySide6.QtWidgets import QDialog, QButtonGroup
+from PySide6.QtWidgets import QDialog, QButtonGroup, QListWidget
 
 from upscale.app import App, Operation
 from upscale.ui.ui_dialog_model import Ui_Dialog
@@ -22,6 +22,8 @@ class UI_DialogModel(Ui_Dialog):
     def setupUi(self, dialog: QDialog):
         super().setupUi(dialog)
 
+        self.listWidget.setSelectionMode(QListWidget.ExtendedSelection)
+
         self.pushButton_modelManager.clicked.connect(self.showModelManager)
         self.drawModelList()
 
@@ -32,7 +34,9 @@ class UI_DialogModel(Ui_Dialog):
             models = {
                 path: model
                 for path, model in models.items()
-                if model["operation"][0] in self.filterOperations
+                if model["operation"] is not None
+                and len(model["operation"]) > 0
+                and model["operation"][0] in self.filterOperations
             }
 
         self.listWidget.clear()

@@ -1,5 +1,6 @@
 <RCC>
   <qresource>
+    <file>icons32/chevron-down.svg</file>
     <file>icons32/columns.svg</file>
     <file>icons32/grid.svg</file>
     <file>icons32/square.svg</file>

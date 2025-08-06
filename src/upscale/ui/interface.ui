@@ -237,27 +237,95 @@
               </widget>
              </item>
              <item>
-              <widget class="QProgressBar" name="progressBar">
+              <widget class="QFrame" name="frame_9">
                <property name="minimumSize">
                 <size>
-                 <width>250</width>
-                 <height>30</height>
+                 <width>280</width>
+                 <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>180</width>
+                 <width>280</width>
                  <height>16777215</height>
                 </size>
                </property>
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
+               <property name="frameShape">
+                <enum>QFrame::NoFrame</enum>
                </property>
-               <property name="value">
-                <number>0</number>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
                </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_17">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QProgressBar" name="progressBar">
+                  <property name="minimumSize">
+                   <size>
+                    <width>250</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>250</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="value">
+                   <number>0</number>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_taskQueue">
+                  <property name="minimumSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="icons.qrc">
+                    <normaloff>:/icons32/chevron-down.svg</normaloff>:/icons32/chevron-down.svg</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>32</width>
+                    <height>32</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
              <item>

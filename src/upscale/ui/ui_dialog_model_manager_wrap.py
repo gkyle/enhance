@@ -28,6 +28,7 @@ class UI_DialogModelManager(Ui_Dialog):
             ["Operation", "Name", "Subject", "", "Author", "Description"]
         )
         self.tableWidget.horizontalHeader().setDefaultAlignment(Qt.AlignLeft)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
 
         self.comboBox_filterOperation.currentTextChanged.connect(
             self.setSelectOperation
@@ -58,6 +59,7 @@ class UI_DialogModelManager(Ui_Dialog):
             model = modelList[modelName]
 
             operation = None
+            subject = None
             if (
                 "operation" in model
                 and isinstance(model["operation"], list)
@@ -71,14 +73,13 @@ class UI_DialogModelManager(Ui_Dialog):
                 and isinstance(model["subject"], list)
                 and len(model["subject"]) > 0
             ):
-                subjects.add(model["subject"][0])
+                subject = model["subject"][0]
+                subjects.add(subject)
 
             if self.selectedOperation != "All" and operation != self.selectedOperation:
                 continue
 
-            if self.selectedSubject != "All" and (
-                "subject" not in model or model["subject"][0] != self.selectedSubject
-            ):
+            if self.selectedSubject != "All" and subject != self.selectedSubject:
                 continue
 
             self.tableWidget.insertRow(row)

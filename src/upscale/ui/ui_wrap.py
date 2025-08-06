@@ -26,9 +26,10 @@ from upscale.ui.canvasLabel import CanvasLabel
 from upscale.ui.filestrip import FileButton, FileStrip
 from upscale.ui.progress import ProgressBarUpdater
 from upscale.ui.selectionManager import SelectionManager
-from upscale.ui.signals import AsyncWorker, emitLater, getSignals
+from upscale.ui.signals import AsyncWorker, WorkerHistory, getSignals
 from upscale.ui.ui_dialog_model_manager_wrap import DialogModelManager
 from upscale.ui.ui_dialog_model_wrap import DialogModel
+from upscale.ui.ui_dialog_taskqueue_wrap import DialogTaskQueue
 from upscale.ui.ui_interface import Ui_MainWindow
 from upscale.ui.common import RenderMode, ZoomLevel
 
@@ -43,7 +44,7 @@ class MainWindow(QMainWindow):
         # timer for updating GPU stats
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.ui.updateGPUStats)
-        self.timer.start(5000)
+        self.timer.start(2000)
 
     def center(self):
         screen = QGuiApplication.primaryScreen().availableGeometry()
@@ -108,6 +109,7 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_mask.clicked.connect(self.runAutoMask)
         self.pushButton_modelManager.clicked.connect(lambda: self.showModelManager())
         self.pushButton_zoom.clicked.connect(self.showZoomMenu)
+        self.pushButton_taskQueue.clicked.connect(self.showTaskQueue)
         self.pushButton_single.clicked.connect(
             lambda: self.canvas_main.setRenderMode(RenderMode.Single)
         )
@@ -174,19 +176,19 @@ class Ui_AppWindow(Ui_MainWindow):
         dialog = DialogModel(self.app, [operation])
         result = dialog.exec()
         if result == QDialog.Accepted:
-            selectedModel = dialog.ui.listWidget.currentItem().text()
+            selectedItems = dialog.ui.listWidget.selectedItems()
             tileSize = int(dialog.ui.tileSize_combobox.currentText())
             tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
             gpuId = dialog.ui.device_combobox.currentData()
             maintainScale = operation != Operation.Upscale
 
-            desc = "Enhance:"
+            desc = "Sharpen"
             if operation == Operation.Upscale:
-                desc = "Upscale:"
+                desc = "Upscale"
             elif operation == Operation.Denoise:
-                desc = "Denoise:"
+                desc = "Denoise"
 
-            def f():
+            def f(selectedModel):
                 file = self.selectionManager.getBaseFile()
                 if file is not None:
                     progressUpdater = ProgressBarUpdater(
@@ -205,9 +207,15 @@ class Ui_AppWindow(Ui_MainWindow):
                         return
                     self.signals.appendFile.emit(result)
                     self.signals.selectCompareFile.emit(result)
+                    self.signals.taskCompleted.emit()
 
-            worker = AsyncWorker(partial(f))
-            self.op_queue.start(worker)
+            for selectedItem in selectedItems:
+                selectedModel = selectedItem.text()
+
+                worker = AsyncWorker(
+                    partial(f, selectedModel), label=f"{desc}: {selectedModel}"
+                )
+                self.op_queue.start(worker)
 
     def showSharpen(self):
         self.showModelDialog(Operation.Sharpen.value)
@@ -218,8 +226,13 @@ class Ui_AppWindow(Ui_MainWindow):
     def showDenoise(self):
         self.showModelDialog(Operation.Denoise.value)
 
+    def showTaskQueue(self):
+        dialog = DialogTaskQueue(WorkerHistory)
+        result = dialog.exec()
+
     def runAutoMask(self):
         file = self.selectionManager.getBaseFile()
+        desc = "Generating Masks"
 
         def f():
             if file is not None:
@@ -227,13 +240,14 @@ class Ui_AppWindow(Ui_MainWindow):
                     self.progressBar,
                     self.label_progressBar,
                     total=1,
-                    desc="Generating Masks",
+                    desc=desc,
                 )
                 self.app.runAutoMask(file, progressUpdater.tick)
                 self.signals.showFiles.emit(False)
                 self.checkBox_render_masks.setChecked(True)
+                self.signals.taskCompleted.emit()
 
-        worker = AsyncWorker(partial(f))
+        worker = AsyncWorker(partial(f), label=desc)
         self.op_queue.start(worker)
 
     def showModelManager(self):
@@ -242,6 +256,7 @@ class Ui_AppWindow(Ui_MainWindow):
 
     def runDetectSubjects(self):
         file = self.selectionManager.getBaseFile()
+        desc = "Detecting Subjects"
 
         def f():
             if file is not None:
@@ -249,7 +264,7 @@ class Ui_AppWindow(Ui_MainWindow):
                     self.progressBar,
                     self.label_progressBar,
                     total=1,
-                    desc="Detecting Subjects",
+                    desc=desc,
                 )
                 result = self.app.runDetectSubjects(file, progressUpdater.tick)
                 if result is not None:
@@ -258,8 +273,9 @@ class Ui_AppWindow(Ui_MainWindow):
                         file.labels.append(Label(label, box))
                 self.renderBaseFile()
                 self.signals.showFiles.emit(False)
+                self.signals.taskCompleted.emit()
 
-        worker = AsyncWorker(partial(f))
+        worker = AsyncWorker(partial(f), label=desc)
         self.op_queue.start(worker)
 
     def cancelOp(self):
