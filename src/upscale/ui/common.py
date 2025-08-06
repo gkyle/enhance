@@ -1,9 +1,10 @@
 from enum import Enum
 import cv2
 from PIL import Image
-from PIL import ExifTags
 import tifftools
+import logging
 
+logger = logging.getLogger(__name__)
 
 exif_fields = [
     271,   # Make
@@ -49,7 +50,7 @@ class ZoomLevel(Enum):
 
 
 # Use PIL to save image and EXIF data for 8bit JPEG and TIF images.
-def write8bitFile(img, basePath, outpath):
+def writeFile(img, basePath, outpath):
     img = img[:, :, ::-1] # bgr2rgb
     dstImg = Image.fromarray(img)
 
@@ -65,26 +66,27 @@ def write8bitFile(img, basePath, outpath):
                     dstExif[tag] = value
 
     except Exception as e:
-        print(f"Unable to copy EXIF fields: {e}")
+        logger.info(f"Unable to copy EXIF fields: {e}")
 
     dstImg.save(outpath, exif=dstExif, quality=100)
 
-# Since PIL doesn't support 16bit RGB images, use OpenCV to save the file, the reopen, copy, and resave the file with EXIF data using tifftools.
-def write16bitTiff(img, basePath, outpath):
-    # Save 16bit image data
-    cv2.imwrite(outpath, img, [cv2.IMWRITE_TIFF_COMPRESSION, 1])
 
-    # Copy EXIF fields
-    srcExif = tifftools.read_tiff(basePath)
-    dstExif = tifftools.read_tiff(outpath)
+# Since PIL doesn't support 16bit RGB images, use OpenCV to save the file, the reopen, copy, and resave the file with EXIF data using tifftools.
+# Also use this method for 8bit TIFF for EXIF handling.
+def writeTiffFile(img, basePath, outpath):
+    # Save 16bit image data
+    cv2.imwrite(outpath, img)
 
     try:
+        # Copy EXIF fields
+        srcExif = tifftools.read_tiff(basePath)
+        dstExif = tifftools.read_tiff(outpath)
+
         for tag in exif_fields:
-            if tag in srcExif['ifds'][0]['tags']:
-                dstExif['ifds'][0]['tags'][tag] = srcExif['ifds'][0]['tags'][tag]
+            if tag in srcExif["ifds"][0]["tags"]:
+                dstExif["ifds"][0]["tags"][tag] = srcExif["ifds"][0]["tags"][tag]
 
         # Save again with EXIF data
         tifftools.write_tiff(dstExif, outpath, allowExisting=True)
     except Exception as e:
-        print(f"Unable to copy EXIF fields: {e}")
-
+        logger.warning(f"Unable to copy EXIF fields: {e}")

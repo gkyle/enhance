@@ -5,8 +5,11 @@ from typing import List
 
 import cv2
 import numpy as np
+import logging
 
-from upscale.ui.common import write16bitTiff, write8bitFile
+from upscale.ui.common import writeTiffFile, writeFile
+
+logger = logging.getLogger(__name__)
 
 
 class Unpickle:
@@ -35,7 +38,7 @@ class File(Unpickle):
         return cv2.imread(self.path, cv2.IMREAD_UNCHANGED)
 
 
-class Mask():
+class Mask:
     def __init__(self, score: float, label: str, mask: np.ndarray, box: tuple):
         self.score = score
         self.label = label
@@ -43,7 +46,7 @@ class Mask():
         self.box = box
 
 
-class Label():
+class Label:
     def __init__(self, label: str, box: tuple):
         self.label = label
         self.box = box
@@ -62,7 +65,7 @@ class PostProcessOperationDeprecated(Enum):
     Blend = "Blend"
 
 
-class PostProcessOperation():
+class PostProcessOperation:
     def execute(self, img, file: File):
         raise NotImplementedError("Not implemented")
 
@@ -104,11 +107,11 @@ class OutputFile(File):
 
         outpath = os.path.join(rootPath, base + pathExtra + "_" + timestamp + ext)
 
-        print(f'Saving {img.dtype} image to cache: {outpath}')
-        if img.dtype == np.uint16 or img.dtype == "uint16":
-            write16bitTiff(img, self.baseFile.path, outpath)
+        logger.info(f"Saving {img.dtype} image to cache: {outpath}")
+        if ext.lower() in [".tif", ".tiff"]:
+            writeTiffFile(img, self.baseFile.path, outpath)
         else:
-            write8bitFile(img, self.baseFile.path, outpath)
+            writeFile(img, self.baseFile.path, outpath)
 
         self.setPath(outpath)
         return outpath
