@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacevIvJCV.ui'
+## Form generated from reading UI file 'interfacefwOYCB.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -278,7 +278,7 @@ class Ui_MainWindow(object):
         self.frame_sidebar.setSizePolicy(sizePolicy5)
         self.frame_sidebar.setMinimumSize(QSize(244, 0))
         self.frame_sidebar.setMaximumSize(QSize(100, 16777215))
-        self.frame_sidebar.setFrameShape(QFrame.NoFrame)
+        self.frame_sidebar.setFrameShape(QFrame.StyledPanel)
         self.frame_sidebar.setFrameShadow(QFrame.Plain)
         self.verticalLayout_3 = QVBoxLayout(self.frame_sidebar)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
@@ -398,12 +398,19 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_18.addWidget(self.frame_label_shape_base)
 
-        self.label_4 = QLabel(self.group_base)
+        self.frame_subject = QFrame(self.group_base)
+        self.frame_subject.setObjectName(u"frame_subject")
+        self.frame_subject.setFrameShape(QFrame.NoFrame)
+        self.frame_subject.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_5 = QVBoxLayout(self.frame_subject)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.label_4 = QLabel(self.frame_subject)
         self.label_4.setObjectName(u"label_4")
 
-        self.verticalLayout_18.addWidget(self.label_4)
+        self.verticalLayout_5.addWidget(self.label_4)
 
-        self.frame_label_subjects = QFrame(self.group_base)
+        self.frame_label_subjects = QFrame(self.frame_subject)
         self.frame_label_subjects.setObjectName(u"frame_label_subjects")
         self.frame_label_subjects.setFrameShape(QFrame.NoFrame)
         self.frame_label_subjects.setFrameShadow(QFrame.Plain)
@@ -416,15 +423,33 @@ class Ui_MainWindow(object):
         self.horizontalLayout_16.addWidget(self.label_subjects)
 
 
-        self.verticalLayout_18.addWidget(self.frame_label_subjects)
+        self.verticalLayout_5.addWidget(self.frame_label_subjects)
+
+
+        self.verticalLayout_18.addWidget(self.frame_subject)
 
 
         self.verticalLayout_3.addWidget(self.group_base)
 
-        self.pushButton_mask = QPushButton(self.frame_sidebar)
+        self.frame_mask = QFrame(self.frame_sidebar)
+        self.frame_mask.setObjectName(u"frame_mask")
+        self.frame_mask.setFrameShape(QFrame.NoFrame)
+        self.frame_mask.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_4 = QVBoxLayout(self.frame_mask)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 9, 0, 0)
+        self.pushButton_mask = QPushButton(self.frame_mask)
         self.pushButton_mask.setObjectName(u"pushButton_mask")
 
-        self.verticalLayout_3.addWidget(self.pushButton_mask)
+        self.verticalLayout_4.addWidget(self.pushButton_mask)
+
+        self.checkBox_render_masks = QCheckBox(self.frame_mask)
+        self.checkBox_render_masks.setObjectName(u"checkBox_render_masks")
+
+        self.verticalLayout_4.addWidget(self.checkBox_render_masks)
+
+
+        self.verticalLayout_3.addWidget(self.frame_mask)
 
         self.frame_8 = QFrame(self.frame_sidebar)
         self.frame_8.setObjectName(u"frame_8")
@@ -433,11 +458,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_15 = QHBoxLayout(self.frame_8)
         self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
         self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
-        self.checkBox_render_masks = QCheckBox(self.frame_8)
-        self.checkBox_render_masks.setObjectName(u"checkBox_render_masks")
-
-        self.horizontalLayout_15.addWidget(self.checkBox_render_masks)
-
 
         self.verticalLayout_3.addWidget(self.frame_8)
 
@@ -458,7 +478,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_19 = QVBoxLayout(self.group_compare)
         self.verticalLayout_19.setSpacing(6)
         self.verticalLayout_19.setObjectName(u"verticalLayout_19")
-        self.verticalLayout_19.setContentsMargins(6, 6, 6, 6)
+        self.verticalLayout_19.setContentsMargins(6, 6, 9, 6)
         self.label_8 = QLabel(self.group_compare)
         self.label_8.setObjectName(u"label_8")
 

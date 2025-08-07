@@ -151,7 +151,8 @@ class Ui_AppWindow(Ui_MainWindow):
         if self.app.doDetect:
             self.runDetectSubjects()
         else:
-            self.pushButton_mask.setVisible(False)
+            self.frame_mask.setVisible(False)
+            self.frame_subject.setVisible(False)
 
     def clear(self):
         self.app.setBaseFile(None)
