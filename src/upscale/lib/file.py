@@ -1,5 +1,6 @@
 from enum import Enum
 import os
+import shutil
 import time
 from typing import List
 
@@ -29,6 +30,7 @@ class File(Unpickle):
         self.basename = os.path.basename(path) if path else None
         self.path = path
         self.timestamp = 0
+        self.saved = False
 
     def setPath(self, path):
         self.path = path
@@ -91,9 +93,9 @@ class OutputFile(File):
                 img = postop.execute(img, self)
             else:
                 raise ValueError("Invalid post process operation")
-        self.saveImage(img)
+        self.saveImageToCache(img)
 
-    def saveImage(self, img):
+    def saveImageToCache(self, img):
         # Determine path based on applied operations
         rootPath = os.getcwd() + "/.cache/"
         if not os.path.exists(rootPath):
@@ -114,7 +116,14 @@ class OutputFile(File):
             writeFile(img, self.baseFile.path, outpath)
 
         self.setPath(outpath)
+        self.saved = False
         return outpath
+
+    # Copy cached img to the target directory
+    def saveImage(self, targetDir):
+        newPath = os.path.join(targetDir, os.path.basename(self.path))
+        shutil.copyfile(self.path, newPath)
+        self.saved = True
 
     def setPath(self, path):
         super().setPath(path)

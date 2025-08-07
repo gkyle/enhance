@@ -61,12 +61,9 @@ class Signals(QObject):
     selectCompareFile: Signal = Signal(File)
     updateIndicator: Signal = Signal(File, int)
     updateGPUStats: Signal = Signal()
-    updateFile: Signal = Signal(File)
-    updateFileButton: Signal = Signal(File)
 
     addFileButton: Signal = Signal(QWidget, QPushButton, bool)
     focusFile: Signal = Signal(File)
-    updateThumbnails: Signal = Signal(QWidget)
     updateThumbnail: Signal = Signal(QFrame, QWidget)
     drawFileList: Signal = Signal(File)
     appendFile: Signal = Signal(File)

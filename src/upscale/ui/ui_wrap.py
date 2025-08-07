@@ -25,7 +25,7 @@ from upscale.lib.file import (
 from upscale.ui.canvasLabel import CanvasLabel
 from upscale.ui.filestrip import FileButton, FileStrip
 from upscale.ui.progress import ProgressBarUpdater
-from upscale.ui.selectionManager import SelectionManager
+from upscale.ui.selectionManager import SAVE_STATE_CHANGED, SelectionManager
 from upscale.ui.signals import AsyncWorker, WorkerHistory, getSignals
 from upscale.ui.ui_dialog_model_manager_wrap import DialogModelManager
 from upscale.ui.ui_dialog_model_wrap import DialogModel
@@ -307,8 +307,8 @@ class Ui_AppWindow(Ui_MainWindow):
     def saveFile(self, file: OutputFile, button: FileButton):
         if file is not None:
             targetDir = os.path.dirname(self.selectionManager.getBaseFile().path)
-            newPath = os.path.join(targetDir, os.path.basename(file.path))
-            shutil.copyfile(file.path, newPath)
+            file.saveImage(targetDir)
+            self.signals.updateIndicator.emit(file, SAVE_STATE_CHANGED)
 
     def updateGPUStats(self):
         cudaStats = self.app.getGpuStats()
@@ -428,6 +428,7 @@ class Ui_AppWindow(Ui_MainWindow):
 
                 self.fileStrip.getButton(compareFile).updateTextLabel()
                 self.signals.showFiles.emit(False)
+                self.signals.updateIndicator.emit(compareFile, SAVE_STATE_CHANGED)
 
     def drawLabelText(self, label, text, maybeElide=False):
         if maybeElide:

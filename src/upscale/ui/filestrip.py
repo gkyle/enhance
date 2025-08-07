@@ -9,7 +9,7 @@ from PIL import Image
 from PIL.ImageQt import ImageQt
 
 from upscale.app import App
-from upscale.lib.file import File, InputFile
+from upscale.lib.file import File, InputFile, OutputFile
 from upscale.ui.selectionManager import SelectionManager
 from upscale.ui.signals import Signals, emitLater, getSignals
 
@@ -26,6 +26,7 @@ class Indicator(Enum):
     SECOND = 2
     THIRD = 3
     FOURTH = 4
+    SAVED = 5
 
 
 class FileStrip:
@@ -41,8 +42,10 @@ class FileStrip:
         self.selectionManager = selectionManager
 
         self.scroll = self.frameContainer.findChildren(QScrollArea)[0]
-        self.scroll.horizontalScrollBar().valueChanged.connect(partial(self.slotUpdateThumbnails, self.frameFileList))
-        self.signals.updateThumbnail.connect(self.slotUpdateThumbnail)
+        self.scroll.horizontalScrollBar().valueChanged.connect(
+            partial(self.updateThumbnails, self.frameFileList)
+        )
+        self.signals.updateThumbnail.connect(self.updateThumbnail)
 
         self.frameContainer.setMinimumSize(QSize(FILE_BUTTON_SIZE+8, FILESTRIP_CONTAINER_HEIGHT))
         self.frameContainer.setMaximumSize(QSize(16777215, FILESTRIP_CONTAINER_HEIGHT))
@@ -52,7 +55,7 @@ class FileStrip:
 
         self.signals.focusFile.connect(self.focusFile)
         self.signals.updateIndicator.connect(self.updateIndicator)
-        self.signals.addFileButton.connect(self.slotAddFileButton)
+        self.signals.addFileButton.connect(self.addFileButton)
         self.signals.appendFile.connect(self.appendFile)
         redrawSignal.connect(self.drawFileList)
 
@@ -121,7 +124,7 @@ class FileStrip:
             self.buttons[file].setFocus()
             self.scroll.ensureWidgetVisible(self.buttons[file])
 
-    def slotAddFileButton(self, frame: QFrame, button: QPushButton, forceFocus=False):
+    def addFileButton(self, frame: QFrame, button: QPushButton, forceFocus=False):
         frame.layout().addWidget(button, 0, Qt.AlignTop)
 
         # force frame relayout to adjust to content
@@ -129,13 +132,13 @@ class FileStrip:
         frame.layout().activate()
         frame.updateGeometry()
 
-    def slotUpdateThumbnails(self, frame, _=None):
+    def updateThumbnails(self, frame, _=None):
         if frame == self.frameFileList:
             for child in frame.findChildren(FileButton):
                 if child.isVisible() and not child.renderedThumbnail and not child.visibleRegion().isEmpty():
                     emitLater(self.signals.updateThumbnail.emit, frame, child)
 
-    def slotUpdateThumbnail(self, frame, button):
+    def updateThumbnail(self, frame, button):
         if frame == self.frameFileList:
             button.showEvent(None)
 
@@ -190,10 +193,12 @@ class IconLabel(QLabel):
     def drawIndicator(self, painter: QPainter, color: QColor, label: str, offset: int):
         painter.setBrush(color)
         painter.setPen(color)
-        painter.drawEllipse(FILE_IMAGE_SIZE - 25-offset, 5, 20, 20)
+        painter.drawEllipse(FILE_IMAGE_SIZE - 25, 5 + offset, 20, 20)
         painter.setPen(QColor(255, 255, 255))
-        painter.drawText(FILE_IMAGE_SIZE - 25-offset, 5, 20, 20, Qt.AlignCenter, label)
-        offset += 12
+        painter.drawText(
+            FILE_IMAGE_SIZE - 25, 5 + offset, 20, 20, Qt.AlignCenter, label
+        )
+        offset += 28
         return offset
 
     def paintEvent(self, event: QPaintEvent) -> None:
@@ -211,6 +216,8 @@ class IconLabel(QLabel):
             offset = self.drawIndicator(painter, QColor(64, 64, 64), "3", offset)
         if Indicator.FOURTH in self.indicators:
             offset = self.drawIndicator(painter, QColor(64, 64, 64), "4", offset)
+        if Indicator.SAVED in self.indicators:
+            offset = self.drawIndicator(painter, QColor(0, 128, 0), "S", offset)
 
 
 class FileButton(QPushButton):
@@ -273,13 +280,14 @@ class FileButton(QPushButton):
             self.click_pending = False
 
         if e.button() == Qt.RightButton:
-            menu = QMenu(self)
-            actionRemove = menu.addAction("Remove from Project")
-            actionRemove.triggered.connect(self.actionRemove)
-            actionSave = menu.addAction("Save to File")
-            actionSave.triggered.connect(self.actionSaveFile)
+            if isinstance(self.file, OutputFile):
+                menu = QMenu(self)
+                actionRemove = menu.addAction("Remove from Project")
+                actionRemove.triggered.connect(self.actionRemove)
+                actionSave = menu.addAction("Save to File")
+                actionSave.triggered.connect(self.actionSaveFile)
 
-            menu.exec_(e.globalPos())
+                menu.exec_(e.globalPos())
         else:
             return super().mousePressEvent(e)
 
@@ -306,6 +314,9 @@ class FileButton(QPushButton):
         return False
 
     def updateIndicator(self, idx):
+        if idx < -1 and len(self.iconLabel.indicators) > 0:
+            idx = self.iconLabel.indicators[0].value - 1
+
         self.iconLabel.indicators.clear()
         if idx == 0:
             self.iconLabel.indicators.append(Indicator.FIRST)
@@ -315,6 +326,9 @@ class FileButton(QPushButton):
             self.iconLabel.indicators.append(Indicator.THIRD)
         elif idx == 3:
             self.iconLabel.indicators.append(Indicator.FOURTH)
+
+        if self.file.saved:
+            self.iconLabel.indicators.append(Indicator.SAVED)
 
         if idx == 0:
             self.setStyleSheet("background-color: blue;")

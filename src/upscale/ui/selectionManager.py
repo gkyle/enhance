@@ -1,10 +1,10 @@
-
 from typing import List
 from upscale.lib.file import File
 from upscale.ui.signals import Signals, emitLater
 from upscale.ui.common import RenderMode
 
 CLEAR = -1
+SAVE_STATE_CHANGED = -2
 
 
 class SelectionManager:
@@ -50,12 +50,12 @@ class SelectionManager:
             rmFile = self.compare.pop()
             self.signals.updateIndicator.emit(rmFile, CLEAR)
 
-        for idx, f in enumerate(self.compare):
-            self.signals.updateIndicator.emit(f, idx+1)
         emitLater(self.signals.showFiles.emit, False)
 
         if self.renderMode == RenderMode.Single:
             self.signals.setRenderMode.emit(RenderMode.Split)
+        else:
+            self.updateIndicators()
 
     def removeFile(self, file):
         if file == self.base:
@@ -98,3 +98,11 @@ class SelectionManager:
 
     def setRenderMode(self, mode: RenderMode):
         self.renderMode = mode
+        self.updateIndicators()
+
+    def updateIndicators(self):
+        for idx, f in enumerate(self.compare):
+            if idx == 0 or self.renderMode == RenderMode.Grid:
+                self.signals.updateIndicator.emit(f, idx + 1)
+            else:
+                self.signals.updateIndicator.emit(f, CLEAR)
