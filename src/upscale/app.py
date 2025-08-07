@@ -1,15 +1,22 @@
 from glob import glob
 import json
-from upscale.lib.util import Observable
-from upscale.lib.file import File, InputFile, OutputFile
+import time
+import logging
 from enum import Enum
 from typing import List
 import os
 import sys
 from huggingface_hub import HfApi
 
+
+from upscale.lib.util import Observable
+from upscale.lib.file import File, InputFile, OutputFile
+
 # Use deferred loading for torch and modules that use torch to reduce startup latency.
 from deferred_import import deferred_import
+
+
+logger = logging.getLogger(__name__)
 
 torch = deferred_import("torch")
 modelRunner = deferred_import("upscale.op.model_runner")
@@ -214,6 +221,24 @@ class App:
                     "installed", False
                 )
         self.storeModels(refreshedModels)
+
+    def hasUnsavedChanges(self):
+        for file in self.rawFiles:
+            if isinstance(file, OutputFile) and not file.saved:
+                return True
+        return False
+
+    # Clear cache files older than 7 days
+    def clearCacheExpiredFiles(self):
+        rootPath = os.getcwd() + "/.cache/"
+        files = glob(rootPath + "*")
+        for file in files:
+            file_mod_time = os.path.getmtime(file)
+            if file_mod_time < (time.time() - 60 * 60 * 24 * 7):
+                try:
+                    os.remove(file)
+                except Exception as e:
+                    logger.warning(f"Error removing file {file}: {e}")
 
 
 def toGB(bytes):

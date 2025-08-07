@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QDialog,
     QMenu,
+    QMessageBox,
 )
 from functools import partial
 
@@ -41,11 +42,6 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.show()
 
-        # timer for updating GPU stats
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.ui.updateGPUStats)
-        self.timer.start(2000)
-
     def center(self):
         screen = QGuiApplication.primaryScreen().availableGeometry()
         window_size = self.geometry()
@@ -62,10 +58,7 @@ class MainWindow(QMainWindow):
         return super().moveEvent(event)
 
     def closeEvent(self, event):
-        self.ui.cancelOp()
-        self.timer.stop()
-        event.accept()
-
+        self.ui.closeEvent(event)
 
 class Ui_AppWindow(Ui_MainWindow):
     app = None
@@ -78,6 +71,12 @@ class Ui_AppWindow(Ui_MainWindow):
 
     def setupUi(self, MainWindow):
         super().setupUi(MainWindow)
+        self.MainWindow = MainWindow
+
+        # timer for updating GPU stats
+        self.timer = QTimer(MainWindow)
+        self.timer.timeout.connect(self.updateGPUStats)
+        self.timer.start(2000)
 
         # Set window size
         screen_resolution = QGuiApplication.primaryScreen().availableGeometry()
@@ -447,6 +446,23 @@ class Ui_AppWindow(Ui_MainWindow):
             dtn = re.findall(r"\d+", dt)
             text = f"{h}H X {w}W  {int(dtn[0])}-bit"
         self.drawLabelText(label, text, maybeElide=False)
+
+    def closeEvent(self, event):
+        self.cancelOp()
+        self.app.clearCacheExpiredFiles()
+        if self.app.hasUnsavedChanges():
+            reply = QMessageBox.question(
+                self.MainWindow,
+                "Unsaved Changes",
+                "You have unsaved files. Do you really want to quit?",
+                buttons=QMessageBox.Yes | QMessageBox.No,
+            )
+            if reply == QMessageBox.No:
+                event.ignore()
+                return
+
+        self.timer.stop()
+        event.accept()
 
 
 def replaceWidget(placeHolder: QWidget, newWidget: QWidget):
