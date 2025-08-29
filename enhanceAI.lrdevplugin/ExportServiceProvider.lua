@@ -96,8 +96,14 @@ processRenderedPhotos = function(functionContext, exportContext)
 		end
 	end
 
-	-- For Windows, show the command window
-	local command = '"start /wait cmd.exe /c '..appPath..' '..tempPath..'"'
+	local command = appPath..' '..tempPath..' &'
+	if WIN_ENV then
+		-- For Windows, show the command window
+		command = '"start /wait cmd.exe /c '..appPath..' '..tempPath..'"'
+	elseif MAC_ENV then
+		-- For Mac, use osascript to open a new Terminal window
+		command = 'osascript -e ''tell application "Terminal" to do script "'..appPath..' '..tempPath..'"'''
+	end
 	inputFiles = {}
 	for filename in LrFileUtils.files(tempPath) do
 		inputFiles[filename] = true
