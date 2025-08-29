@@ -1,9 +1,9 @@
 import os
 import cv2
-from upscale.app import Operation
-from upscale.lib.file import DownscaleOperation, File, OutputFile
-from upscale.lib.util import Observable
-from upscale.op.simple_tile_processor import TileProcessor
+from enhance.app import Operation
+from enhance.lib.file import DownscaleOperation, File, OutputFile
+from enhance.lib.util import Observable
+from enhance.op.simple_tile_processor import TileProcessor
 
 from spandrel import ImageModelDescriptor, ModelLoader
 import spandrel_extra_arches

@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QDialog, QTableWidgetItem
 
 from ui_dialog_taskqueue import Ui_Dialog
-from upscale.ui.signals import getSignals
+from enhance.ui.signals import getSignals
 
 class DialogTaskQueue(QDialog):
     def __init__(self, history=None):

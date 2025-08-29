@@ -14,8 +14,8 @@ from PySide6.QtWidgets import (
 )
 from functools import partial
 
-from upscale.app import App, Operation
-from upscale.lib.file import (
+from enhance.app import App, Operation
+from enhance.lib.file import (
     BlendOperation,
     DownscaleOperation,
     File,
@@ -23,16 +23,16 @@ from upscale.lib.file import (
     Label,
     OutputFile,
 )
-from upscale.ui.canvasLabel import CanvasLabel
-from upscale.ui.filestrip import FileButton, FileStrip
-from upscale.ui.progress import ProgressBarUpdater
-from upscale.ui.selectionManager import SAVE_STATE_CHANGED, SelectionManager
-from upscale.ui.signals import AsyncWorker, WorkerHistory, getSignals
-from upscale.ui.ui_dialog_model_manager_wrap import DialogModelManager
-from upscale.ui.ui_dialog_model_wrap import DialogModel
-from upscale.ui.ui_dialog_taskqueue_wrap import DialogTaskQueue
-from upscale.ui.ui_interface import Ui_MainWindow
-from upscale.ui.common import RenderMode, ZoomLevel
+from enhance.ui.canvasLabel import CanvasLabel
+from enhance.ui.filestrip import FileButton, FileStrip
+from enhance.ui.progress import ProgressBarUpdater
+from enhance.ui.selectionManager import SAVE_STATE_CHANGED, SelectionManager
+from enhance.ui.signals import AsyncWorker, WorkerHistory, getSignals
+from enhance.ui.ui_dialog_model_manager_wrap import DialogModelManager
+from enhance.ui.ui_dialog_model_wrap import DialogModel
+from enhance.ui.ui_dialog_taskqueue_wrap import DialogTaskQueue
+from enhance.ui.ui_interface import Ui_MainWindow
+from enhance.ui.common import RenderMode, ZoomLevel
 
 
 class MainWindow(QMainWindow):
@@ -221,7 +221,7 @@ class Ui_AppWindow(Ui_MainWindow):
         self.showModelDialog(Operation.Sharpen.value)
 
     def showUpscale(self):
-        self.showModelDialog(Operation.Upscale.value)
+        self.showModelDialog(Operation.enhance.value)
 
     def showDenoise(self):
         self.showModelDialog(Operation.Denoise.value)

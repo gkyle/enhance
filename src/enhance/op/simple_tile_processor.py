@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.nn import functional as F
 
-from upscale.lib.util import Observable
+from enhance.lib.util import Observable
 
 
 class TileProcessor:

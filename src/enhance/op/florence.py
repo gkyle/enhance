@@ -2,8 +2,8 @@ import torch
 from transformers import AutoProcessor, AutoModelForCausalLM
 from PIL import Image
 
-from upscale.lib.file import InputFile
-from upscale.lib.util import Observable
+from enhance.lib.file import InputFile
+from enhance.lib.util import Observable
 
 FLORENCE2_MODEL_ID = "microsoft/Florence-2-base"
 TASK_PROMPT = "<OD>"

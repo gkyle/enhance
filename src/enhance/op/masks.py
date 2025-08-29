@@ -1,10 +1,10 @@
 from PIL import Image
 
-from upscale.lib.file import File, Mask
-from upscale.lib.util import Observable
+from enhance.lib.file import File, Mask
+from enhance.lib.util import Observable
 
-import upscale.op.florence as florence
-import upscale.op.sam as sam
+import enhance.op.florence as florence
+import enhance.op.sam as sam
 
 
 class GenerateMasks(Observable):

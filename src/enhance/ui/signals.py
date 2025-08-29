@@ -4,8 +4,8 @@ from PySide6.QtCore import QObject, Signal, QThreadPool, QEvent
 from PySide6.QtWidgets import QWidget, QPushButton, QFrame
 from PySide6.QtCore import QThread, QRunnable
 
-from upscale.lib.file import File
-from upscale.ui.common import RenderMode
+from enhance.lib.file import File
+from enhance.ui.common import RenderMode
 
 
 WorkerHistory = []

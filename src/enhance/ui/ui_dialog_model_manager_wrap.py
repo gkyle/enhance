@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QDialog, QTableWidgetItem, QPushButton, QAbstractItemView
 
-from upscale.app import App
-from upscale.ui.ui_dialog_model_manager import Ui_Dialog
+from enhance.app import App
+from enhance.ui.ui_dialog_model_manager import Ui_Dialog
 
 from PySide6.QtCore import Qt
 import json

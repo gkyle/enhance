@@ -9,8 +9,8 @@ import sys
 from huggingface_hub import HfApi
 
 
-from upscale.lib.util import Observable
-from upscale.lib.file import File, InputFile, OutputFile
+from enhance.lib.util import Observable
+from enhance.lib.file import File, InputFile, OutputFile
 
 # Use deferred loading for torch and modules that use torch to reduce startup latency.
 from deferred_import import deferred_import
@@ -19,13 +19,13 @@ from deferred_import import deferred_import
 logger = logging.getLogger(__name__)
 
 torch = deferred_import("torch")
-modelRunner = deferred_import("upscale.op.model_runner")
+modelRunner = deferred_import("enhance.op.model_runner")
 
 # Conditionally import mask generation and subject detection modules
 DO_DETECT = False
 try:
-    import upscale.op.masks as generate_masks
-    import upscale.op.florence as detect_subjects
+    import enhance.op.masks as generate_masks
+    import enhance.op.florence as detect_subjects
 
     DO_DETECT = True
 except ImportError as e:

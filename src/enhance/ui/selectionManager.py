@@ -1,7 +1,7 @@
 from typing import List
-from upscale.lib.file import File
-from upscale.ui.signals import Signals, emitLater
-from upscale.ui.common import RenderMode
+from enhance.lib.file import File
+from enhance.ui.signals import Signals, emitLater
+from enhance.ui.common import RenderMode
 
 CLEAR = -1
 SAVE_STATE_CHANGED = -2

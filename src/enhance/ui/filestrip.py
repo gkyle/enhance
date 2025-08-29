@@ -8,10 +8,10 @@ from PySide6.QtCore import QObject, Qt, QSize, QPoint, Signal, QTimer
 from PIL import Image
 from PIL.ImageQt import ImageQt
 
-from upscale.app import App
-from upscale.lib.file import File, InputFile, OutputFile
-from upscale.ui.selectionManager import SelectionManager
-from upscale.ui.signals import Signals, emitLater, getSignals
+from enhance.app import App
+from enhance.lib.file import File, InputFile, OutputFile
+from enhance.ui.selectionManager import SelectionManager
+from enhance.ui.signals import Signals, emitLater, getSignals
 
 FILESTRIP_CONTAINER_HEIGHT = 210
 FILESTRIP_SCROLL_HEIGHT = 180

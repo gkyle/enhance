@@ -1,7 +1,7 @@
 from tqdm import tqdm
 from PySide6.QtWidgets import QProgressBar, QLabel
 
-from upscale.ui.signals import getSignals
+from enhance.ui.signals import getSignals
 
 
 class ProgressBarUpdater(tqdm):

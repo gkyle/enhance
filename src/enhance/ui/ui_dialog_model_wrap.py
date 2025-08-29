@@ -2,8 +2,8 @@ from enum import Enum
 from typing import List
 from PySide6.QtWidgets import QDialog, QButtonGroup, QListWidget
 
-from upscale.app import App, Operation
-from upscale.ui.ui_dialog_model import Ui_Dialog
+from enhance.app import App, Operation
+from enhance.ui.ui_dialog_model import Ui_Dialog
 
 
 class DialogModel(QDialog):
@@ -63,7 +63,7 @@ class UI_DialogModel(Ui_Dialog):
         )  # Default to max padding
 
     def showModelManager(self):
-        from upscale.ui.ui_dialog_model_manager_wrap import DialogModelManager
+        from enhance.ui.ui_dialog_model_manager_wrap import DialogModelManager
 
         dialog = DialogModelManager(self.app)
         result = dialog.exec()

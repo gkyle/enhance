@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import QApplication
-from upscale.ui.ui_wrap import MainWindow, App
+from enhance.ui.ui_wrap import MainWindow, App
 from PySide6.QtGui import QPalette, QColor
 
 

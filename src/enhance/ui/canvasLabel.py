@@ -6,9 +6,9 @@ from PySide6.QtGui import (QPainter, QPaintEvent, QWheelEvent, QMouseEvent,
                            QPixmap, QColor, QPen, QFont, QImage)
 from PySide6.QtWidgets import QLabel, QWidget
 
-from upscale.ui.selectionManager import SelectionManager
-from upscale.ui.signals import Signals, getSignals
-from upscale.ui.common import RenderMode, ZoomLevel
+from enhance.ui.selectionManager import SelectionManager
+from enhance.ui.signals import Signals, getSignals
+from enhance.ui.common import RenderMode, ZoomLevel
 
 
 MASK_COLORS = [

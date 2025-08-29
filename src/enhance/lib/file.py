@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 import logging
 
-from upscale.ui.common import writeTiffFile, writeFile
+from enhance.ui.common import writeTiffFile, writeFile
 
 logger = logging.getLogger(__name__)
 

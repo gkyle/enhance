@@ -1,7 +1,7 @@
 [project]
-name = "upscale"
-version = "0.1.0"
-description = "Enhance AI"
+name = "enhance"
+version = "0.2.0"
+description = "Enhance AI - Sharpen, Denoise, and Upscale images using community models."
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
@@ -75,6 +75,6 @@ explicit = true
 
 [[tool.uv.index]]
 name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu124"
+url = "https://download.pytorch.org/whl/cu126"
 explicit = true
 
