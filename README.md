@@ -79,7 +79,7 @@ In Side-by-side Compare, you can move the divider by right-pressing the mouse in
 
 When viewing upscaled images, the scale is referenced to the original image.
 
-<img width="1812" height="1579" alt="Screenshot 2025-08-29 144112" src="https://github.com/user-attachments/assets/499ff0e4-39c7-4d5e-a677-522521335d98" />
+<img width="1812" height="1505" alt="Screenshot 2025-08-29 152023" src="https://github.com/user-attachments/assets/225dda4b-9689-46a8-a575-ad9ef077eaf1" />
 
 ### Post Processing
 Blend Original Image: Soften the impact of the model on the generated image, by blending with the original. The percentage indicates the amount of the original image included in the blend.
