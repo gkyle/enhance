@@ -57,7 +57,7 @@ class ModelRunner(Observable):
 
         # TODO: Fix this signature
         outputFile = OutputFile(None, inFile, Operation.Sharpen, self.modelName)
-        outputFile.saveImage(output)
+        outputFile.saveImageToCache(output)
         if self.maintainScale and model.scale > 1:
             outputFile.postops.append(DownscaleOperation(1 / model.scale))
         outputFile.applyPostProcessAndSave()  # Apply any postprocess ops and save

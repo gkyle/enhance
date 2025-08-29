@@ -15,6 +15,7 @@ class TileProcessor:
 
         self.device = "cpu" if device is None else device
         self.model.to(self.device)
+        self.model.eval()
 
         self.dtype = None
         self.img_tensor = None
