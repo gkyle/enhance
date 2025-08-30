@@ -154,6 +154,10 @@ class BlendOperation(PostProcessOperation):
 
     def execute(self, img, file: OutputFile):
         baseImg = cv2.imread(file.baseFile.path, cv2.IMREAD_UNCHANGED)
+        if baseImg.shape != img.shape:
+            baseImg = cv2.resize(
+                baseImg, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_CUBIC
+            )
         blendedImg = cv2.addWeighted(baseImg, self.factor, img, 1 - self.factor, 0)
         return blendedImg
 
