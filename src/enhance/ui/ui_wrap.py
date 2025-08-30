@@ -180,7 +180,7 @@ class Ui_AppWindow(Ui_MainWindow):
             tileSize = int(dialog.ui.tileSize_combobox.currentText())
             tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
             gpuId = dialog.ui.device_combobox.currentData()
-            maintainScale = operation != Operation.Upscale
+            maintainScale = dialog.ui.checkBox_maintainScale.isChecked()
 
             desc = "Sharpen"
             if operation == Operation.Upscale:
@@ -218,13 +218,13 @@ class Ui_AppWindow(Ui_MainWindow):
                 self.op_queue.start(worker)
 
     def showSharpen(self):
-        self.showModelDialog(Operation.Sharpen.value)
+        self.showModelDialog(Operation.Sharpen)
 
     def showUpscale(self):
-        self.showModelDialog(Operation.enhance.value)
+        self.showModelDialog(Operation.Upscale)
 
     def showDenoise(self):
-        self.showModelDialog(Operation.Denoise.value)
+        self.showModelDialog(Operation.Denoise)
 
     def showTaskQueue(self):
         dialog = DialogTaskQueue(WorkerHistory)

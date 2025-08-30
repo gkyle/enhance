@@ -17,7 +17,7 @@ class UI_DialogModel(Ui_Dialog):
     def __init__(self, app: App, filterOperations: List[Operation]):
         super().__init__()
         self.app = app
-        self.filterOperations = filterOperations
+        self.filterOperations = [op.value.lower() for op in filterOperations]
 
     def setupUi(self, dialog: QDialog):
         super().setupUi(dialog)
@@ -26,6 +26,11 @@ class UI_DialogModel(Ui_Dialog):
 
         self.pushButton_modelManager.clicked.connect(self.showModelManager)
         self.drawModelList()
+
+        if Operation.Upscale.value.lower() in self.filterOperations:
+            self.checkBox_maintainScale.setChecked(False)
+        else:
+            self.checkBox_maintainScale.setChecked(True)
 
     def drawModelList(self):
         models = self.app.getModels(installed=True)
