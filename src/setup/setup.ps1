@@ -2,7 +2,6 @@
 $do_detect = $false
 
 try {
-    Set-ExecutionPolicy RemoteSigned -scope CurrentUser
     Write-Host "Checking for uv..."
     Invoke-Expression -Command "uv -V"
 } catch {

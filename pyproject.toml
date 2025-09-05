@@ -31,12 +31,9 @@ cu126 = [
   "torchvision",
 ]
 detect = [
-  "flash-attn==2.7.4",
-  "pretrainedmodels>=0.7.4",
-  "sam-2",
-  "timm>=1.0.15",
-  "transformers",
-  "triton-windows>=3.3.1.post19; platform_system == 'Windows'",
+  # TODO: This feature is not enabled by default and the deps may require local compilation.
+  # UV attempts to resolve all deps, including optionaly ones (https://github.com/astral-sh/uv/issues/6729).
+  # Removing these optional deps for now.
 ]
 
 [tool.uv]
