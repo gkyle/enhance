@@ -218,7 +218,7 @@ class App:
         refreshedModels = self.getModels()
         for modelName, modelData in refreshedModels.items():
             if modelName not in existingModels:
-                modelData["installed"] = True
+                modelData["installed"] = False
             else:
                 modelData["installed"] = existingModels[modelName].get(
                     "installed", False
