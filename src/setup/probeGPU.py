@@ -1,22 +1,27 @@
 import subprocess
 import re
+import sys
 
 
 def get_cuda_version():
     try:
-        result = subprocess.run(['nvidia-smi'], capture_output=True, text=True, check=True)
+        result = subprocess.run(
+            ["nvidia-smi"], capture_output=True, text=True, check=True
+        )
         output = result.stdout
         cuda_version_match = re.search(r' CUDA Version: \s*([\d.]+)', output)
         if cuda_version_match:
             return cuda_version_match.group(1)
         else:
-            print("CUDA version not found. Is CUDA Toolkit installed?")
+            sys.stderr.write("CUDA version not found. Is CUDA Toolkit installed?")
             return None
     except subprocess.CalledProcessError as e:
-        print(f"Error executing nvidia-smi: {e}")
+        sys.stderr.write(f"Error executing nvidia-smi: {e}")
         return None
     except FileNotFoundError:
-        print("nvidia-smi command not found. Is the NVIDIA driver installed?")
+        sys.stderr.write(
+            "nvidia-smi command not found. Is the NVIDIA driver installed?"
+        )
         return None
 
 

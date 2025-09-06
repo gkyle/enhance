@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Install UV if not already installed
 uv_version=`uv -V`
@@ -10,7 +10,7 @@ fi;
 # Check for CUDA GPU.
 echo "Determining correct configuration for your GPU..."
 torch_variant=`uv run --no-sync src/setup/probeGPU.py`
-if [ "$torch_variant" = "" ]; then 
+if [[ "$torch_variant" != "cu"* ]]; then
     torch_variant="cpu"
     echo "Install did not find a CUDA compatible GPU. Install will continue with CPU-only dependencies. You can re-run after installing drivers or CUDA Toolkit to enable GPU support."
 else
