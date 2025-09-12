@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'dialog_model_managerSMjcun.ui'
+## Form generated from reading UI file 'dialog_model_managersRaJBR.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QDialog
     QDialogButtonBox, QFrame, QHBoxLayout, QHeaderView,
     QLabel, QPushButton, QSizePolicy, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QWidget)
+import icons_rc
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -29,6 +30,28 @@ class Ui_Dialog(object):
         Dialog.setMaximumSize(QSize(1100, 16777215))
         self.verticalLayout_2 = QVBoxLayout(Dialog)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.frame_nomodels = QFrame(Dialog)
+        self.frame_nomodels.setObjectName(u"frame_nomodels")
+        self.frame_nomodels.setFrameShape(QFrame.NoFrame)
+        self.frame_nomodels.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_6 = QHBoxLayout(self.frame_nomodels)
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.label_3 = QLabel(self.frame_nomodels)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setMaximumSize(QSize(32, 32))
+        self.label_3.setPixmap(QPixmap(u":/icons32/alert-circle.svg"))
+
+        self.horizontalLayout_6.addWidget(self.label_3)
+
+        self.label_4 = QLabel(self.frame_nomodels)
+        self.label_4.setObjectName(u"label_4")
+
+        self.horizontalLayout_6.addWidget(self.label_4)
+
+
+        self.verticalLayout_2.addWidget(self.frame_nomodels)
+
         self.frame = QFrame(Dialog)
         self.frame.setObjectName(u"frame")
         self.frame.setFrameShape(QFrame.NoFrame)
@@ -134,8 +157,10 @@ class Ui_Dialog(object):
         self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.pushButton_refresh = QPushButton(self.frame_7)
         self.pushButton_refresh.setObjectName(u"pushButton_refresh")
-        icon = QIcon(QIcon.fromTheme(u"mail-send-receive"))
+        icon = QIcon()
+        icon.addFile(u":/icons32/refresh-cw.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_refresh.setIcon(icon)
+        self.pushButton_refresh.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_5.addWidget(self.pushButton_refresh)
 
@@ -165,6 +190,8 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Model Manager", None))
+        self.label_3.setText("")
+        self.label_4.setText(QCoreApplication.translate("Dialog", u"Local model dictionary is empty. Click \"Refresh Model List\" below.", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Filter Subject:", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"Filter Operation:", None))
         self.pushButton_refresh.setText(QCoreApplication.translate("Dialog", u"Refresh Model List", None))

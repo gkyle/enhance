@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'dialog_modelNzfPHR.ui'
+## Form generated from reading UI file 'dialog_modelQjiFYi.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QComboB
     QDialog, QDialogButtonBox, QFrame, QGridLayout,
     QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
     QPushButton, QSizePolicy, QVBoxLayout, QWidget)
+import icons_rc
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -35,6 +36,29 @@ class Ui_Dialog(object):
         self.frame.setFrameShadow(QFrame.Raised)
         self.verticalLayout_2 = QVBoxLayout(self.frame)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.frame_nomodels = QFrame(self.frame)
+        self.frame_nomodels.setObjectName(u"frame_nomodels")
+        self.frame_nomodels.setEnabled(True)
+        self.frame_nomodels.setFrameShape(QFrame.NoFrame)
+        self.frame_nomodels.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_7 = QHBoxLayout(self.frame_nomodels)
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.label_6 = QLabel(self.frame_nomodels)
+        self.label_6.setObjectName(u"label_6")
+        self.label_6.setMaximumSize(QSize(32, 32))
+        self.label_6.setPixmap(QPixmap(u":/icons32/alert-circle.svg"))
+
+        self.horizontalLayout_7.addWidget(self.label_6)
+
+        self.label_7 = QLabel(self.frame_nomodels)
+        self.label_7.setObjectName(u"label_7")
+
+        self.horizontalLayout_7.addWidget(self.label_7)
+
+
+        self.verticalLayout_2.addWidget(self.frame_nomodels)
+
         self.label = QLabel(self.frame)
         self.label.setObjectName(u"label")
 
@@ -163,13 +187,9 @@ class Ui_Dialog(object):
         self.pushButton_modelManager = QPushButton(self.frame_7)
         self.pushButton_modelManager.setObjectName(u"pushButton_modelManager")
         icon = QIcon()
-        iconThemeName = u"list-add"
-        if QIcon.hasThemeIcon(iconThemeName):
-            icon = QIcon.fromTheme(iconThemeName)
-        else:
-            icon.addFile(u".", QSize(), QIcon.Normal, QIcon.Off)
-
+        icon.addFile(u":/icons32/plus-circle.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_modelManager.setIcon(icon)
+        self.pushButton_modelManager.setIconSize(QSize(24, 24))
 
         self.horizontalLayout_5.addWidget(self.pushButton_modelManager)
 
@@ -196,6 +216,8 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Run Model", None))
+        self.label_6.setText("")
+        self.label_7.setText(QCoreApplication.translate("Dialog", u"You have no models installed. Click \"Add and Manage Models\" below.", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"Choose Model:", None))
         self.label_3.setText(QCoreApplication.translate("Dialog", u"Tile Size:", None))
         self.label_4.setText(QCoreApplication.translate("Dialog", u"Tile Padding:", None))

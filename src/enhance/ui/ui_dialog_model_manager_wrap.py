@@ -22,6 +22,7 @@ class UI_DialogModelManager(Ui_Dialog):
     def setupUi(self, dialog: QDialog):
         super().setupUi(dialog)
 
+        self.frame_nomodels.hide()
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.tableWidget.setColumnCount(6)
         self.tableWidget.setHorizontalHeaderLabels(
@@ -54,6 +55,11 @@ class UI_DialogModelManager(Ui_Dialog):
 
         modelList = self.app.getModels()
         self.tableWidget.setRowCount(0)
+        if len(modelList) == 0:
+            self.frame_nomodels.show()
+        else:
+            self.frame_nomodels.hide()
+
         for modelName in modelList:
             row = self.tableWidget.rowCount()
             model = modelList[modelName]
@@ -135,4 +141,4 @@ class UI_DialogModelManager(Ui_Dialog):
 
     def doRefresh(self):
         self.app.refreshModelList()
-        self.drawModelList()
+        self.drawModelList(True)

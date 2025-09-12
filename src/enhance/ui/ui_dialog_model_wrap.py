@@ -22,6 +22,7 @@ class UI_DialogModel(Ui_Dialog):
     def setupUi(self, dialog: QDialog):
         super().setupUi(dialog)
 
+        self.frame_nomodels.hide()
         self.listWidget.setSelectionMode(QListWidget.ExtendedSelection)
 
         self.pushButton_modelManager.clicked.connect(self.showModelManager)
@@ -34,6 +35,10 @@ class UI_DialogModel(Ui_Dialog):
 
     def drawModelList(self):
         models = self.app.getModels(installed=True)
+        if len(models) == 0:
+            self.frame_nomodels.show()
+        else:
+            self.frame_nomodels.hide()
 
         if len(self.filterOperations) > 0:
             models = {

@@ -1,5 +1,8 @@
 <RCC>
   <qresource>
+    <file>icons32/plus-circle.svg</file>
+    <file>icons32/refresh-cw.svg</file>
+    <file>icons32/alert-circle.svg</file>
     <file>icons32/chevron-down.svg</file>
     <file>icons32/columns.svg</file>
     <file>icons32/grid.svg</file>

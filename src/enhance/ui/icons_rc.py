@@ -141,6 +141,91 @@ matrix(1.333333,\
  0, 0, 1.333333,\
  0, 0)\x22/>\x0a</svg>\
 \
+\x00\x00\x05$\
+<\
+?xml version=\x221.\
+0\x22 encoding=\x22UTF\
+-8\x22 standalone=\x22\
+yes\x22?>\x0a<svg xmln\
+s=\x22http://www.w3\
+.org/2000/svg\x22 x\
+mlns:xlink=\x22http\
+://www.w3.org/19\
+99/xlink\x22 width=\
+\x2232\x22 height=\x2232\x22\
+ viewBox=\x220 0 32\
+ 32\x22>\x0a  <path fi\
+ll=\x22none\x22 stroke\
+-width=\x222\x22 strok\
+e-linecap=\x22round\
+\x22 stroke-linejoi\
+n=\x22round\x22 stroke\
+=\x22rgb(90.196078%\
+, 1.960784%, 25.\
+098039%)\x22 stroke\
+-opacity=\x221\x22 str\
+oke-miterlimit=\x22\
+4\x22 d=\x22M 23.00097\
+7 3.999023 L 23.\
+000977 9.999023 \
+L 17.000977 9.99\
+9023 \x22 transform\
+=\x22matrix(1.33333\
+3, 0, 0, 1.33333\
+3, 0, 0)\x22/>\x0a  <p\
+ath fill=\x22none\x22 \
+stroke-width=\x222\x22\
+ stroke-linecap=\
+\x22round\x22 stroke-l\
+inejoin=\x22round\x22 \
+stroke=\x22rgb(90.1\
+96078%, 1.960784\
+%, 25.098039%)\x22 \
+stroke-opacity=\x22\
+1\x22 stroke-miterl\
+imit=\x224\x22 d=\x22M 0.\
+999023 20.000977\
+ L 0.999023 14.0\
+00977 L 6.999023\
+ 14.000977 \x22 tra\
+nsform=\x22matrix(1\
+.333333, 0, 0, 1\
+.333333, 0, 0)\x22/\
+>\x0a  <path fill=\x22\
+none\x22 stroke-wid\
+th=\x222\x22 stroke-li\
+necap=\x22round\x22 st\
+roke-linejoin=\x22r\
+ound\x22 stroke=\x22rg\
+b(90.196078%, 1.\
+960784%, 25.0980\
+39%)\x22 stroke-opa\
+city=\x221\x22 stroke-\
+miterlimit=\x224\x22 d\
+=\x22M 3.509766 9 C\
+ 4.541016 6.0849\
+61 6.993164 3.90\
+5273 10.007812 3\
+.225586 C 13.022\
+461 2.542969 16.\
+174805 3.454102 \
+18.360352 5.6396\
+48 L 23.000977 9\
+.999023 M 0.9990\
+23 14.000977 L 5\
+.639648 18.36035\
+2 C 7.825195 20.\
+545898 10.977539\
+ 21.457031 13.99\
+2188 20.774414 C\
+ 17.006836 20.09\
+4727 19.458984 1\
+7.915039 20.4902\
+34 15 \x22 transfor\
+m=\x22matrix(1.3333\
+33, 0, 0, 1.3333\
+33, 0, 0)\x22/>\x0a</s\
+vg>\
 \x00\x00\x01\xb9\
 <\
 ?xml version=\x221.\
@@ -171,6 +256,158 @@ nsform=\x22matrix(1\
 .333333, 0, 0, 1\
 .333333, 0, 0)\x22/\
 >\x0a</svg>\
+\x00\x00\x04\x9e\
+<\
+?xml version=\x221.\
+0\x22 encoding=\x22UTF\
+-8\x22 standalone=\x22\
+yes\x22?>\x0a<svg xmln\
+s=\x22http://www.w3\
+.org/2000/svg\x22 x\
+mlns:xlink=\x22http\
+://www.w3.org/19\
+99/xlink\x22 width=\
+\x2232\x22 height=\x2232\x22\
+ viewBox=\x220 0 32\
+ 32\x22>\x0a  <path fi\
+ll=\x22none\x22 stroke\
+-width=\x222\x22 strok\
+e-linecap=\x22round\
+\x22 stroke-linejoi\
+n=\x22round\x22 stroke\
+=\x22rgb(90.196078%\
+, 1.960784%, 25.\
+098039%)\x22 stroke\
+-opacity=\x221\x22 str\
+oke-miterlimit=\x22\
+4\x22 d=\x22M 21.99902\
+3 12 C 21.999023\
+ 17.522461 17.52\
+2461 21.999023 1\
+2 21.999023 C 6.\
+477539 21.999023\
+ 2.000977 17.522\
+461 2.000977 12 \
+C 2.000977 6.477\
+539 6.477539 2.0\
+00977 12 2.00097\
+7 C 17.522461 2.\
+000977 21.999023\
+ 6.477539 21.999\
+023 12 Z M 21.99\
+9023 12 \x22 transf\
+orm=\x22matrix(1.33\
+3333, 0, 0, 1.33\
+3333, 0, 0)\x22/>\x0a \
+ <path fill=\x22non\
+e\x22 stroke-width=\
+\x222\x22 stroke-linec\
+ap=\x22round\x22 strok\
+e-linejoin=\x22roun\
+d\x22 stroke=\x22rgb(9\
+0.196078%, 1.960\
+784%, 25.098039%\
+)\x22 stroke-opacit\
+y=\x221\x22 stroke-mit\
+erlimit=\x224\x22 d=\x22M\
+ 12 8.000977 L 1\
+2 15.999023 \x22 tr\
+ansform=\x22matrix(\
+1.333333, 0, 0, \
+1.333333, 0, 0)\x22\
+/>\x0a  <path fill=\
+\x22none\x22 stroke-wi\
+dth=\x222\x22 stroke-l\
+inecap=\x22round\x22 s\
+troke-linejoin=\x22\
+round\x22 stroke=\x22r\
+gb(90.196078%, 1\
+.960784%, 25.098\
+039%)\x22 stroke-op\
+acity=\x221\x22 stroke\
+-miterlimit=\x224\x22 \
+d=\x22M 8.000977 12\
+ L 15.999023 12 \
+\x22 transform=\x22mat\
+rix(1.333333, 0,\
+ 0, 1.333333, 0,\
+ 0)\x22/>\x0a</svg>\
+\x00\x00\x04\x9f\
+<\
+?xml version=\x221.\
+0\x22 encoding=\x22UTF\
+-8\x22 standalone=\x22\
+yes\x22?>\x0a<svg xmln\
+s=\x22http://www.w3\
+.org/2000/svg\x22 x\
+mlns:xlink=\x22http\
+://www.w3.org/19\
+99/xlink\x22 width=\
+\x2232\x22 height=\x2232\x22\
+ viewBox=\x220 0 32\
+ 32\x22>\x0a  <path fi\
+ll=\x22none\x22 stroke\
+-width=\x222\x22 strok\
+e-linecap=\x22round\
+\x22 stroke-linejoi\
+n=\x22round\x22 stroke\
+=\x22rgb(90.196078%\
+, 1.960784%, 25.\
+098039%)\x22 stroke\
+-opacity=\x221\x22 str\
+oke-miterlimit=\x22\
+4\x22 d=\x22M 21.99902\
+3 12 C 21.999023\
+ 17.522461 17.52\
+2461 21.999023 1\
+2 21.999023 C 6.\
+477539 21.999023\
+ 2.000977 17.522\
+461 2.000977 12 \
+C 2.000977 6.477\
+539 6.477539 2.0\
+00977 12 2.00097\
+7 C 17.522461 2.\
+000977 21.999023\
+ 6.477539 21.999\
+023 12 Z M 21.99\
+9023 12 \x22 transf\
+orm=\x22matrix(1.33\
+3333, 0, 0, 1.33\
+3333, 0, 0)\x22/>\x0a \
+ <path fill=\x22non\
+e\x22 stroke-width=\
+\x222\x22 stroke-linec\
+ap=\x22round\x22 strok\
+e-linejoin=\x22roun\
+d\x22 stroke=\x22rgb(9\
+0.196078%, 1.960\
+784%, 25.098039%\
+)\x22 stroke-opacit\
+y=\x221\x22 stroke-mit\
+erlimit=\x224\x22 d=\x22M\
+ 12 8.000977 L 1\
+2 12 \x22 transform\
+=\x22matrix(1.33333\
+3, 0, 0, 1.33333\
+3, 0, 0)\x22/>\x0a  <p\
+ath fill=\x22none\x22 \
+stroke-width=\x222\x22\
+ stroke-linecap=\
+\x22round\x22 stroke-l\
+inejoin=\x22round\x22 \
+stroke=\x22rgb(90.1\
+96078%, 1.960784\
+%, 25.098039%)\x22 \
+stroke-opacity=\x22\
+1\x22 stroke-miterl\
+imit=\x224\x22 d=\x22M 12\
+ 15.999023 L 12.\
+008789 15.999023\
+ \x22 transform=\x22ma\
+trix(1.333333, 0\
+, 0, 1.333333, 0\
+, 0)\x22/>\x0a</svg>\
 \x00\x00\x05\xbf\
 <\
 ?xml version=\x221.\
@@ -368,10 +605,22 @@ qt_resource_name = b"\
 \x04\x82\x9dG\
 \x00c\
 \x00o\x00l\x00u\x00m\x00n\x00s\x00.\x00s\x00v\x00g\
+\x00\x0e\
+\x04\x1b\xd7\x87\
+\x00r\
+\x00e\x00f\x00r\x00e\x00s\x00h\x00-\x00c\x00w\x00.\x00s\x00v\x00g\
 \x00\x10\
 \x0e\x17\x06\x87\
 \x00c\
 \x00h\x00e\x00v\x00r\x00o\x00n\x00-\x00d\x00o\x00w\x00n\x00.\x00s\x00v\x00g\
+\x00\x0f\
+\x02\xe3G'\
+\x00p\
+\x00l\x00u\x00s\x00-\x00c\x00i\x00r\x00c\x00l\x00e\x00.\x00s\x00v\x00g\
+\x00\x10\
+\x0c\xdd\x10\xe7\
+\x00a\
+\x00l\x00e\x00r\x00t\x00-\x00c\x00i\x00r\x00c\x00l\x00e\x00.\x00s\x00v\x00g\
 \x00\x0b\
 \x03\x03\x96\xc7\
 \x00z\
@@ -389,19 +638,25 @@ qt_resource_name = b"\
 qt_resource_struct = b"\
 \x00\x00\x00\x00\x00\x02\x00\x00\x00\x01\x00\x00\x00\x01\
 \x00\x00\x00\x00\x00\x00\x00\x00\
-\x00\x00\x00\x00\x00\x02\x00\x00\x00\x06\x00\x00\x00\x02\
+\x00\x00\x00\x00\x00\x02\x00\x00\x00\x09\x00\x00\x00\x02\
 \x00\x00\x00\x00\x00\x00\x00\x00\
-\x00\x00\x00\xa2\x00\x00\x00\x00\x00\x01\x00\x00\x126\
+\x00\x00\x01\x0e\x00\x00\x00\x00\x00\x01\x00\x00 \xa3\
 \x00\x00\x01\x960\x9b*\xb1\
-\x00\x00\x00l\x00\x00\x00\x00\x00\x01\x00\x00\x09\xdf\
+\x00\x00\x00\x8e\x00\x00\x00\x00\x00\x01\x00\x00\x0f\x07\
+\x00\x00\x01\x960\x9a\xbd\x92\
+\x00\x00\x00\xd8\x00\x00\x00\x00\x00\x01\x00\x00\x18L\
 \x00\x00\x01\x960\x9b4\xe5\
+\x00\x00\x00F\x00\x00\x00\x00\x00\x01\x00\x00\x08\x22\
+\x00\x00\x01\x960\x9a\xc5X\
 \x00\x00\x00*\x00\x00\x00\x00\x00\x01\x00\x00\x05}\
 \x00\x00\x01\x960\x9aE\x1e\
-\x00\x00\x00\x88\x00\x00\x00\x00\x00\x01\x00\x00\x0f\xa2\
+\x00\x00\x00\xf4\x00\x00\x00\x00\x00\x01\x00\x00\x1e\x0f\
 \x00\x00\x01\x960\x9a\xe3\x88\
 \x00\x00\x00\x14\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\
 \x00\x00\x01\x960\x9ax\x09\
-\x00\x00\x00F\x00\x00\x00\x00\x00\x01\x00\x00\x08\x22\
+\x00\x00\x00\xb2\x00\x00\x00\x00\x00\x01\x00\x00\x13\xa9\
+\x00\x00\x01\x960\x99\xea\xb5\
+\x00\x00\x00h\x00\x00\x00\x00\x00\x01\x00\x00\x0dJ\
 \x00\x00\x01\x960\x9a,\x0b\
 "
 

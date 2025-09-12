@@ -182,13 +182,18 @@ class App:
 
     def getModels(self, installed=False):
         modelListPath = self.getModelPath() + MODEL_CONFIG
-        with open(modelListPath, "r") as f:
-            models = json.load(f)
-        if installed:
-            models = {
-                path: model for path, model in models.items() if model.get("installed")
-            }
-        return models
+        try:
+            with open(modelListPath, "r") as f:
+                models = json.load(f)
+            if installed:
+                models = {
+                    path: model
+                    for path, model in models.items()
+                    if model.get("installed")
+                }
+            return models
+        except Exception as e:
+            return {}
 
     def storeModels(self, models):
         modelListPath = self.getModelPath() + MODEL_CONFIG
