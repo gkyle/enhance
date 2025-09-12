@@ -21,11 +21,14 @@ class UI_DialogTaskQueue(Ui_Dialog):
     def setupUi(self, dialog):
         super().setupUi(dialog)      
 
-        self.tableWidget_history.setColumnCount(3)
-        self.tableWidget_history.setHorizontalHeaderLabels(["Task", "Status", "Latency"])
+        self.tableWidget_history.setColumnCount(4)
+        self.tableWidget_history.setHorizontalHeaderLabels(
+            ["Task", "Device", "Status", "Latency"]
+        )
         self.tableWidget_history.setColumnWidth(0, 450)
         self.tableWidget_history.setColumnWidth(1, 100)
         self.tableWidget_history.setColumnWidth(2, 100)
+        self.tableWidget_history.setColumnWidth(3, 100)
         self.tableWidget_history.horizontalHeader().setDefaultAlignment(Qt.AlignLeft)
         self.tableWidget_history.horizontalHeader().setStretchLastSection(True)
 
@@ -37,6 +40,8 @@ class UI_DialogTaskQueue(Ui_Dialog):
         for i, status in enumerate(reversed(self.history)):
             self.tableWidget_history.insertRow(i)
             self.tableWidget_history.setItem(i, 0, QTableWidgetItem(status.label))
-            self.tableWidget_history.setItem(i, 1, QTableWidgetItem(status.status))
+            if status.device is not None:
+                self.tableWidget_history.setItem(i, 1, QTableWidgetItem(status.device))
+            self.tableWidget_history.setItem(i, 2, QTableWidgetItem(status.status))
             if status.latency is not None:
-                self.tableWidget_history.setItem(i, 2, QTableWidgetItem(f"{status.latency:.2f}s"))
+                self.tableWidget_history.setItem(i, 3, QTableWidgetItem(f"{status.latency:.2f}s"))

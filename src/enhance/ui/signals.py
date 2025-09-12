@@ -12,8 +12,10 @@ WorkerHistory = []
 
 
 class WorkerStatus:
-    def __init__(self, label, status, scheduleTime, latency=None):
+
+    def __init__(self, label, status, scheduleTime, latency=None, device=None):
         self.label = label
+        self.device = device
         self.status = status
         self.scheduleTime = scheduleTime
         self.latency = latency
@@ -23,11 +25,11 @@ class WorkerStatus:
 
 class AsyncWorker(QRunnable):
 
-    def __init__(self, work, parent=None, label=None):
+    def __init__(self, work, parent=None, label=None, device=None):
         super().__init__(parent)
         self.signals = getSignals()
         self.work = work
-        self.status = WorkerStatus(label, "scheduled", time.time())
+        self.status = WorkerStatus(label, "scheduled", time.time(), device=device)
 
     def run(self):
         if not QThread.currentThread().isInterruptionRequested():

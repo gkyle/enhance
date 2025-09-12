@@ -213,7 +213,9 @@ class Ui_AppWindow(Ui_MainWindow):
                 selectedModel = selectedItem.text()
 
                 worker = AsyncWorker(
-                    partial(f, selectedModel), label=f"{desc}: {selectedModel}"
+                    partial(f, selectedModel),
+                    label=f"{desc}: {selectedModel}",
+                    device=gpuId if gpuId is not None else "cpu",
                 )
                 self.op_queue.start(worker)
 

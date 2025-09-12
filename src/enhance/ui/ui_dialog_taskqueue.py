@@ -23,7 +23,7 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(703, 431)
+        Dialog.resize(803, 431)
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.frame = QFrame(Dialog)
@@ -43,7 +43,6 @@ class Ui_Dialog(object):
 
         self.verticalLayout_2.addWidget(self.tableWidget_history)
 
-
         self.verticalLayout.addWidget(self.frame)
 
         self.buttonBox = QDialogButtonBox(Dialog)
@@ -52,7 +51,6 @@ class Ui_Dialog(object):
         self.buttonBox.setStandardButtons(QDialogButtonBox.Ok)
 
         self.verticalLayout.addWidget(self.buttonBox)
-
 
         self.retranslateUi(Dialog)
         self.buttonBox.accepted.connect(Dialog.accept)
@@ -65,4 +63,3 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(QCoreApplication.translate("Dialog", u"Task Queue", None))
         self.label_2.setText(QCoreApplication.translate("Dialog", u"Task Queue:", None))
     # retranslateUi
-
