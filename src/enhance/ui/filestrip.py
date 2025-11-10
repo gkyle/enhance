@@ -13,10 +13,10 @@ from enhance.lib.file import File, InputFile, OutputFile
 from enhance.ui.selectionManager import SelectionManager
 from enhance.ui.signals import Signals, emitLater, getSignals
 
-FILESTRIP_CONTAINER_HEIGHT = 210
-FILESTRIP_SCROLL_HEIGHT = 180
-FILE_BUTTON_SIZE = 160
-FILE_IMAGE_SIZE = 148
+FILESTRIP_CONTAINER_HEIGHT = 150
+FILESTRIP_SCROLL_HEIGHT = 146
+FILE_BUTTON_SIZE = 120
+FILE_IMAGE_SIZE = 108
 
 DOUBLE_CLICK_INTERVAL = 200
 

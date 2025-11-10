@@ -52,7 +52,7 @@ if __name__ == "__main__":
         if not cuda_version is None:
             cuda_version = int(float(cuda_version))
             if cuda_version == 12:
-                print("cu124",end="")
+                print("cu126",end="")
             elif cuda_version == 11:
                 print("cu118",end="")
             else:

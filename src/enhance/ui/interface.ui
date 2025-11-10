@@ -1732,8 +1732,8 @@ margin-top:5px;
            <widget class="QFrame" name="frame_inputFile">
             <property name="minimumSize">
              <size>
-              <width>160</width>
-              <height>160</height>
+              <width>100</width>
+              <height>100</height>
              </size>
             </property>
             <property name="frameShape">
@@ -1824,7 +1824,7 @@ margin-top:5px;
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>1412</width>
+               <width>1472</width>
                <height>200</height>
               </rect>
              </property>
