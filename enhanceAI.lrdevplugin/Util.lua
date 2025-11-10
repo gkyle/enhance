@@ -3,7 +3,7 @@ local LrErrors      = import("LrErrors")
 local LrFileUtils   = import("LrFileUtils")
 local LrPathUtils   = import("LrPathUtils")
 local LrLogger      = import("LrLogger")
-local myLogger      = LrLogger("enhanceai2")
+local myLogger      = LrLogger("enhanceai")
 
 myLogger:enable("logfile")
 

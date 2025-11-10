@@ -30,6 +30,10 @@ cu126 = [
   "torch>=2.6.0",
   "torchvision",
 ]
+mps = [
+  "torch>=2.6.0",
+  "torchvision",
+]
 detect = [
   # TODO: This feature is not enabled by default and the deps may require local compilation.
   # UV attempts to resolve all deps, including optionaly ones (https://github.com/astral-sh/uv/issues/6729).
@@ -43,6 +47,7 @@ conflicts = [
     { extra = "cpu" },
     { extra = "cu118" },
     { extra = "cu126" },
+    { extra = "mps" },
   ],
 ]
 
@@ -53,6 +58,7 @@ torch = [
   # TODO: UV fails to resolve path for torch+cu126 on Windows. Use cu124 index.
   { index = "pytorch-cu124", extra = "cu126", marker = "platform_system == 'Windows'" },
   { index = "pytorch-cu126", extra = "cu126", marker = "platform_system != 'Windows'" },
+  { index = "pytorch-cpu", extra = "mps" },
 ]
 sam-2 = { git = "https://github.com/facebookresearch/sam2.git", rev = "c2ec8e14a185632b0a5d8b161928ceb50197eddc" }
 # For windows, prefer a prebuilt flash_attn wheel. https://huggingface.co/lldacing/flash-attention-windows-wheel/tree/main
