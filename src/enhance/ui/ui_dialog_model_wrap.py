@@ -55,7 +55,7 @@ class UI_DialogModel(Ui_Dialog):
 
         self.device_combobox.clear()
         self.device_combobox.addItem("cpu")
-        for gpuId, gpuName in self.app.getGpuNames():
+        for gpuId, gpuName in self.app.gpuInfo.getGpuNames():
             self.device_combobox.addItem(f"{gpuName} ({gpuId})", userData=gpuId)
         if self.device_combobox.count() > 1:
             self.device_combobox.setCurrentIndex(1)  # Default to first GPU if available

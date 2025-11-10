@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacefwOYCB.ui'
+## Form generated from reading UI file 'interfacegksxeT.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1622, 1326)
+        MainWindow.resize(1622, 1343)
         sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -57,46 +57,6 @@ class Ui_MainWindow(object):
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setHorizontalSpacing(0)
         self.gridLayout.setContentsMargins(0, 0, 6, 0)
-        self.frame = QFrame(self.toolbar)
-        self.frame.setObjectName(u"frame")
-        sizePolicy2.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
-        self.frame.setSizePolicy(sizePolicy2)
-        self.frame.setMinimumSize(QSize(300, 0))
-        self.frame.setFrameShape(QFrame.NoFrame)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_9 = QHBoxLayout(self.frame)
-        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
-        self.label_title = QLabel(self.frame)
-        self.label_title.setObjectName(u"label_title")
-        font = QFont()
-        font.setPointSize(18)
-        font.setBold(True)
-        self.label_title.setFont(font)
-
-        self.horizontalLayout_9.addWidget(self.label_title)
-
-
-        self.gridLayout.addWidget(self.frame, 0, 0, 1, 1)
-
-        self.frame_4 = QFrame(self.toolbar)
-        self.frame_4.setObjectName(u"frame_4")
-        self.frame_4.setMinimumSize(QSize(244, 0))
-        self.frame_4.setMaximumSize(QSize(244, 16777215))
-        self.frame_4.setFrameShape(QFrame.NoFrame)
-        self.frame_4.setFrameShadow(QFrame.Plain)
-        self.horizontalLayout_7 = QHBoxLayout(self.frame_4)
-        self.horizontalLayout_7.setSpacing(6)
-        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.horizontalLayout_7.setContentsMargins(12, -1, 0, -1)
-        self.label_cuda = QLabel(self.frame_4)
-        self.label_cuda.setObjectName(u"label_cuda")
-
-        self.horizontalLayout_7.addWidget(self.label_cuda)
-
-
-        self.gridLayout.addWidget(self.frame_4, 0, 3, 1, 1)
-
         self.frame_3 = QFrame(self.toolbar)
         self.frame_3.setObjectName(u"frame_3")
         sizePolicy2.setHeightForWidth(self.frame_3.sizePolicy().hasHeightForWidth())
@@ -119,9 +79,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.setContentsMargins(0, 0, 0, 0)
         self.label_progressBar = QLabel(self.frame_progressBar)
         self.label_progressBar.setObjectName(u"label_progressBar")
-        font1 = QFont()
-        font1.setPointSize(12)
-        self.label_progressBar.setFont(font1)
+        font = QFont()
+        font.setPointSize(12)
+        self.label_progressBar.setFont(font)
 
         self.horizontalLayout_11.addWidget(self.label_progressBar)
 
@@ -139,9 +99,9 @@ class Ui_MainWindow(object):
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setMinimumSize(QSize(250, 30))
         self.progressBar.setMaximumSize(QSize(250, 16777215))
-        font2 = QFont()
-        font2.setPointSize(11)
-        self.progressBar.setFont(font2)
+        font1 = QFont()
+        font1.setPointSize(11)
+        self.progressBar.setFont(font1)
         self.progressBar.setValue(0)
 
         self.horizontalLayout_17.addWidget(self.progressBar)
@@ -164,9 +124,9 @@ class Ui_MainWindow(object):
         self.pushButton_cancelOp.setObjectName(u"pushButton_cancelOp")
         self.pushButton_cancelOp.setMinimumSize(QSize(30, 0))
         self.pushButton_cancelOp.setMaximumSize(QSize(30, 16777215))
-        font3 = QFont()
-        font3.setPointSize(9)
-        self.pushButton_cancelOp.setFont(font3)
+        font2 = QFont()
+        font2.setPointSize(9)
+        self.pushButton_cancelOp.setFont(font2)
         icon1 = QIcon()
         icon1.addFile(u":/icons32/x.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_cancelOp.setIcon(icon1)
@@ -218,7 +178,7 @@ class Ui_MainWindow(object):
         self.pushButton_zoom = QPushButton(self.frame_3)
         self.pushButton_zoom.setObjectName(u"pushButton_zoom")
         self.pushButton_zoom.setMinimumSize(QSize(0, 40))
-        self.pushButton_zoom.setFont(font1)
+        self.pushButton_zoom.setFont(font)
         icon5 = QIcon()
         icon5.addFile(u":/icons32/zoom-in.svg", QSize(), QIcon.Normal, QIcon.Off)
         self.pushButton_zoom.setIcon(icon5)
@@ -228,6 +188,128 @@ class Ui_MainWindow(object):
 
 
         self.gridLayout.addWidget(self.frame_3, 0, 1, 1, 1, Qt.AlignRight)
+
+        self.frame_4 = QFrame(self.toolbar)
+        self.frame_4.setObjectName(u"frame_4")
+        self.frame_4.setMinimumSize(QSize(244, 0))
+        self.frame_4.setMaximumSize(QSize(244, 16777215))
+        self.frame_4.setFrameShape(QFrame.NoFrame)
+        self.frame_4.setFrameShadow(QFrame.Plain)
+        self.verticalLayout_14 = QVBoxLayout(self.frame_4)
+        self.verticalLayout_14.setSpacing(6)
+        self.verticalLayout_14.setObjectName(u"verticalLayout_14")
+        self.verticalLayout_14.setContentsMargins(12, 0, 0, 0)
+        self.frame_gpu = QFrame(self.frame_4)
+        self.frame_gpu.setObjectName(u"frame_gpu")
+        self.frame_gpu.setStyleSheet(u"")
+        self.frame_gpu.setFrameShape(QFrame.NoFrame)
+        self.frame_gpu.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_15 = QVBoxLayout(self.frame_gpu)
+        self.verticalLayout_15.setObjectName(u"verticalLayout_15")
+        self.verticalLayout_15.setContentsMargins(0, 0, 0, 0)
+        self.frame_gpu_label = QFrame(self.frame_gpu)
+        self.frame_gpu_label.setObjectName(u"frame_gpu_label")
+        self.frame_gpu_label.setMinimumSize(QSize(0, 0))
+        self.frame_gpu_label.setFrameShape(QFrame.StyledPanel)
+        self.frame_gpu_label.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_7 = QVBoxLayout(self.frame_gpu_label)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.label_gpu = QLabel(self.frame_gpu_label)
+        self.label_gpu.setObjectName(u"label_gpu")
+
+        self.verticalLayout_7.addWidget(self.label_gpu)
+
+
+        self.verticalLayout_15.addWidget(self.frame_gpu_label)
+
+        self.frame_gpu_util = QFrame(self.frame_gpu)
+        self.frame_gpu_util.setObjectName(u"frame_gpu_util")
+        self.frame_gpu_util.setFrameShape(QFrame.NoFrame)
+        self.frame_gpu_util.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_19 = QHBoxLayout(self.frame_gpu_util)
+        self.horizontalLayout_19.setObjectName(u"horizontalLayout_19")
+        self.horizontalLayout_19.setContentsMargins(0, 0, 0, 0)
+        self.progressBar_gpu_util = QProgressBar(self.frame_gpu_util)
+        self.progressBar_gpu_util.setObjectName(u"progressBar_gpu_util")
+        font3 = QFont()
+        font3.setPointSize(8)
+        self.progressBar_gpu_util.setFont(font3)
+        self.progressBar_gpu_util.setStyleSheet(u"QProgressBar {\n"
+"            border: 2px solid grey;\n"
+"            border-radius: 5px;\n"
+"        }\n"
+"\n"
+"        QProgressBar::chunk {\n"
+"            background-color: green;\n"
+"            width: 20px;\n"
+"        }")
+        self.progressBar_gpu_util.setValue(0)
+        self.progressBar_gpu_util.setAlignment(Qt.AlignCenter)
+        self.progressBar_gpu_util.setTextVisible(True)
+        self.progressBar_gpu_util.setInvertedAppearance(False)
+        self.progressBar_gpu_util.setTextDirection(QProgressBar.TopToBottom)
+
+        self.horizontalLayout_19.addWidget(self.progressBar_gpu_util)
+
+
+        self.verticalLayout_15.addWidget(self.frame_gpu_util)
+
+        self.frame_gpu_mem = QFrame(self.frame_gpu)
+        self.frame_gpu_mem.setObjectName(u"frame_gpu_mem")
+        self.frame_gpu_mem.setFrameShape(QFrame.NoFrame)
+        self.frame_gpu_mem.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_18 = QHBoxLayout(self.frame_gpu_mem)
+        self.horizontalLayout_18.setObjectName(u"horizontalLayout_18")
+        self.horizontalLayout_18.setContentsMargins(0, 0, 0, 0)
+        self.progressBar_gpu_mem = QProgressBar(self.frame_gpu_mem)
+        self.progressBar_gpu_mem.setObjectName(u"progressBar_gpu_mem")
+        self.progressBar_gpu_mem.setFont(font3)
+        self.progressBar_gpu_mem.setStyleSheet(u"QProgressBar {\n"
+"            border: 2px solid grey;\n"
+"            border-radius: 5px;\n"
+"        }\n"
+"\n"
+"        QProgressBar::chunk {\n"
+"            background-color: green;\n"
+"            width: 20px;\n"
+"        }")
+        self.progressBar_gpu_mem.setValue(0)
+        self.progressBar_gpu_mem.setAlignment(Qt.AlignCenter)
+        self.progressBar_gpu_mem.setTextVisible(True)
+        self.progressBar_gpu_mem.setInvertedAppearance(False)
+
+        self.horizontalLayout_18.addWidget(self.progressBar_gpu_mem)
+
+
+        self.verticalLayout_15.addWidget(self.frame_gpu_mem)
+
+
+        self.verticalLayout_14.addWidget(self.frame_gpu)
+
+
+        self.gridLayout.addWidget(self.frame_4, 0, 3, 1, 1)
+
+        self.frame = QFrame(self.toolbar)
+        self.frame.setObjectName(u"frame")
+        sizePolicy2.setHeightForWidth(self.frame.sizePolicy().hasHeightForWidth())
+        self.frame.setSizePolicy(sizePolicy2)
+        self.frame.setMinimumSize(QSize(300, 0))
+        self.frame.setFrameShape(QFrame.NoFrame)
+        self.frame.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_9 = QHBoxLayout(self.frame)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.label_title = QLabel(self.frame)
+        self.label_title.setObjectName(u"label_title")
+        font4 = QFont()
+        font4.setPointSize(18)
+        font4.setBold(True)
+        self.label_title.setFont(font4)
+
+        self.horizontalLayout_9.addWidget(self.label_title)
+
+
+        self.gridLayout.addWidget(self.frame, 0, 0, 1, 1)
 
 
         self.verticalLayout_2.addWidget(self.toolbar)
@@ -584,14 +666,14 @@ class Ui_MainWindow(object):
         self.frame_blur.setObjectName(u"frame_blur")
         self.frame_blur.setFrameShape(QFrame.NoFrame)
         self.frame_blur.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_7 = QVBoxLayout(self.frame_blur)
-        self.verticalLayout_7.setSpacing(6)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.verticalLayout_7.setContentsMargins(0, 0, 0, 9)
+        self.verticalLayout_71 = QVBoxLayout(self.frame_blur)
+        self.verticalLayout_71.setSpacing(6)
+        self.verticalLayout_71.setObjectName(u"verticalLayout_71")
+        self.verticalLayout_71.setContentsMargins(0, 0, 0, 9)
         self.label_6 = QLabel(self.frame_blur)
         self.label_6.setObjectName(u"label_6")
 
-        self.verticalLayout_7.addWidget(self.label_6)
+        self.verticalLayout_71.addWidget(self.label_6)
 
         self.frame_7 = QFrame(self.frame_blur)
         self.frame_7.setObjectName(u"frame_7")
@@ -614,7 +696,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_6.addWidget(self.horizontalSlider_blur)
 
 
-        self.verticalLayout_7.addWidget(self.frame_7)
+        self.verticalLayout_71.addWidget(self.frame_7)
 
         self.line_2 = QFrame(self.frame_blur)
         self.line_2.setObjectName(u"line_2")
@@ -622,7 +704,7 @@ class Ui_MainWindow(object):
         self.line_2.setFrameShadow(QFrame.Plain)
         self.line_2.setFrameShape(QFrame.HLine)
 
-        self.verticalLayout_7.addWidget(self.line_2)
+        self.verticalLayout_71.addWidget(self.line_2)
 
 
         self.verticalLayout_20.addWidget(self.frame_blur)
@@ -754,10 +836,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
         self.label = QLabel(self.frame_10)
         self.label.setObjectName(u"label")
-        font4 = QFont()
-        font4.setPointSize(12)
-        font4.setBold(True)
-        self.label.setFont(font4)
+        font5 = QFont()
+        font5.setPointSize(12)
+        font5.setBold(True)
+        self.label.setFont(font5)
 
         self.horizontalLayout_12.addWidget(self.label)
 
@@ -866,8 +948,6 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"Enhance AI", None))
-        self.label_title.setText(QCoreApplication.translate("MainWindow", u"Enhance AI", None))
-        self.label_cuda.setText("")
         self.label_progressBar.setText("")
         self.pushButton_taskQueue.setText("")
         self.pushButton_cancelOp.setText("")
@@ -875,6 +955,8 @@ class Ui_MainWindow(object):
         self.pushButton_split.setText("")
         self.pushButton_quad.setText("")
         self.pushButton_zoom.setText(QCoreApplication.translate("MainWindow", u"100%", None))
+        self.label_gpu.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.label_title.setText(QCoreApplication.translate("MainWindow", u"Enhance AI", None))
         self.canvas_main.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"Open", None))
         self.pushButton_clear.setText(QCoreApplication.translate("MainWindow", u"Clear", None))

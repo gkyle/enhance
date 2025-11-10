@@ -11,6 +11,7 @@ from huggingface_hub import HfApi
 
 from enhance.lib.util import Observable
 from enhance.lib.file import File, InputFile, OutputFile
+from enhance.lib.gpu import GPUInfo
 
 # Use deferred loading for torch and modules that use torch to reduce startup latency.
 from deferred_import import deferred_import
@@ -58,6 +59,7 @@ class App:
             for i in range(2, len(sys.argv)):
                 self.appendFile(sys.argv[i])
 
+        self.gpuInfo = GPUInfo()
         self.activeOperation: Observable = None
 
         # environment settings
@@ -144,39 +146,6 @@ class App:
         if self.activeOperation:
             self.activeOperation.requestInterrupt()
 
-    def getGpuNames(self):
-        try:
-            if torch.backends.mps.is_available():
-                return [["mps", "Apple Silicon GPU (MPS)"]]
-            if torch.cuda.is_available():
-                return [
-                    [f"cuda:{i}", torch.cuda.get_device_name(i)]
-                    for i in range(torch.cuda.device_count())
-                ]
-        except Exception as e:
-            pass
-        return []
-
-    def getGpuStats(self):
-        try:
-            if torch.backends.mps.is_available():
-                # MPS does not provide memory stats
-                return None
-            if torch.cuda.is_available():
-                free_bytes, total_bytes = torch.cuda.mem_get_info()
-                return int(toGB(free_bytes)), int(toGB(total_bytes))
-        except Exception as e:
-            pass
-        return None
-
-    def getGpuPresent(self):
-        try:
-            if torch.cuda.is_available():
-                return True
-        except Exception as e:
-            pass
-        return False
-
     def getModelPath(self) -> str:
         return os.path.join("models/")
 
@@ -247,7 +216,3 @@ class App:
                     os.remove(file)
                 except Exception as e:
                     logger.warning(f"Error removing file {file}: {e}")
-
-
-def toGB(bytes):
-    return bytes / (1024 * 1024 * 1024)

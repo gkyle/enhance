@@ -153,6 +153,8 @@ class Ui_AppWindow(Ui_MainWindow):
             self.frame_mask.setVisible(False)
             self.frame_subject.setVisible(False)
 
+        self.updateGPUStats()
+
     def clear(self):
         self.app.setBaseFile(None)
         self.app.clearFileList()
@@ -312,11 +314,39 @@ class Ui_AppWindow(Ui_MainWindow):
             self.signals.updateIndicator.emit(file, SAVE_STATE_CHANGED)
 
     def updateGPUStats(self):
-        cudaStats = self.app.getGpuStats()
-        if cudaStats is None:
-            self.label_cuda.setText("NO GPU")
-        else:
-            self.label_cuda.setText("GPU: Free: {}GB | Total: {}GB".format(*cudaStats))
+        gpu_data_available = self.app.gpuInfo.getGpuPresent()
+        if gpu_data_available:
+            self.frame_gpu_label.setVisible(False)
+            gpu_utilization = self.app.gpuInfo.getGpuUtilization()
+            if gpu_utilization is None:
+                self.frame_gpu_util.setVisible(False)
+            else:
+                self.frame_gpu_util.setVisible(True)
+                self.progressBar_gpu_util.setValue(gpu_utilization * 100)
+                self.progressBar_gpu_util.setFormat(
+                    "GPU: {:.0f}%".format(gpu_utilization * 100)
+                )
+
+            gpu_mem_total = self.app.gpuInfo.getGpuMemeoryTotal()
+            gpu_mem_available = self.app.gpuInfo.getGpuMemoryAvailable()
+            if gpu_mem_total is None:
+                self.frame_gpu_mem.setVisible(False)
+            else:
+                mem_util = (gpu_mem_total - gpu_mem_available) / gpu_mem_total
+                self.progressBar_gpu_mem.setValue(mem_util * 100)
+                self.progressBar_gpu_mem.setFormat(
+                    "GPU Mem: {:.0f}%  {:.1f}GB / {:.1f}GB".format(
+                        mem_util * 100, (gpu_mem_total - gpu_mem_available), gpu_mem_total
+                    )
+                )
+
+            gpu_data_available = (gpu_utilization is not None) or (gpu_mem_total is not None)
+
+        if not gpu_data_available:
+            self.frame_gpu_label.setVisible(True)
+            self.frame_gpu_util.setVisible(False)
+            self.frame_gpu_mem.setVisible(False)
+            self.label_gpu.setText("NO GPU")
 
     def changeZoom(self, zoomFactor: float):
         self.pushButton_zoom.setText(str(int(zoomFactor * 100)) + "%")
