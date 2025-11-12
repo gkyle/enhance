@@ -41,11 +41,24 @@ def has_mps_support():
         pass
     
     return False
+
+def has_intel_gpu():
+    """Check if Intel GPU is available."""
+    try:
+        result = subprocess.run(['xpu-smi', 'discovery'], capture_output=True, text=True, timeout=5)
+        if result.returncode == 0 and 'Device' in result.stdout:
+            return True
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    return False
     
 if __name__ == "__main__":
     # First check for MPS on macOS
     if has_mps_support():
         print("mps", end="")
+    # Check for Intel GPU
+    elif has_intel_gpu():
+        print("xpu", end="")
     else:
         # Check for CUDA
         cuda_version = get_cuda_version()
