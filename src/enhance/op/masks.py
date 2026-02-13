@@ -37,7 +37,7 @@ class GenerateMasks(Observable):
                     mask=maskResults['masks'][i],
                     box=maskResults['bboxes'][i]
                 )
-                inFile.masks.append(mask)
+                inFile.addMask(mask)
 
         self.updateJob(1)
         return len(maskResults['masks']) > 0

@@ -1,9 +1,12 @@
 from enum import Enum
 from typing import List
-from PySide6.QtWidgets import QDialog, QButtonGroup, QListWidget
+from PySide6.QtWidgets import QDialog, QButtonGroup, QListWidget, QCheckBox
+from PySide6.QtCore import Qt
 
-from enhance.app import App, Operation
+from enhance.app import App
+from enhance.lib.file import Operation, Mask
 from enhance.ui.ui_dialog_model import Ui_Dialog
+from enhance.ui.mask_selector import MaskSelectorButton
 
 
 class DialogModel(QDialog):
@@ -18,6 +21,7 @@ class UI_DialogModel(Ui_Dialog):
         super().__init__()
         self.app = app
         self.filterOperations = [op.value.lower() for op in filterOperations]
+        self.maskSelector: MaskSelectorButton = None
 
     def setupUi(self, dialog: QDialog):
         super().setupUi(dialog)
@@ -27,6 +31,7 @@ class UI_DialogModel(Ui_Dialog):
 
         self.pushButton_modelManager.clicked.connect(self.showModelManager)
         self.drawModelList()
+        self.drawMaskList()
 
         if Operation.Upscale.value.lower() in self.filterOperations:
             self.checkBox_maintainScale.setChecked(False)
@@ -71,6 +76,37 @@ class UI_DialogModel(Ui_Dialog):
         self.tilePadding_combobox.setCurrentIndex(
             self.tilePadding_combobox.count() - 1
         )  # Default to max padding
+
+    def drawMaskList(self):
+        """Setup the mask selector button."""
+        # Hide the placeholder
+        self.label_placeholder.hide()
+
+        # Get masks from base file
+        masks = []
+        if (
+            self.app.baseFile
+            and hasattr(self.app.baseFile, "masks")
+            and self.app.baseFile.masks
+        ):
+            masks = self.app.baseFile.masks
+            self.frame_masks.show()
+        else:
+            self.frame_masks.hide()
+            return
+
+        # Create mask selector if not already created
+        if self.maskSelector is None:
+            self.maskSelector = MaskSelectorButton()
+            self.frame_masksSelect.layout().addWidget(self.maskSelector)
+
+        self.maskSelector.setMasks(masks)
+
+    def getSelectedMasks(self) -> List[Mask]:
+        """Get the list of selected masks with per-mask inverted property set."""
+        if self.maskSelector:
+            return self.maskSelector.getSelection()
+        return []
 
     def showModelManager(self):
         from enhance.ui.ui_dialog_model_manager_wrap import DialogModelManager

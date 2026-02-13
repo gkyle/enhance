@@ -982,7 +982,7 @@ class Ui_MainWindow(object):
         self.label_modelname.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"Shape:", None))
         self.label_shape.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p/></body></html>", None))
-        self.group_postprocess.setTitle(QCoreApplication.translate("MainWindow", u"Post Processing", None))
+        self.group_postprocess.setTitle(QCoreApplication.translate("MainWindow", u"Operations", None))
         self.label_6.setText(QCoreApplication.translate("MainWindow", u"Blur:", None))
         self.label_blur_amt.setText(QCoreApplication.translate("MainWindow", u"0", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Downscale:", None))

@@ -8,7 +8,16 @@ from enhance.lib.util import Observable
 
 class TileProcessor:
 
-    def __init__(self, model, tileSize, tilePad, scale, device=None, observer: Observable = None):
+    def __init__(
+        self,
+        model,
+        tileSize,
+        tilePad,
+        scale,
+        device=None,
+        observer: Observable = None,
+        mask: np.ndarray = None,
+    ):
         self.model = model
         self.tileSize = tileSize
         self.tilePad = tilePad
@@ -26,6 +35,10 @@ class TileProcessor:
 
         self.observer: Observable = observer
 
+        # Combined mask (binary: 1 = process, 0 = skip)
+        self.mask = mask
+        self.mask_tensor = None
+
     def preprocess_img(self):
         # img size should be a multiple of tile size
         # pad image with reflection
@@ -38,6 +51,17 @@ class TileProcessor:
         y2 = self.imgYPad - y1
 
         self.img_tensor = F.pad(self.img_tensor, (x1, x2, y1, y2), 'reflect')
+
+        # Also pad the mask if it exists
+        if self.mask is not None:
+            # Convert mask to tensor and add batch/channel dimensions, move to device
+            mask_t = (
+                torch.from_numpy(self.mask.astype(np.float32))
+                .unsqueeze(0)
+                .unsqueeze(0)
+                .to(self.device)
+            )
+            self.mask_tensor = F.pad(mask_t, (x1, x2, y1, y2), "constant", 0)
 
     def postprocess_result(self, img_tensor):
         # remove padding
@@ -111,6 +135,21 @@ class TileProcessor:
 
         return output_img
 
+    def _tile_has_mask_pixels(self, y: int, x: int) -> bool:
+        """Check if a tile contains any mask pixels (optimization to skip empty tiles)."""
+        if self.mask_tensor is None:
+            return True  # No mask means process all tiles
+
+        actual_tile_size = self.tileSize - (self.tilePad * 2)
+        y1 = y * actual_tile_size
+        y2 = (y + 1) * actual_tile_size
+        x1 = x * actual_tile_size
+        x2 = (x + 1) * actual_tile_size
+
+        # Get the mask region for this tile (without padding)
+        mask_region = self.mask_tensor[:, :, y1:y2, x1:x2]
+        return mask_region.sum() > 0
+
     @torch.no_grad()
     def process_tiles(self):
         actual_tile_size = self.tileSize - (self.tilePad * 2)
@@ -124,10 +163,41 @@ class TileProcessor:
 
         output_tensor = torch.zeros((1, 3, h*self.scale, w*self.scale), dtype=torch.float32).to(self.device)
 
+        # If we have a mask, also keep a copy of the original scaled up for non-masked regions
+        if self.mask_tensor is not None:
+            # Scale up input tensor to output size for blending non-masked regions
+            original_scaled = F.interpolate(
+                self.img_tensor,
+                scale_factor=self.scale,
+                mode="bicubic",
+                align_corners=False,
+            )
+            # Also scale up the mask
+            mask_scaled = F.interpolate(
+                self.mask_tensor, scale_factor=self.scale, mode="nearest"
+            )
+
         for y in range(ytiles):
             for x in range(xtiles):
                 if self.observer is not None and self.observer.shouldInterrupt():
                     return None
+
+                # Skip tiles with no mask pixels (optimization)
+                if not self._tile_has_mask_pixels(y, x):
+                    # Copy original pixels for this tile region
+                    if self.mask_tensor is not None:
+                        px = x * scaled_tile_size
+                        py = y * scaled_tile_size
+                        trimmed_x = min(scaled_tile_size, output_tensor.shape[3] - px)
+                        trimmed_y = min(scaled_tile_size, output_tensor.shape[2] - py)
+                        output_tensor[
+                            :, :, py : py + trimmed_y, px : px + trimmed_x
+                        ] = original_scaled[
+                            :, :, py : py + trimmed_y, px : px + trimmed_x
+                        ]
+                    if self.observer is not None:
+                        self.observer.updateJob(1)
+                    continue
 
                 # Get tile, padded to tile_size + tile_pad
                 tile = self.preprocess_tile(y, x)
@@ -152,6 +222,13 @@ class TileProcessor:
 
                 if self.observer is not None:
                     self.observer.updateJob(1)
+
+        # Apply mask blending: only keep model output within masked regions
+        if self.mask_tensor is not None:
+            # Blend: output = mask * model_output + (1 - mask) * original
+            output_tensor = (
+                mask_scaled * output_tensor + (1 - mask_scaled) * original_scaled
+            )
 
         return output_tensor
 

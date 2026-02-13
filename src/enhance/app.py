@@ -6,18 +6,21 @@ from enum import Enum
 from typing import List
 import os
 import sys
+import shutil
+import time
+import os
+
 from huggingface_hub import HfApi
 
 
 from enhance.lib.util import Observable
-from enhance.lib.file import File, InputFile, OutputFile
+from enhance.lib.file import File, InputFile, OutputFile, Operation
 from enhance.lib.gpu import GPUInfo
+
+logger = logging.getLogger(__name__)
 
 # Use deferred loading for torch and modules that use torch to reduce startup latency.
 from deferred_import import deferred_import
-
-
-logger = logging.getLogger(__name__)
 
 torch = deferred_import("torch")
 modelRunner = deferred_import("enhance.op.model_runner")
@@ -30,16 +33,11 @@ try:
 
     DO_DETECT = True
 except ImportError as e:
+    logger.warning(f"Optional detection modules not available: {e}")
     pass
 
 HF_REPO_ID = "gkyle/enhance"
 MODEL_CONFIG = "models.json"
-
-class Operation(Enum):
-    Sharpen = "sharpen"
-    Denoise = "denoise"
-    Upscale = "upscale"
-
 
 class App:
 
@@ -88,44 +86,95 @@ class App:
         self.rawFiles = []
 
     def appendFile(
-        self, path: str, baseFile: InputFile = None, operation: Operation = None
+        self, path: str, baseFile: InputFile = None
     ) -> File:
-        file = OutputFile(path, baseFile, operation)
+        file = OutputFile(path, baseFile)
         self.rawFiles.append(file)
         return file
 
     def removeFile(self, file: File) -> None:
         self.rawFiles.remove(file)
 
+    def createOutputFile(self, baseFile: InputFile) -> OutputFile:
+        """Create a new OutputFile from a base file, copying its image to cache"""
+
+        # Create cache directory if needed
+        cachePath = os.getcwd() + "/.cache/"
+        if not os.path.exists(cachePath):
+            os.makedirs(cachePath)
+
+        # Generate output path
+        baseName = os.path.basename(baseFile.path)
+        base, ext = os.path.splitext(baseName)
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        outPath = os.path.join(cachePath, f"{base}_copy_{timestamp}{ext}")
+
+        # Copy the base file to cache
+        shutil.copyfile(baseFile.path, outPath)
+
+        # Create OutputFile
+        outputFile = OutputFile(outPath, baseFile)
+        return outputFile
+
     def runModel(
         self,
         file: InputFile,
-        modelName: str,
+        modelKey: str,
         progressBar,
         tileSize: int,
         tilePadding: int,
         maintainScale: bool,
         device: str,
+        operation: Operation = Operation.Sharpen,
+        masks: list = None,
     ) -> OutputFile:
         runner = modelRunner.ModelRunner(
-            self.getModelPath() + modelName,
+            modelKey,
             tileSize,
             tilePadding,
             maintainScale,
             device,
+            modelRoot=self.getModelRoot(),
         )
         runner.addObserver(progressBar)
         self.activeOperation = runner
-        outputFile = runner.run(file)
+        outputFile = runner.run(file, operation, masks=masks)
         runner.removeObserver(progressBar)
         if outputFile is None:
             return None
         self.rawFiles.append(outputFile)
         return outputFile
 
+    def runModelOnExisting(
+        self,
+        outputFile: OutputFile,
+        modelKey: str,
+        progressBar,
+        tileSize: int,
+        tilePadding: int,
+        maintainScale: bool,
+        device: str,
+        operation: Operation = Operation.Sharpen,
+        masks: list = None,
+    ) -> OutputFile:
+        """Run a model on an existing OutputFile, appending the operation"""
+        runner = modelRunner.ModelRunner(
+            modelKey,
+            tileSize,
+            tilePadding,
+            maintainScale,
+            device,
+            modelRoot=self.getModelRoot(),
+        )
+        runner.addObserver(progressBar)
+        self.activeOperation = runner
+        result = runner.runOnExisting(outputFile, operation, masks=masks)
+        runner.removeObserver(progressBar)
+        return result
+
     def runAutoMask(self, file: InputFile, progressBar):
         if self.doDetect:
-            device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
+            device = self.gpuInfo.getPreferredDevice()
             generateMasksOp = generate_masks.GenerateMasks(device)
             generateMasksOp.addObserver(progressBar)
             self.activeOperation = generateMasksOp
@@ -134,7 +183,7 @@ class App:
 
     def runDetectSubjects(self, file: InputFile, progressBar):
         if self.doDetect:
-            device = self.getGpuNames()[0][0] if self.getGpuPresent() else "cpu"
+            device = self.gpuInfo.getPreferredDevice()
             detectSubjects = detect_subjects.GenerateLabels(device)
             detectSubjects.addObserver(progressBar)
             self.activeOperation = detectSubjects
@@ -146,11 +195,82 @@ class App:
         if self.activeOperation:
             self.activeOperation.requestInterrupt()
 
-    def getModelPath(self) -> str:
+    def rerunOperationChain(
+        self,
+        compareFile: OutputFile,
+        startIndex: int,
+        progressCallback=None,
+        tileSize: int = 512,
+        tilePadding: int = 32,
+    ) -> bool:
+        """Re-run operations starting from the given index."""
+        # Collect the operations that need to be re-run (from startIndex onwards)
+        opsToRerun = list(compareFile.operations[startIndex:])
+
+        # Remove these operations from the file
+        compareFile.removeOperationsFrom(startIndex)
+
+        # Reset the file path to the state before these operations
+        if startIndex == 0:
+            # Copy base file to cache and set as current path
+            rootPath = os.getcwd() + "/.cache/"
+            if not os.path.exists(rootPath):
+                os.makedirs(rootPath)
+            baseName = os.path.basename(compareFile.baseFile.path)
+            base, ext = os.path.splitext(baseName)
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            newPath = os.path.join(rootPath, f"{base}_reset_{timestamp}{ext}")
+            shutil.copyfile(compareFile.baseFile.path, newPath)
+            compareFile.setPath(newPath)
+        else:
+            # Use reapplyStrength to regenerate from previous operations
+            compareFile.reapplyStrength(compareFile.operations[-1])
+
+        # Get preferred device
+        device = self.gpuInfo.getPreferredDevice()
+
+        # Re-run each operation
+        for op in opsToRerun:
+            maintainScale = op.scale is not None and op.scale < 1.0
+
+            runner = modelRunner.ModelRunner(
+                op.modelPath,
+                tileSize,
+                tilePadding,
+                maintainScale,
+                device,
+                modelRoot=self.getModelRoot(),
+            )
+            if progressCallback:
+                runner.addObserver(progressCallback)
+            self.activeOperation = runner
+
+            result = runner.runOnExisting(
+                compareFile,
+                op.operation_type,
+                masks=op.masks if op.masks else None,
+            )
+
+            if progressCallback:
+                runner.removeObserver(progressCallback)
+
+            if result is None:
+                logger.error(f"Failed to re-run operation: {op.operation_type}")
+                return False
+
+            # Apply the strength from the original operation
+            newOp = compareFile.operations[-1]
+            if newOp.supportsStrength() and op.strength is not None:
+                newOp.strength = op.strength
+                compareFile.reapplyStrength(newOp)
+
+        return True
+
+    def getModelRoot(self) -> str:
         return os.path.join("models/")
 
     def getModels(self, installed=False):
-        modelListPath = self.getModelPath() + MODEL_CONFIG
+        modelListPath = self.getModelRoot() + MODEL_CONFIG
         try:
             with open(modelListPath, "r") as f:
                 models = json.load(f)
@@ -170,7 +290,7 @@ class App:
             json.dump(models, f, indent=4)
 
     def fetchFile(self, path):
-        modelInstallPath = self.getModelPath()
+        modelInstallPath = self.getModelRoot()
         hf_api_client = HfApi()
         hf_api_client.list_repo_files(HF_REPO_ID)
         hf_api_client.hf_hub_download(

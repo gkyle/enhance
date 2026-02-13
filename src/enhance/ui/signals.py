@@ -69,6 +69,7 @@ class Signals(QObject):
     updateThumbnail: Signal = Signal(QFrame, QWidget)
     drawFileList: Signal = Signal(File)
     appendFile: Signal = Signal(File)
+    createOutputFile: Signal = Signal()
 
     removeFile: Signal = Signal(File, QPushButton)
     saveFile: Signal = Signal(File, QPushButton)
@@ -79,6 +80,8 @@ class Signals(QObject):
     changeZoom: Signal = Signal(float)
 
     taskCompleted: Signal = Signal()
+    
+    updateOperationWidgetMasks: Signal = Signal()  # Signal to update masks on operation widgets
 
 
 lowpri_threadpool = QThreadPool()

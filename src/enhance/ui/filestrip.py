@@ -40,6 +40,7 @@ class FileStrip:
         self.app = app
         self.maxVisibleButtons = maxVisibleButtons
         self.selectionManager = selectionManager
+        self.addButton: QPushButton = None  # The "+" button for creating new output files
 
         self.scroll = self.frameContainer.findChildren(QScrollArea)[0]
         self.scroll.horizontalScrollBar().valueChanged.connect(
@@ -72,11 +73,27 @@ class FileStrip:
         priority = 10 if doPriority else 0
         emitLater(self.signals.addFileButton.emit, frame, button, doFocus, priority=priority)
 
+    def makeAddButton(self):
+        """Create the '+' button for adding new output files"""
+        if self.addButton is not None:
+            return self.addButton
+        
+        self.addButton = QPushButton("+")
+        self.addButton.setObjectName("addOutputFileButton")
+        self.addButton.setFixedSize(QSize(FILE_BUTTON_SIZE, FILE_BUTTON_SIZE))
+        self.addButton.setStyleSheet("font-size: 32px; font-weight: bold;")
+        self.addButton.setToolTip("Create new output file from current base")
+        self.addButton.clicked.connect(lambda: self.signals.createOutputFile.emit())
+        return self.addButton
+
     def cleanFrame(self, frame):
         for child in frame.findChildren(QLabel):
             child.setParent(None)
             child.deleteLater()
         for child in frame.findChildren(QPushButton):
+            # Preserve the add button
+            if child == self.addButton:
+                continue
             child.setParent(None)
             child.deleteLater()
         for child in frame.findChildren(QFrame):
@@ -87,6 +104,19 @@ class FileStrip:
         fileList = self.app.getFileList()
         self.fileCountLabel.setText(f"({len(fileList)})")
         self.makeFileButton(self.frameFileList, file, True, True)
+        # Re-add the "+" button at the end
+        self.ensureAddButtonAtEnd()
+
+    def ensureAddButtonAtEnd(self):
+        """Ensure the '+' button is at the end of the file list"""
+        if self.app.getBaseFile() is None:
+            return  # No base file, don't show add button
+        addBtn = self.makeAddButton()
+        # Remove from layout if present, then re-add at end
+        layout = self.frameFileList.layout()
+        if addBtn.parent() == self.frameFileList:
+            layout.removeWidget(addBtn)
+        layout.addWidget(addBtn, 0, Qt.AlignTop)
 
     def drawFileList(self, focusOnFile: File = None):
         self.cleanFrame(self.frameBaseFile)
@@ -109,6 +139,9 @@ class FileStrip:
             if idx % 5 == 0:  # yield periodically to enable the frame to render with full width buttons
                 QApplication.processEvents()
             self.makeFileButton(self.frameFileList, file, doFocus, doPriority)
+
+        # Add the "+" button at the end
+        self.ensureAddButtonAtEnd()
 
         if self.maxVisibleButtons > 0:
             self.fitMaxSize()

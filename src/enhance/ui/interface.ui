@@ -1306,7 +1306,7 @@ margin-top:5px;
 }</string>
             </property>
             <property name="title">
-             <string>Post Processing</string>
+             <string>Operations</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_20">
              <property name="leftMargin">

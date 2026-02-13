@@ -45,6 +45,14 @@ class GPUInfo:
     def getGpuPresent(self):
         return self.cudaAvailable or self.mpsAvailable
 
+    def getPreferredDevice(self) -> str:
+        """Return the preferred device name - GPU if available, otherwise 'cpu'."""
+        if self.cudaAvailable:
+            return "cuda:0"
+        elif self.mpsAvailable:
+            return "mps"
+        return "cpu"
+
     def getGpuMemory(self) -> Tuple[float, float]:  # Return (total GB, available GB)
         try:
             if self.mpsAvailable:
