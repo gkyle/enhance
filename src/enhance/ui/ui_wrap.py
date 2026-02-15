@@ -519,12 +519,6 @@ class Ui_AppWindow(Ui_MainWindow):
         """When masks change, we need to re-run the operation from scratch since
         the mask affects which pixels are processed by the model.
         """
-        # Check if anything actually changed - compare labels and inverted states
-        currentMaskKey = set((m.uniqueLabel, m.inverted) for m in operation.masks)
-        newMaskKey = set((m.uniqueLabel, m.inverted) for m in masks)
-        if currentMaskKey == newMaskKey:
-            return
-
         # Update the operation's masks
         operation.masks = masks
 
@@ -540,27 +534,44 @@ class Ui_AppWindow(Ui_MainWindow):
         if not isinstance(compareFile, OutputFile):
             return
 
-        # Update strengths from widgets and reapply
-        anyChanged = False
-        for widget in self.operationWidgets:
+        # Find the earliest operation whose strength changed
+        earliestChangedIndex = None
+        for i, widget in enumerate(self.operationWidgets):
             op = widget.operation
             if op.supportsStrength():
                 newStrength = widget.getStrength()
                 if op.strength != newStrength:
                     op.strength = newStrength
-                    compareFile.reapplyStrength(op)
-                    anyChanged = True
+                    if earliestChangedIndex is None:
+                        earliestChangedIndex = i
 
-        if anyChanged:
-            button = self.fileStrip.getButton(compareFile)
-            if button:
-                button.updateTextLabel()
-            self.signals.showFiles.emit(False)
-            self.signals.updateIndicator.emit(compareFile, SAVE_STATE_CHANGED)
+        if earliestChangedIndex is None:
+            return
+
+        # If there are subsequent operations, re-run them through the model
+        # since their input has changed
+        nextIndex = earliestChangedIndex + 1
+        if nextIndex < len(compareFile.operations):
+            self._rerunOperationChain(compareFile.operations[nextIndex])
+        else:
+            # Only the last operation changed - just re-blend, no model re-run needed
+            def applyStrength():
+                compareFile.reapplyStrength(compareFile.operations[earliestChangedIndex])
+
+                # Update UI
+                self.signals.selectCompareFile.emit(compareFile)
+                self.signals.updateIndicator.emit(compareFile, SAVE_STATE_CHANGED)
+                self.signals.taskCompleted.emit()
+
+            worker = AsyncWorker(
+                applyStrength,
+                label="Applying strength",
+                device=self.app.gpuInfo.getPreferredDevice(),
+            )
+            self.op_queue.start(worker)
 
     def _rerunOperationChain(self, startOperation: AppliedOperation):
         """Re-run operations starting from the given operation."""
-
         if self.currentCompareFile is None or not isinstance(
             self.currentCompareFile, OutputFile
         ):
@@ -572,35 +583,47 @@ class Ui_AppWindow(Ui_MainWindow):
             logger.warning("Operation not found in file")
             return
 
-        def rerunOps():
-            progressUpdater = ProgressBarUpdater(
-                self.progressBar,
-                self.label_progressBar,
-                total=1,
-                desc="Re-running operations",
+        # Prepare: remove ops from startIndex onward and reset file state
+        opsToRerun = self.app.prepareRerunChain(compareFile, opIndex)
+
+        if not opsToRerun:
+            return
+
+        # Queue each operation as a separate job
+        for i, op in enumerate(opsToRerun):
+            isLast = (i == len(opsToRerun) - 1)
+            desc = f"{op.operation_type.value.capitalize()} (re-run)"
+
+            def f(op=op, isLast=isLast):
+                def rerunJob():
+                    progressUpdater = ProgressBarUpdater(
+                        self.progressBar,
+                        self.label_progressBar,
+                        total=1,
+                        desc=desc,
+                    )
+
+                    success = self.app.rerunSingleOperation(
+                        compareFile,
+                        op,
+                        progressCallback=progressUpdater.tick,
+                    )
+
+                    if not success:
+                        logger.error(f"Failed to re-run operation: {op.operation_type}")
+                        return
+
+                    if isLast:
+                        self.signals.selectCompareFile.emit(compareFile)
+                    self.signals.taskCompleted.emit()
+                return rerunJob
+
+            worker = AsyncWorker(
+                f(),
+                label=f"{desc}: {op.model}",
+                device=self.app.gpuInfo.getPreferredDevice(),
             )
-
-            success = self.app.rerunOperationChain(
-                compareFile,
-                opIndex,
-                progressCallback=progressUpdater.tick,
-            )
-
-            if not success:
-                logger.error("Failed to re-run operation chain")
-                return
-
-            # Update UI
-            self.signals.selectCompareFile.emit(compareFile)
-            self.signals.taskCompleted.emit()
-
-        # Run async
-        worker = AsyncWorker(
-            rerunOps,
-            label="Re-running operations",
-            device=self.app.gpuInfo.getPreferredDevice(),
-        )
-        self.op_queue.start(worker)
+            self.op_queue.start(worker)
 
     def renderPostProcess(self, compareFile: OutputFile):
         self.group_compare.hide()

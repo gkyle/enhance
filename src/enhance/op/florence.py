@@ -18,7 +18,6 @@ class GenerateLabels(Observable):
     def __init__(self, device):
         super().__init__()
         self.device = device
-        # Load model and processor once during initialization
         self.florence2_model = (
             AutoModelForCausalLM.from_pretrained(
                 FLORENCE2_MODEL_ID,
@@ -34,8 +33,11 @@ class GenerateLabels(Observable):
         )
 
     def detect(self, inFile: InputFile):
+        self.startJob(1)
         img = Image.open(inFile.path).convert("RGB")
-        return self.run(img)
+        result = self.run(img)
+        self.updateJob(1)
+        return result
 
     def run(self, img):
         results = run_florence2(

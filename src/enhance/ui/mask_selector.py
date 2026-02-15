@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal, Qt, QPoint, QTimer
 
+import copy
 from typing import List, Tuple
 from enhance.lib.file import Mask
 
@@ -222,9 +223,9 @@ class MaskPopupFrame(QFrame):
         
         for widget in self.maskWidgets:
             if widget.isSelected():
-                # Set the inverted property on the mask
-                widget.mask.inverted = widget.isInverted()
-                selectedMasks.append(widget.mask)
+                maskCopy = copy.copy(widget.mask)
+                maskCopy.inverted = widget.isInverted()
+                selectedMasks.append(maskCopy)
         
         return selectedMasks
 

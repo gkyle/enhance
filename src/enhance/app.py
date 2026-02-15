@@ -14,7 +14,7 @@ from huggingface_hub import HfApi
 
 
 from enhance.lib.util import Observable
-from enhance.lib.file import File, InputFile, OutputFile, Operation
+from enhance.lib.file import AppliedOperation, File, InputFile, OutputFile, Operation
 from enhance.lib.gpu import GPUInfo
 
 logger = logging.getLogger(__name__)
@@ -195,15 +195,12 @@ class App:
         if self.activeOperation:
             self.activeOperation.requestInterrupt()
 
-    def rerunOperationChain(
+    def prepareRerunChain(
         self,
         compareFile: OutputFile,
         startIndex: int,
-        progressCallback=None,
-        tileSize: int = 512,
-        tilePadding: int = 32,
-    ) -> bool:
-        """Re-run operations starting from the given index."""
+    ) -> list:
+        """Prepare to re-run operations from startIndex onward."""
         # Collect the operations that need to be re-run (from startIndex onwards)
         opsToRerun = list(compareFile.operations[startIndex:])
 
@@ -213,7 +210,7 @@ class App:
         # Reset the file path to the state before these operations
         if startIndex == 0:
             # Copy base file to cache and set as current path
-            rootPath = os.getcwd() + "/.cache/"
+            rootPath = os.path.normpath(os.path.join(os.getcwd(), ".cache"))
             if not os.path.exists(rootPath):
                 os.makedirs(rootPath)
             baseName = os.path.basename(compareFile.baseFile.path)
@@ -226,43 +223,51 @@ class App:
             # Use reapplyStrength to regenerate from previous operations
             compareFile.reapplyStrength(compareFile.operations[-1])
 
-        # Get preferred device
+        return opsToRerun
+
+    # TODO: Hard-coding values for tile size, padding, maintainScale, and device. These may differ from original run.
+    def rerunSingleOperation(
+        self,
+        compareFile: OutputFile,
+        op: AppliedOperation,
+        progressCallback=None,
+        tileSize: int = 512,
+        tilePadding: int = 32,
+    ) -> bool:
+        """Re-run a single operation on the current state of compareFile."""
         device = self.gpuInfo.getPreferredDevice()
+        maintainScale = op.scale is not None and op.scale < 1.0
 
-        # Re-run each operation
-        for op in opsToRerun:
-            maintainScale = op.scale is not None and op.scale < 1.0
+        runner = modelRunner.ModelRunner(
+            op.modelPath,
+            tileSize,
+            tilePadding,
+            maintainScale,
+            device,
+            modelRoot=self.getModelRoot(),
+        )
+        if progressCallback:
+            runner.addObserver(progressCallback)
+        self.activeOperation = runner
 
-            runner = modelRunner.ModelRunner(
-                op.modelPath,
-                tileSize,
-                tilePadding,
-                maintainScale,
-                device,
-                modelRoot=self.getModelRoot(),
-            )
-            if progressCallback:
-                runner.addObserver(progressCallback)
-            self.activeOperation = runner
+        result = runner.runOnExisting(
+            compareFile,
+            op.operation_type,
+            masks=op.masks if op.masks else None,
+        )
 
-            result = runner.runOnExisting(
-                compareFile,
-                op.operation_type,
-                masks=op.masks if op.masks else None,
-            )
+        if progressCallback:
+            runner.removeObserver(progressCallback)
 
-            if progressCallback:
-                runner.removeObserver(progressCallback)
+        if result is None:
+            logger.error(f"Failed to re-run operation: {op.operation_type}")
+            return False
 
-            if result is None:
-                logger.error(f"Failed to re-run operation: {op.operation_type}")
-                return False
-
-            # Apply the strength from the original operation
-            newOp = compareFile.operations[-1]
-            if newOp.supportsStrength() and op.strength is not None:
-                newOp.strength = op.strength
-                compareFile.reapplyStrength(newOp)
+        # Apply the strength from the original operation
+        newOp = compareFile.operations[-1]
+        if newOp.supportsStrength() and op.strength is not None:
+            newOp.strength = op.strength
+            compareFile.reapplyStrength(newOp)
 
         return True
 
@@ -285,7 +290,7 @@ class App:
             return {}
 
     def storeModels(self, models):
-        modelListPath = self.getModelPath() + MODEL_CONFIG
+        modelListPath = self.getModelRoot() + MODEL_CONFIG
         with open(modelListPath, "w") as f:
             json.dump(models, f, indent=4)
 

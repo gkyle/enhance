@@ -75,7 +75,8 @@ class OperationWidget(QFrame):
             strengthTitleLabel.setStyleSheet("color: #aaa;")
             strengthHeaderLayout.addWidget(strengthTitleLabel)
 
-            self.strengthValueLabel = QLabel(f"{int((self.operation.strength or 1.0) * 100)}%")
+            strengthPct = int((self.operation.strength if self.operation.strength is not None else 1.0) * 100)
+            self.strengthValueLabel = QLabel(f"{strengthPct}%")
             self.strengthValueLabel.setStyleSheet("color: #aaa;")
             self.strengthValueLabel.setMinimumWidth(35)
             strengthHeaderLayout.addWidget(self.strengthValueLabel)
@@ -91,7 +92,7 @@ class OperationWidget(QFrame):
             self.strengthSlider = QSlider(Qt.Horizontal)
             self.strengthSlider.setMinimum(0)
             self.strengthSlider.setMaximum(100)
-            self.strengthSlider.setValue(int((self.operation.strength or 1.0) * 100))
+            self.strengthSlider.setValue(strengthPct)
             self.strengthSlider.setTickPosition(QSlider.TicksBothSides)
             self.strengthSlider.setTickInterval(10)
             self.strengthSlider.valueChanged.connect(self._onStrengthChanged)

@@ -1,4 +1,5 @@
 from enum import Enum
+import hashlib
 import os
 import shutil
 import time
@@ -11,6 +12,11 @@ import logging
 from enhance.ui.common import writeTiffFile, writeFile
 
 logger = logging.getLogger(__name__)
+
+
+# Leave headroom below Windows MAX_PATH (260) for temp-file suffixes
+# that libraries like tifftools append during writes.
+_MAX_FILENAME_PATH = 240
 
 
 class Unpickle:
@@ -151,10 +157,10 @@ class AppliedOperation:
                 inside_masks = [m for m in self.masks if not m.inverted]
                 outside_masks = [m for m in self.masks if m.inverted]
                 if inside_masks:
-                    inside_labels = "_".join(m.uniqueLabel for m in inside_masks)
+                    inside_labels = "_".join(m.uniqueLabel.replace(" ", "-") for m in inside_masks)
                     base += f"_m{inside_labels}"
                 if outside_masks:
-                    outside_labels = "_".join(m.uniqueLabel for m in outside_masks)
+                    outside_labels = "_".join(m.uniqueLabel.replace(" ", "-") for m in outside_masks)
                     base += f"_minv{outside_labels}"
             return base
         return ""
@@ -231,7 +237,7 @@ class OutputFile(File):
 
     def saveRawModelOutput(self, img, operation: AppliedOperation):
         """Save the raw (unblended) model output for later strength adjustment"""
-        rootPath = os.getcwd() + "/.cache/"
+        rootPath = os.path.normpath(os.path.join(os.getcwd(), ".cache"))
         if not os.path.exists(rootPath):
             os.makedirs(rootPath)
         baseName = os.path.basename(self.baseFile.path)
@@ -239,7 +245,9 @@ class OutputFile(File):
         timestamp = time.strftime("%Y%m%d-%H%M%S")
 
         # Save raw output with _raw suffix
-        rawPath = os.path.join(rootPath, f"{base}_{operation.operation_type.value}_{operation.model}_raw_{timestamp}{ext}")
+        rawFilename = f"{base}_{operation.operation_type.value}_{operation.model}_raw_{timestamp}{ext}"
+        rawFilename = _truncate_path(rootPath, rawFilename)
+        rawPath = os.path.join(rootPath, rawFilename)
 
         logger.info(f"Saving raw model output to: {rawPath}")
         if ext.lower() in [".tif", ".tiff"]:
@@ -304,13 +312,9 @@ class OutputFile(File):
         self.saveImageToCache(currentImg)
         return True
 
-        # Save the result
-        self.saveImageToCache(blendedImg)
-        return True
-
     def saveImageToCache(self, img):
         # Determine path based on applied operations
-        rootPath = os.getcwd() + "/.cache/"
+        rootPath = os.path.normpath(os.path.join(os.getcwd(), ".cache"))
         if not os.path.exists(rootPath):
             os.makedirs(rootPath)
         baseName = os.path.basename(self.baseFile.path)
@@ -320,7 +324,9 @@ class OutputFile(File):
         # Build path from all operations
         pathExtra = "".join(op.getPathExtra() for op in self.operations)
 
-        outpath = os.path.join(rootPath, base + pathExtra + "_" + timestamp + ext)
+        filename = base + pathExtra + "_" + timestamp + ext
+        filename = _truncate_path(rootPath, filename)
+        outpath = os.path.join(rootPath, filename)
 
         logger.info(f"Saving {img.dtype} image to cache: {outpath}")
         if ext.lower() in [".tif", ".tiff"]:
@@ -342,3 +348,22 @@ class OutputFile(File):
         super().setPath(path)
         if self.origPath is None:
             self.origPath = path
+
+def _truncate_path(directory: str, filename: str) -> str:
+    """Truncate filename if the full path would exceed the safe limit."""
+    directory = os.path.normpath(directory)
+    full = os.path.join(directory, filename)
+    if len(full) <= _MAX_FILENAME_PATH:
+        return filename
+    
+    base, ext = os.path.splitext(filename)
+    # 8-char hex hash for uniqueness
+    digest = hashlib.md5(base.encode()).hexdigest()[:8]
+    # How much space is available for the base name?
+    # directory + separator + base + "_" + hash + extension
+    overhead = len(directory) + 1 + 1 + len(digest) + len(ext)
+    max_base = _MAX_FILENAME_PATH - overhead
+    if max_base < 1:
+        max_base = 1
+    truncated = base[:max_base] + "_" + digest + ext
+    return truncated
