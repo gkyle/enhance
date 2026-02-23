@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QSlider,
 )
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QFontMetrics
 
 from enhance.lib.file import AppliedOperation, Mask
 from enhance.ui.mask_selector import MaskSelectorButton
@@ -50,10 +51,16 @@ class OperationWidget(QFrame):
             modelFrame = QFrame()
             modelFrame.setFrameShape(QFrame.NoFrame)
             modelLayout = QHBoxLayout(modelFrame)
-            modelLayout.setContentsMargins(12, 0, 0, 0)
+            modelLayout.setContentsMargins(0, 0, 0, 0)
             modelLayout.setSpacing(4)
 
-            modelLabel = QLabel(self.operation.model)
+            modelLabel = QLabel()
+            metrics = QFontMetrics(modelLabel.font())
+            elided = metrics.elidedText(
+                self.operation.model, Qt.TextElideMode.ElideMiddle, 200
+            )
+            modelLabel.setText(elided)
+            modelLabel.setToolTip(self.operation.model)
             modelLabel.setStyleSheet("color: #9a9996;")
             modelLayout.addWidget(modelLabel)
             modelLayout.addStretch()
@@ -87,7 +94,7 @@ class OperationWidget(QFrame):
             sliderFrame = QFrame()
             sliderFrame.setFrameShape(QFrame.NoFrame)
             sliderLayout = QHBoxLayout(sliderFrame)
-            sliderLayout.setContentsMargins(12, 0, 0, 0)
+            sliderLayout.setContentsMargins(0, 0, 0, 0)
 
             self.strengthSlider = QSlider(Qt.Horizontal)
             self.strengthSlider.setMinimum(0)

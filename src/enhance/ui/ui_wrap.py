@@ -38,6 +38,7 @@ from enhance.ui.ui_dialog_model_wrap import DialogModel
 from enhance.ui.ui_dialog_taskqueue_wrap import DialogTaskQueue
 from enhance.ui.ui_interface import Ui_MainWindow
 from enhance.ui.common import RenderMode, ZoomLevel
+from enhance.ui.mask_visibility_list import MaskVisibilityList
 
 
 class MainWindow(QMainWindow):
@@ -107,8 +108,20 @@ class Ui_AppWindow(Ui_MainWindow):
         self._setupOperationsContainer()
 
         # Hide optional panels
+        self.group_base.hide()
+        self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
+
+        # Make filename labels clickable to toggle detail frames
+        self.label_filename_base.setCursor(Qt.PointingHandCursor)
+        self.label_filename_base.mousePressEvent = (
+            lambda _: self._toggleFrameVisibility(self.group_base)
+        )
+        self.label_filename.setCursor(Qt.PointingHandCursor)
+        self.label_filename.mousePressEvent = lambda _: self._toggleFrameVisibility(
+            self.group_compare
+        )
 
         # Bind events
         self.pushButton_cancelOp.clicked.connect(self.cancelOp)
@@ -130,8 +143,11 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_quad.clicked.connect(
             lambda: self.canvas_main.setRenderMode(RenderMode.Grid)
         )
-        self.checkBox_render_masks.stateChanged.connect(
-            lambda state: self.canvas_main.setShowMasks(state != 0)
+
+        self.maskVisibilityList = MaskVisibilityList()
+        self.frame_mask_visibility.layout().addWidget(self.maskVisibilityList)
+        self.maskVisibilityList.visibilityChanged.connect(
+            lambda indices: self.canvas_main.setVisibleMasks(indices)
         )
 
         self.signals.incrementProgress.connect(self.incrementProgressBar)
@@ -168,6 +184,9 @@ class Ui_AppWindow(Ui_MainWindow):
 
         self.updateGPUStats()
 
+    def _toggleFrameVisibility(self, frame):
+        frame.setVisible(not frame.isVisible())
+
     def clear(self):
         self.app.setBaseFile(None)
         self.app.clearFileList()
@@ -175,6 +194,9 @@ class Ui_AppWindow(Ui_MainWindow):
         self.selectionManager.clear()
         self._clearOperationWidgets()
         self.currentCompareFile = None
+        self.maskVisibilityList.setMasks([])
+        self.group_base.hide()
+        self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
 
@@ -188,6 +210,9 @@ class Ui_AppWindow(Ui_MainWindow):
             self.app.clearFileList()
             self._clearOperationWidgets()
             self.currentCompareFile = None
+            self.maskVisibilityList.setMasks([])
+            self.group_base.hide()
+            self.frame_info_compare.hide()
             self.group_compare.hide()
             self.group_postprocess.hide()
             self.signals.selectBaseFile.emit(file, True)
@@ -199,6 +224,9 @@ class Ui_AppWindow(Ui_MainWindow):
         dialog = DialogModel(self.app, [operation])
         result = dialog.exec()
         if result == QDialog.Accepted:
+            # Hide masks before running operation
+            self.maskVisibilityList.setAllVisible(False)
+
             selectedItems = dialog.ui.listWidget.selectedItems()
             tileSize = int(dialog.ui.tileSize_combobox.currentText())
             tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
@@ -297,7 +325,6 @@ class Ui_AppWindow(Ui_MainWindow):
                 )
                 self.app.runAutoMask(file, progressUpdater.tick)
                 self.signals.showFiles.emit(False)
-                self.checkBox_render_masks.setChecked(True)
                 self.signals.updateOperationWidgetMasks.emit()
                 self.signals.taskCompleted.emit()
 
@@ -457,7 +484,6 @@ class Ui_AppWindow(Ui_MainWindow):
         """Set up the container for dynamically-created operation widgets."""
         # Clear the existing postprocess group contents and replace with a vertical layout
         # Hide the old static controls
-        self.frame_blur.hide()
         self.frame_scale.hide()
         self.frame_blend.hide()
         self.pushButton_postprocess_apply.hide()
@@ -507,6 +533,18 @@ class Ui_AppWindow(Ui_MainWindow):
         availableMasks = self.app.baseFile.masks
         for widget in self.operationWidgets:
             widget.updateAvailableMasks(availableMasks)
+
+        # Also update the visibility list
+        self._updateMaskVisibilityList()
+
+    def _updateMaskVisibilityList(self):
+        if not self.app.baseFile or not hasattr(self.app.baseFile, "masks"):
+            self.maskVisibilityList.setMasks([])
+            return
+
+        self.maskVisibilityList.setMasks(self.app.baseFile.masks)
+        # Show all masks by default when first generated
+        self.maskVisibilityList.setAllVisible(True)
 
     def _onOperationStrengthChanged(self, operation: AppliedOperation, strength: float):
         """Handle strength change from an operation widget - debounced."""
@@ -626,6 +664,7 @@ class Ui_AppWindow(Ui_MainWindow):
             self.op_queue.start(worker)
 
     def renderPostProcess(self, compareFile: OutputFile):
+        self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
 
@@ -641,14 +680,6 @@ class Ui_AppWindow(Ui_MainWindow):
                 self.drawLabelText(
                     self.label_filename, compareFile.basename, maybeElide=True
                 )
-                self.drawLabelText(
-                    self.label_opname, firstOp.operation_type.value if firstOp else ""
-                )
-                self.drawLabelText(
-                    self.label_modelname,
-                    firstOp.model if firstOp else "",
-                    maybeElide=True,
-                )
 
                 compareImg = compareFile.loadUnchanged()
                 self.drawLabelShape(self.label_shape, compareImg)
@@ -656,7 +687,7 @@ class Ui_AppWindow(Ui_MainWindow):
                 # Create operation widgets for all operations
                 self._createOperationWidgets(compareFile)
 
-                self.group_compare.show()
+                self.frame_info_compare.show()
                 self.group_postprocess.show()
 
     def drawLabelText(self, label, text, maybeElide=False):
@@ -664,8 +695,10 @@ class Ui_AppWindow(Ui_MainWindow):
             metrics = QFontMetrics(label.font())
             clippedText = metrics.elidedText(text, Qt.TextElideMode.ElideMiddle, 200)
             label.setText(clippedText)
+            label.setToolTip(text)
         else:
             label.setText(text)
+            label.setToolTip("")
         label.setStyleSheet("color: #aaa;")
 
     def drawLabelShape(self, label, img):

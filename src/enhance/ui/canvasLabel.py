@@ -49,7 +49,7 @@ class CanvasLabel(QLabel):
         self.img4 = None
         self.fraction = 0.5
         self.renderMode: RenderMode = RenderMode.Single
-        self.renderMasks: bool = False
+        self.visibleMaskIndices: set = set()
 
         self.setScaledContents(False)
         self.setStatusMessage()
@@ -69,13 +69,15 @@ class CanvasLabel(QLabel):
         baseFile = self.selectionManager.getBaseFile()
         if baseFile is not None:
             self.img1 = cv2.imread(baseFile.path)
-            if self.renderMasks:
+            if self.visibleMaskIndices:
                 self.img1 = self.applyMasks(baseFile, self.img1)
 
             if self.renderMode == RenderMode.Split or self.renderMode == RenderMode.Grid:
                 compareFile = self.selectionManager.getCompareFile(0)
                 if compareFile is not None:
                     self.img2 = cv2.imread(compareFile.path)
+                    if self.visibleMaskIndices:
+                        self.img2 = self.applyMasks(baseFile, self.img2)
                 else:
                     self.img2 = np.zeros((self.img1.shape[0], self.img1.shape[1], 3), np.uint8)
 
@@ -83,12 +85,16 @@ class CanvasLabel(QLabel):
                 compareFile2 = self.selectionManager.getCompareFile(1)
                 if compareFile2 is not None:
                     self.img3 = cv2.imread(compareFile2.path)
+                    if self.visibleMaskIndices:
+                        self.img3 = self.applyMasks(baseFile, self.img3)
                 else:
                     self.img3 = np.zeros((self.img1.shape[0], self.img1.shape[1], 3), np.uint8)
 
                 compareFile3 = self.selectionManager.getCompareFile(2)
                 if compareFile3 is not None:
                     self.img4 = cv2.imread(compareFile3.path)
+                    if self.visibleMaskIndices:
+                        self.img4 = self.applyMasks(baseFile, self.img4)
                 else:
                     self.img4 = np.zeros((self.img1.shape[0], self.img1.shape[1], 3), np.uint8)
 
@@ -104,13 +110,15 @@ class CanvasLabel(QLabel):
     def applyMasks(self, file, img):
         if len(file.masks) > 0:
             for idx, mask in enumerate(file.masks):
+                if idx not in self.visibleMaskIndices:
+                    continue
                 # If there are masks, we can use the first one to set the size of the image
                 box = mask.box
-                color = MASK_COLORS[idx % len(MASK_COLORS)]
+                color = MASK_COLORS[idx % len(MASK_COLORS)].copy()
                 color.reverse()
                 img = cv2.rectangle(img, (int(box[0]), int(
                     box[1])), (int(box[2]), int(box[3])), color, 2)
-                img = cv2.putText(img, mask.label,
+                img = cv2.putText(img, mask.uniqueLabel,
                                   (int(box[0]), int(box[1]) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
                 mask_img = mask.mask
                 if mask_img is not None and len(mask_img.shape) == 2:
@@ -185,8 +193,8 @@ class CanvasLabel(QLabel):
         self.repaint()
         self.signals.changeZoom.emit(self.zoomFactor)
 
-    def setShowMasks(self, showMasks: bool) -> None:
-        self.renderMasks = showMasks
+    def setVisibleMasks(self, indices: set) -> None:
+        self.visibleMaskIndices = indices
         self.showFiles(False)
         self.repaint()
 
