@@ -24,11 +24,11 @@ def has_mps_support():
     """Check if Apple Silicon MPS is available."""
     if sys.platform != 'darwin':
         return False
-    
+
     # Check if running on Apple Silicon (arm64)
     if platform.machine() != 'arm64':
         return False
-    
+
     # Verify macOS version supports MPS (macOS 12.3+)
     try:
         mac_version = platform.mac_ver()[0]
@@ -39,9 +39,9 @@ def has_mps_support():
                 return True
     except (ValueError, AttributeError):
         pass
-    
+
     return False
-    
+
 if __name__ == "__main__":
     # First check for MPS on macOS
     if has_mps_support():
@@ -51,7 +51,7 @@ if __name__ == "__main__":
         cuda_version = get_cuda_version()
         if not cuda_version is None:
             cuda_version = int(float(cuda_version))
-            if cuda_version == 12:
+            if cuda_version >= 12:
                 print("cu126",end="")
             elif cuda_version == 11:
                 print("cu118",end="")
@@ -59,4 +59,3 @@ if __name__ == "__main__":
                 print("cpu",end="")
         else:
             print("cpu",end="")
-
