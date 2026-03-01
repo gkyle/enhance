@@ -1,0 +1,11 @@
+[flake8]
+max-line-length = 120
+extend-ignore = E203
+
+# N815: Qt Signals follow camelCase convention by design
+per-file-ignores =
+    src/enhance/ui/*.py: N815
+
+# pep8-naming configuration
+# Ignore Qt override methods (Qt convention uses camelCase for these)
+ignore-names = mousePressEvent,mouseReleaseEvent,mouseMoveEvent,mouseDoubleClickEvent,wheelEvent,paintEvent,resizeEvent,closeEvent,moveEvent,showEvent,hideEvent,keyPressEvent,keyReleaseEvent,focusInEvent,focusOutEvent,enterEvent,leaveEvent,dragEnterEvent,dragLeaveEvent,dragMoveEvent,dropEvent,setupUi,retranslateUi
