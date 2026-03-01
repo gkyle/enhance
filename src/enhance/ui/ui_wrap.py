@@ -194,7 +194,7 @@ class Ui_AppWindow(Ui_MainWindow):
         self.selectionManager.clear()
         self._clearOperationWidgets()
         self.currentCompareFile = None
-        self.maskVisibilityList.setMasks([])
+        self.maskVisibilityList.set_masks([])
         self.group_base.hide()
         self.frame_info_compare.hide()
         self.group_compare.hide()
@@ -210,7 +210,7 @@ class Ui_AppWindow(Ui_MainWindow):
             self.app.clearFileList()
             self._clearOperationWidgets()
             self.currentCompareFile = None
-            self.maskVisibilityList.setMasks([])
+            self.maskVisibilityList.set_masks([])
             self.group_base.hide()
             self.frame_info_compare.hide()
             self.group_compare.hide()
@@ -225,14 +225,14 @@ class Ui_AppWindow(Ui_MainWindow):
         result = dialog.exec()
         if result == QDialog.Accepted:
             # Hide masks before running operation
-            self.maskVisibilityList.setAllVisible(False)
+            self.maskVisibilityList.set_all_visible(False)
 
             selectedItems = dialog.ui.listWidget.selectedItems()
             tileSize = int(dialog.ui.tileSize_combobox.currentText())
             tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
             gpuId = dialog.ui.device_combobox.currentData()
             maintainScale = dialog.ui.checkBox_maintainScale.isChecked()
-            selectedMasks = dialog.ui.getSelectedMasks()
+            selectedMasks = dialog.ui.get_selected_masks()
 
             desc = "Sharpen"
             if operation == Operation.Upscale:
@@ -532,19 +532,19 @@ class Ui_AppWindow(Ui_MainWindow):
 
         availableMasks = self.app.baseFile.masks
         for widget in self.operationWidgets:
-            widget.updateAvailableMasks(availableMasks)
+            widget.update_available_masks(availableMasks)
 
         # Also update the visibility list
         self._updateMaskVisibilityList()
 
     def _updateMaskVisibilityList(self):
         if not self.app.baseFile or not hasattr(self.app.baseFile, "masks"):
-            self.maskVisibilityList.setMasks([])
+            self.maskVisibilityList.set_masks([])
             return
 
-        self.maskVisibilityList.setMasks(self.app.baseFile.masks)
+        self.maskVisibilityList.set_masks(self.app.baseFile.masks)
         # Show all masks by default when first generated
-        self.maskVisibilityList.setAllVisible(True)
+        self.maskVisibilityList.set_all_visible(True)
 
     def _onOperationStrengthChanged(self, operation: AppliedOperation, strength: float):
         """Handle strength change from an operation widget - debounced."""
@@ -577,7 +577,7 @@ class Ui_AppWindow(Ui_MainWindow):
         for i, widget in enumerate(self.operationWidgets):
             op = widget.operation
             if op.supportsStrength():
-                newStrength = widget.getStrength()
+                newStrength = widget.get_strength()
                 if op.strength != newStrength:
                     op.strength = newStrength
                     if earliestChangedIndex is None:

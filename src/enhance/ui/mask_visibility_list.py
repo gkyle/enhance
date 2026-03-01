@@ -2,7 +2,6 @@ from PySide6.QtWidgets import (
     QFrame,
     QVBoxLayout,
     QCheckBox,
-    QLabel,
 )
 from PySide6.QtCore import Signal
 from typing import List
@@ -27,7 +26,7 @@ class MaskVisibilityList(QFrame):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(2)
 
-    def setMasks(self, masks: List[Mask]):
+    def set_masks(self, masks: List[Mask]):
         """Update the list of masks displayed."""
         # Clear existing checkboxes
         for checkbox in self.checkboxes:
@@ -42,11 +41,11 @@ class MaskVisibilityList(QFrame):
             checkbox = QCheckBox(mask.uniqueLabel)
             checkbox.setStyleSheet("color: #aaa;")
             checkbox.setChecked(False)
-            checkbox.stateChanged.connect(self._onCheckboxChanged)
+            checkbox.stateChanged.connect(self._on_checkbox_changed)
             self.checkboxes.append(checkbox)
             self.layout.addWidget(checkbox)
 
-    def _onCheckboxChanged(self):
+    def _on_checkbox_changed(self):
         """Handle checkbox state changes."""
         visible = set()
         for idx, checkbox in enumerate(self.checkboxes):
@@ -54,7 +53,7 @@ class MaskVisibilityList(QFrame):
                 visible.add(idx)
         self.visibilityChanged.emit(visible)
 
-    def getVisibleIndices(self) -> set:
+    def get_visible_indices(self) -> set:
         """Get the set of currently visible mask indices."""
         visible = set()
         for idx, checkbox in enumerate(self.checkboxes):
@@ -62,10 +61,10 @@ class MaskVisibilityList(QFrame):
                 visible.add(idx)
         return visible
 
-    def setAllVisible(self, visible: bool):
+    def set_all_visible(self, visible: bool):
         """Set all masks visible or hidden."""
         for checkbox in self.checkboxes:
             checkbox.blockSignals(True)
             checkbox.setChecked(visible)
             checkbox.blockSignals(False)
-        self._onCheckboxChanged()
+        self._on_checkbox_changed()

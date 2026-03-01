@@ -100,12 +100,12 @@ class UI_DialogModel(Ui_Dialog):
             self.maskSelector = MaskSelectorButton()
             self.frame_masksSelect.layout().addWidget(self.maskSelector)
 
-        self.maskSelector.setMasks(masks)
+        self.maskSelector.set_masks(masks)
 
-    def getSelectedMasks(self) -> List[Mask]:
+    def get_selected_masks(self) -> List[Mask]:
         """Get the list of selected masks with per-mask inverted property set."""
         if self.maskSelector:
-            return self.maskSelector.getSelection()
+            return self.maskSelector.get_selection()
         return []
 
     def showModelManager(self):

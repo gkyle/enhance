@@ -19,11 +19,11 @@ class OperationWidget(QFrame):
     strengthChanged = Signal(AppliedOperation, float)
     masksChanged = Signal(AppliedOperation, list)
 
-    def __init__(self, operation: AppliedOperation, availableMasks: List[Mask] = None, parent=None):
+    def __init__(self, operation: AppliedOperation, available_masks: List[Mask] = None, parent=None):
         super().__init__(parent)
         self.operation = operation
-        self.availableMasks = availableMasks if availableMasks else []
-        self.maskSelector: MaskSelectorButton = None
+        self.available_masks = available_masks if available_masks else []
+        self.mask_selector: MaskSelectorButton = None
         self.setupUi()
 
     def setupUi(self):
@@ -42,148 +42,148 @@ class OperationWidget(QFrame):
         layout.setSpacing(4)
 
         # Operation name header
-        nameLabel = QLabel(self._getOperationDisplayName())
-        nameLabel.setStyleSheet("font-weight: bold; color: #fff;")
-        layout.addWidget(nameLabel)
+        name_label = QLabel(self._get_operation_display_name())
+        name_label.setStyleSheet("font-weight: bold; color: #fff;")
+        layout.addWidget(name_label)
 
         # Model name (if applicable)
         if self.operation.model:
-            modelFrame = QFrame()
-            modelFrame.setFrameShape(QFrame.NoFrame)
-            modelLayout = QHBoxLayout(modelFrame)
-            modelLayout.setContentsMargins(0, 0, 0, 0)
-            modelLayout.setSpacing(4)
+            model_frame = QFrame()
+            model_frame.setFrameShape(QFrame.NoFrame)
+            model_layout = QHBoxLayout(model_frame)
+            model_layout.setContentsMargins(0, 0, 0, 0)
+            model_layout.setSpacing(4)
 
-            modelLabel = QLabel()
-            metrics = QFontMetrics(modelLabel.font())
+            model_label = QLabel()
+            metrics = QFontMetrics(model_label.font())
             elided = metrics.elidedText(
                 self.operation.model, Qt.TextElideMode.ElideMiddle, 200
             )
-            modelLabel.setText(elided)
-            modelLabel.setToolTip(self.operation.model)
-            modelLabel.setStyleSheet("color: #9a9996;")
-            modelLayout.addWidget(modelLabel)
-            modelLayout.addStretch()
+            model_label.setText(elided)
+            model_label.setToolTip(self.operation.model)
+            model_label.setStyleSheet("color: #9a9996;")
+            model_layout.addWidget(model_label)
+            model_layout.addStretch()
 
-            layout.addWidget(modelFrame)
+            layout.addWidget(model_frame)
 
         # Strength slider (if applicable)
         if self.operation.supportsStrength():
-            strengthFrame = QFrame()
-            strengthFrame.setFrameShape(QFrame.NoFrame)
-            strengthLayout = QVBoxLayout(strengthFrame)
-            strengthLayout.setContentsMargins(0, 4, 0, 0)
-            strengthLayout.setSpacing(2)
+            strength_frame = QFrame()
+            strength_frame.setFrameShape(QFrame.NoFrame)
+            strength_layout = QVBoxLayout(strength_frame)
+            strength_layout.setContentsMargins(0, 4, 0, 0)
+            strength_layout.setSpacing(2)
 
-            strengthHeaderLayout = QHBoxLayout()
-            strengthHeaderLayout.setContentsMargins(0, 0, 0, 0)
+            strength_header_layout = QHBoxLayout()
+            strength_header_layout.setContentsMargins(0, 0, 0, 0)
 
-            strengthTitleLabel = QLabel("Strength:")
-            strengthTitleLabel.setStyleSheet("color: #aaa;")
-            strengthHeaderLayout.addWidget(strengthTitleLabel)
+            strength_title_label = QLabel("Strength:")
+            strength_title_label.setStyleSheet("color: #aaa;")
+            strength_header_layout.addWidget(strength_title_label)
 
-            strengthPct = int((self.operation.strength if self.operation.strength is not None else 1.0) * 100)
-            self.strengthValueLabel = QLabel(f"{strengthPct}%")
-            self.strengthValueLabel.setStyleSheet("color: #aaa;")
-            self.strengthValueLabel.setMinimumWidth(35)
-            strengthHeaderLayout.addWidget(self.strengthValueLabel)
-            strengthHeaderLayout.addStretch()
+            strength_pct = int((self.operation.strength if self.operation.strength is not None else 1.0) * 100)
+            self.strength_value_label = QLabel(f"{strength_pct}%")
+            self.strength_value_label.setStyleSheet("color: #aaa;")
+            self.strength_value_label.setMinimumWidth(35)
+            strength_header_layout.addWidget(self.strength_value_label)
+            strength_header_layout.addStretch()
 
-            strengthLayout.addLayout(strengthHeaderLayout)
+            strength_layout.addLayout(strength_header_layout)
 
-            sliderFrame = QFrame()
-            sliderFrame.setFrameShape(QFrame.NoFrame)
-            sliderLayout = QHBoxLayout(sliderFrame)
-            sliderLayout.setContentsMargins(0, 0, 0, 0)
+            slider_frame = QFrame()
+            slider_frame.setFrameShape(QFrame.NoFrame)
+            slider_layout = QHBoxLayout(slider_frame)
+            slider_layout.setContentsMargins(0, 0, 0, 0)
 
-            self.strengthSlider = QSlider(Qt.Horizontal)
-            self.strengthSlider.setMinimum(0)
-            self.strengthSlider.setMaximum(100)
-            self.strengthSlider.setValue(strengthPct)
-            self.strengthSlider.setTickPosition(QSlider.TicksBothSides)
-            self.strengthSlider.setTickInterval(10)
-            self.strengthSlider.valueChanged.connect(self._onStrengthChanged)
-            sliderLayout.addWidget(self.strengthSlider)
+            self.strength_slider = QSlider(Qt.Horizontal)
+            self.strength_slider.setMinimum(0)
+            self.strength_slider.setMaximum(100)
+            self.strength_slider.setValue(strength_pct)
+            self.strength_slider.setTickPosition(QSlider.TicksBothSides)
+            self.strength_slider.setTickInterval(10)
+            self.strength_slider.valueChanged.connect(self._on_strength_changed)
+            slider_layout.addWidget(self.strength_slider)
 
-            strengthLayout.addWidget(sliderFrame)
-            layout.addWidget(strengthFrame)
+            strength_layout.addWidget(slider_frame)
+            layout.addWidget(strength_frame)
 
         # Scale display (if applicable)
         if self.operation.scale is not None and self.operation.scale < 1.0:
-            scaleFrame = QFrame()
-            scaleFrame.setFrameShape(QFrame.NoFrame)
-            scaleLayout = QHBoxLayout(scaleFrame)
-            scaleLayout.setContentsMargins(0, 4, 0, 0)
-            scaleLayout.setSpacing(4)
+            scale_frame = QFrame()
+            scale_frame.setFrameShape(QFrame.NoFrame)
+            scale_layout = QHBoxLayout(scale_frame)
+            scale_layout.setContentsMargins(0, 4, 0, 0)
+            scale_layout.setSpacing(4)
 
-            scaleTitleLabel = QLabel("Downscale:")
-            scaleTitleLabel.setStyleSheet("color: #aaa;")
-            scaleLayout.addWidget(scaleTitleLabel)
+            scale_title_label = QLabel("Downscale:")
+            scale_title_label.setStyleSheet("color: #aaa;")
+            scale_layout.addWidget(scale_title_label)
 
-            scaleValue = f"{int(1 / self.operation.scale)}X"
-            scaleValueLabel = QLabel(scaleValue)
-            scaleValueLabel.setStyleSheet("color: #9a9996;")
-            scaleLayout.addWidget(scaleValueLabel)
-            scaleLayout.addStretch()
+            scale_value = f"{int(1 / self.operation.scale)}X"
+            scale_value_label = QLabel(scale_value)
+            scale_value_label.setStyleSheet("color: #9a9996;")
+            scale_layout.addWidget(scale_value_label)
+            scale_layout.addStretch()
 
-            layout.addWidget(scaleFrame)
+            layout.addWidget(scale_frame)
 
         # Mask selector button (always show, even if no masks yet)
-        self._createMaskSelector(layout)
+        self._create_mask_selector(layout)
 
-    def _createMaskSelector(self, layout: QVBoxLayout):
+    def _create_mask_selector(self, layout: QVBoxLayout):
         """Create the mask selector button."""
-        masksFrame = QFrame()
-        masksFrame.setFrameShape(QFrame.NoFrame)
-        masksLayout = QHBoxLayout(masksFrame)
-        masksLayout.setContentsMargins(0, 4, 0, 0)
-        masksLayout.setSpacing(4)
+        masks_frame = QFrame()
+        masks_frame.setFrameShape(QFrame.NoFrame)
+        masks_layout = QHBoxLayout(masks_frame)
+        masks_layout.setContentsMargins(0, 4, 0, 0)
+        masks_layout.setSpacing(4)
 
-        self.maskSelector = MaskSelectorButton()
-        self.maskSelector.setMasks(
-            self.availableMasks, selectedMasks=self.operation.masks
+        self.mask_selector = MaskSelectorButton()
+        self.mask_selector.set_masks(
+            self.available_masks, selected_masks=self.operation.masks
         )
-        self.maskSelector.selectionChanged.connect(self._onMaskSelectionChanged)
-        masksLayout.addWidget(self.maskSelector)
-        masksLayout.addStretch()
+        self.mask_selector.selectionChanged.connect(self._on_mask_selection_changed)
+        masks_layout.addWidget(self.mask_selector)
+        masks_layout.addStretch()
 
-        layout.addWidget(masksFrame)
-        self.masksFrame = masksFrame
+        layout.addWidget(masks_frame)
+        self.masks_frame = masks_frame
 
-    def _getOperationDisplayName(self) -> str:
+    def _get_operation_display_name(self) -> str:
         """Get a human-readable name for the operation."""
         if self.operation.operation_type:
             return self.operation.operation_type.value
         return "Unknown"
 
-    def _onStrengthChanged(self, value: int):
+    def _on_strength_changed(self, value: int):
         """Handle strength slider value changes."""
         strength = value / 100.0
-        self.strengthValueLabel.setText(f"{value}%")
+        self.strength_value_label.setText(f"{value}%")
         self.strengthChanged.emit(self.operation, strength)
 
-    def _onMaskSelectionChanged(self, selectedMasks: list):
+    def _on_mask_selection_changed(self, selected_masks: list):
         """Handle mask selection changes from the mask selector."""
-        self.masksChanged.emit(self.operation, selectedMasks)
+        self.masksChanged.emit(self.operation, selected_masks)
 
-    def getStrength(self) -> float:
+    def get_strength(self) -> float:
         """Get the current strength value."""
-        if hasattr(self, 'strengthSlider'):
-            return self.strengthSlider.value() / 100.0
+        if hasattr(self, 'strength_slider'):
+            return self.strength_slider.value() / 100.0
         return self.operation.strength or 1.0
 
-    def getSelectedMasks(self) -> List[Mask]:
+    def get_selected_masks(self) -> List[Mask]:
         """Get the currently selected masks."""
-        if self.maskSelector:
-            return self.maskSelector.getSelection()
+        if self.mask_selector:
+            return self.mask_selector.get_selection()
         return []
 
-    def updateAvailableMasks(self, newMasks: List[Mask]):
+    def update_available_masks(self, new_masks: List[Mask]):
         """Update the available masks in the mask selector."""
-        if len(newMasks) == len(self.availableMasks):
+        if len(new_masks) == len(self.available_masks):
             return
 
-        self.availableMasks = newMasks
+        self.available_masks = new_masks
 
-        if self.maskSelector:
-            self.maskSelector.setMasks(newMasks, selectedMasks=self.operation.masks)
+        if self.mask_selector:
+            self.mask_selector.set_masks(new_masks, selected_masks=self.operation.masks)
