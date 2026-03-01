@@ -81,7 +81,10 @@ class FileStrip:
         self.addButton = QPushButton("+")
         self.addButton.setObjectName("addOutputFileButton")
         self.addButton.setFixedSize(QSize(FILE_BUTTON_SIZE, FILE_BUTTON_SIZE))
-        self.addButton.setStyleSheet("font-size: 32px; font-weight: bold;")
+        self.addButton.setStyleSheet(
+            "QPushButton { font-size: 48px; font-weight: bold; padding-bottom: 8px; }"
+            " QToolTip { font-size: 12px; font-weight: normal; }"
+        )
         self.addButton.setToolTip("Create new output file from current base")
         self.addButton.clicked.connect(lambda: self.signals.createOutputFile.emit())
         return self.addButton
@@ -91,7 +94,7 @@ class FileStrip:
             child.setParent(None)
             child.deleteLater()
         for child in frame.findChildren(QPushButton):
-            # Preserve the add button
+            # Preserve the add button; it will be repositioned by ensureAddButtonAtEnd
             if child == self.addButton:
                 continue
             child.setParent(None)
@@ -108,15 +111,18 @@ class FileStrip:
         self.ensureAddButtonAtEnd()
 
     def ensureAddButtonAtEnd(self):
-        """Ensure the '+' button is at the end of the file list"""
+        """Ensure the '+' button is the last item inside the file list."""
         if self.app.getBaseFile() is None:
-            return  # No base file, don't show add button
+            if self.addButton is not None:
+                self.addButton.setVisible(False)
+            return
         addBtn = self.makeAddButton()
-        # Remove from layout if present, then re-add at end
         layout = self.frameFileList.layout()
-        if addBtn.parent() == self.frameFileList:
-            layout.removeWidget(addBtn)
+        # Remove from current position if already in the layout
+        layout.removeWidget(addBtn)
+        # Re-add at the end
         layout.addWidget(addBtn, 0, Qt.AlignTop)
+        addBtn.setVisible(True)
 
     def drawFileList(self, focusOnFile: File = None):
         self.cleanFrame(self.frameBaseFile)
@@ -158,11 +164,21 @@ class FileStrip:
             self.scroll.ensureWidgetVisible(self.buttons[file])
 
     def addFileButton(self, frame: QFrame, button: QPushButton, forceFocus=False):
-        frame.layout().addWidget(button, 0, Qt.AlignTop)
+        layout = frame.layout()
+
+        # Insert before the "+" button if it exists in this frame
+        if frame == self.frameFileList and self.addButton is not None and self.addButton.parent() == frame:
+            idx = layout.indexOf(self.addButton)
+            if idx >= 0:
+                layout.insertWidget(idx, button, 0, Qt.AlignTop)
+            else:
+                layout.addWidget(button, 0, Qt.AlignTop)
+        else:
+            layout.addWidget(button, 0, Qt.AlignTop)
 
         # force frame relayout to adjust to content
-        frame.layout().invalidate()
-        frame.layout().activate()
+        layout.invalidate()
+        layout.activate()
         frame.updateGeometry()
 
     def updateThumbnails(self, frame, _=None):

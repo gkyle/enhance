@@ -251,42 +251,33 @@ class Ui_AppWindow(Ui_MainWindow):
                     self.progressBar, self.label_progressBar, total=1, desc=desc
                 )
 
-                # If we have a selected OutputFile, append operation to it
-                if compareFile is not None and isinstance(compareFile, OutputFile):
-                    result = self.app.runModelOnExisting(
-                        compareFile,
-                        selectedModel,
-                        progressUpdater.tick,
-                        tileSize,
-                        tilePadding,
-                        maintainScale,
-                        gpuId,
-                        operation,
-                        masks=selectedMasks if selectedMasks else None,
-                    )
-                    if result is None:
+                # If no OutputFile is selected, create one from the base file first.
+                # This ensures the file exists in the UI before the operation starts,
+                # allowing additional operations to be chained onto it.
+                if compareFile is None or not isinstance(compareFile, OutputFile):
+                    compareFile = self.app.createOutputFile(baseFile)
+                    if compareFile is None:
                         return
-                    # Update the file button to reflect changes
-                    self.signals.selectCompareFile.emit(result)
-                    self.signals.taskCompleted.emit()
-                else:
-                    # No OutputFile selected, create a new one from base file
-                    result = self.app.runModel(
-                        baseFile,
-                        selectedModel,
-                        progressUpdater.tick,
-                        tileSize,
-                        tilePadding,
-                        maintainScale,
-                        gpuId,
-                        operation,
-                        masks=selectedMasks if selectedMasks else None,
-                    )
-                    if result is None:
-                        return
-                    self.signals.appendFile.emit(result)
-                    self.signals.selectCompareFile.emit(result)
-                    self.signals.taskCompleted.emit()
+                    self.app.rawFiles.append(compareFile)
+                    self.signals.appendFile.emit(compareFile)
+                    self.signals.selectCompareFile.emit(compareFile)
+
+                result = self.app.runModelOnExisting(
+                    compareFile,
+                    selectedModel,
+                    progressUpdater.tick,
+                    tileSize,
+                    tilePadding,
+                    maintainScale,
+                    gpuId,
+                    operation,
+                    masks=selectedMasks if selectedMasks else None,
+                )
+                if result is None:
+                    return
+                # Update the file button to reflect changes
+                self.signals.selectCompareFile.emit(result)
+                self.signals.taskCompleted.emit()
 
             for selectedItem in selectedItems:
                 selectedModel = selectedItem.text()
@@ -396,6 +387,7 @@ class Ui_AppWindow(Ui_MainWindow):
             self.app.rawFiles.append(outputFile)
             self.signals.appendFile.emit(outputFile)
             self.selectionManager.selectCompare(outputFile)
+            self.signals.selectCompareFile.emit(outputFile)
 
     def saveFile(self, file: OutputFile, button: FileButton):
         if file is not None:
