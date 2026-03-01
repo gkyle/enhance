@@ -29,4 +29,4 @@ uv sync --extra $torch_variant
 # Run
 echo "Starting Enhance AI..."
 uv run --no-sync src/setup/lrcPath.py
-uv run --no-sync src/main.py $*
+uv run --no-sync src/main.py "$@"

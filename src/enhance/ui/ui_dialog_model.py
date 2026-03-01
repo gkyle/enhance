@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'dialog_modelQjiFYi.ui'
+## Form generated from reading UI file 'dialog_modeluVJHfh.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -25,8 +25,8 @@ class Ui_Dialog(object):
     def setupUi(self, Dialog):
         if not Dialog.objectName():
             Dialog.setObjectName(u"Dialog")
-        Dialog.resize(1098, 500)
-        Dialog.setMinimumSize(QSize(0, 400))
+        Dialog.resize(1098, 608)
+        Dialog.setMinimumSize(QSize(0, 480))
         self.verticalLayout = QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.frame = QFrame(Dialog)
@@ -79,27 +79,60 @@ class Ui_Dialog(object):
         self.frame_2.setFrameShadow(QFrame.Raised)
         self.gridLayout = QGridLayout(self.frame_2)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.frame_4 = QFrame(self.frame_2)
-        self.frame_4.setObjectName(u"frame_4")
-        self.frame_4.setFrameShape(QFrame.NoFrame)
-        self.frame_4.setFrameShadow(QFrame.Plain)
-        self.horizontalLayout_2 = QHBoxLayout(self.frame_4)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.label_3 = QLabel(self.frame_4)
-        self.label_3.setObjectName(u"label_3")
-        self.label_3.setMinimumSize(QSize(100, 0))
-        self.label_3.setMaximumSize(QSize(100, 16777215))
+        self.frame_masks = QFrame(self.frame_2)
+        self.frame_masks.setObjectName(u"frame_masks")
+        self.frame_masks.setFrameShape(QFrame.NoFrame)
+        self.frame_masks.setFrameShadow(QFrame.Plain)
+        self.horizontalLayout_8 = QHBoxLayout(self.frame_masks)
+        self.horizontalLayout_8.setSpacing(0)
+        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
+        self.horizontalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.label_masks = QLabel(self.frame_masks)
+        self.label_masks.setObjectName(u"label_masks")
+        self.label_masks.setMinimumSize(QSize(100, 0))
+        self.label_masks.setMaximumSize(QSize(100, 16777215))
 
-        self.horizontalLayout_2.addWidget(self.label_3)
+        self.horizontalLayout_8.addWidget(self.label_masks)
 
-        self.tileSize_combobox = QComboBox(self.frame_4)
-        self.tileSize_combobox.setObjectName(u"tileSize_combobox")
+        self.frame_masksSelect = QFrame(self.frame_masks)
+        self.frame_masksSelect.setObjectName(u"frame_masksSelect")
+        self.frame_masksSelect.setFrameShape(QFrame.NoFrame)
+        self.frame_masksSelect.setFrameShadow(QFrame.Plain)
+        self.horizontalLayout_invertMask = QHBoxLayout(self.frame_masksSelect)
+        self.horizontalLayout_invertMask.setObjectName(u"horizontalLayout_invertMask")
+        self.horizontalLayout_invertMask.setContentsMargins(12, 6, 6, 6)
+        self.label_placeholder = QLabel(self.frame_masksSelect)
+        self.label_placeholder.setObjectName(u"label_placeholder")
 
-        self.horizontalLayout_2.addWidget(self.tileSize_combobox)
+        self.horizontalLayout_invertMask.addWidget(self.label_placeholder)
 
 
-        self.gridLayout.addWidget(self.frame_4, 3, 0, 1, 1)
+        self.horizontalLayout_8.addWidget(self.frame_masksSelect, 0, Qt.AlignLeft)
+
+
+        self.gridLayout.addWidget(self.frame_masks, 5, 0, 1, 1)
+
+        self.frame_8 = QFrame(self.frame_2)
+        self.frame_8.setObjectName(u"frame_8")
+        self.frame_8.setFrameShape(QFrame.NoFrame)
+        self.frame_8.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_6 = QHBoxLayout(self.frame_8)
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.label_5 = QLabel(self.frame_8)
+        self.label_5.setObjectName(u"label_5")
+        self.label_5.setMinimumSize(QSize(100, 0))
+        self.label_5.setMaximumSize(QSize(100, 16777215))
+
+        self.horizontalLayout_6.addWidget(self.label_5)
+
+        self.checkBox_maintainScale = QCheckBox(self.frame_8)
+        self.checkBox_maintainScale.setObjectName(u"checkBox_maintainScale")
+
+        self.horizontalLayout_6.addWidget(self.checkBox_maintainScale)
+
+
+        self.gridLayout.addWidget(self.frame_8, 0, 0, 1, 1)
 
         self.frame_5 = QFrame(self.frame_2)
         self.frame_5.setObjectName(u"frame_5")
@@ -145,27 +178,27 @@ class Ui_Dialog(object):
 
         self.gridLayout.addWidget(self.frame_3, 1, 0, 1, 1)
 
-        self.frame_8 = QFrame(self.frame_2)
-        self.frame_8.setObjectName(u"frame_8")
-        self.frame_8.setFrameShape(QFrame.NoFrame)
-        self.frame_8.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_6 = QHBoxLayout(self.frame_8)
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
-        self.label_5 = QLabel(self.frame_8)
-        self.label_5.setObjectName(u"label_5")
-        self.label_5.setMinimumSize(QSize(100, 0))
-        self.label_5.setMaximumSize(QSize(100, 16777215))
+        self.frame_4 = QFrame(self.frame_2)
+        self.frame_4.setObjectName(u"frame_4")
+        self.frame_4.setFrameShape(QFrame.NoFrame)
+        self.frame_4.setFrameShadow(QFrame.Plain)
+        self.horizontalLayout_2 = QHBoxLayout(self.frame_4)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.label_3 = QLabel(self.frame_4)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setMinimumSize(QSize(100, 0))
+        self.label_3.setMaximumSize(QSize(100, 16777215))
 
-        self.horizontalLayout_6.addWidget(self.label_5)
+        self.horizontalLayout_2.addWidget(self.label_3)
 
-        self.checkBox_maintainScale = QCheckBox(self.frame_8)
-        self.checkBox_maintainScale.setObjectName(u"checkBox_maintainScale")
+        self.tileSize_combobox = QComboBox(self.frame_4)
+        self.tileSize_combobox.setObjectName(u"tileSize_combobox")
 
-        self.horizontalLayout_6.addWidget(self.checkBox_maintainScale)
+        self.horizontalLayout_2.addWidget(self.tileSize_combobox)
 
 
-        self.gridLayout.addWidget(self.frame_8, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.frame_4, 3, 0, 1, 1)
 
 
         self.verticalLayout.addWidget(self.frame_2)
@@ -219,11 +252,13 @@ class Ui_Dialog(object):
         self.label_6.setText("")
         self.label_7.setText(QCoreApplication.translate("Dialog", u"You have no models installed. Click \"Add and Manage Models\" below.", None))
         self.label.setText(QCoreApplication.translate("Dialog", u"Choose Model:", None))
-        self.label_3.setText(QCoreApplication.translate("Dialog", u"Tile Size:", None))
-        self.label_4.setText(QCoreApplication.translate("Dialog", u"Tile Padding:", None))
-        self.label_2.setText(QCoreApplication.translate("Dialog", u"Device:", None))
+        self.label_masks.setText(QCoreApplication.translate("Dialog", u"Apply to:", None))
+        self.label_placeholder.setText(QCoreApplication.translate("Dialog", u"Placeholder", None))
         self.label_5.setText("")
         self.checkBox_maintainScale.setText(QCoreApplication.translate("Dialog", u"Maintain Original Scale", None))
+        self.label_4.setText(QCoreApplication.translate("Dialog", u"Tile Padding:", None))
+        self.label_2.setText(QCoreApplication.translate("Dialog", u"Device:", None))
+        self.label_3.setText(QCoreApplication.translate("Dialog", u"Tile Size:", None))
         self.pushButton_modelManager.setText(QCoreApplication.translate("Dialog", u"Add and Manage Models", None))
     # retranslateUi
 

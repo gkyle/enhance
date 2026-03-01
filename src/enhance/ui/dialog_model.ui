@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>1098</width>
-    <height>500</height>
+    <height>608</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>400</height>
+    <height>480</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -71,7 +71,7 @@
             <string/>
            </property>
            <property name="pixmap">
-            <pixmap resource="icons.qrc">:/icons32/alert-circle.svg</pixmap>
+            <pixmap>:/icons32/alert-circle.svg</pixmap>
            </property>
           </widget>
          </item>
@@ -114,15 +114,18 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="3" column="0">
-       <widget class="QFrame" name="frame_4">
+      <item row="5" column="0">
+       <widget class="QFrame" name="frame_masks">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Plain</enum>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -136,7 +139,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="label_masks">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -150,12 +153,90 @@
             </size>
            </property>
            <property name="text">
-            <string>Tile Size:</string>
+            <string>Apply to:</string>
+           </property>
+          </widget>
+         </item>
+         <item alignment="Qt::AlignLeft">
+          <widget class="QFrame" name="frame_masksSelect">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_invertMask">
+            <property name="leftMargin">
+             <number>12</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_placeholder">
+              <property name="text">
+               <string>Placeholder</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QFrame" name="frame_8">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_5">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="tileSize_combobox"/>
+          <widget class="QCheckBox" name="checkBox_maintainScale">
+           <property name="text">
+            <string>Maintain Original Scale</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -252,15 +333,15 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QFrame" name="frame_8">
+      <item row="3" column="0">
+       <widget class="QFrame" name="frame_4">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+         <enum>QFrame::Plain</enum>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -274,7 +355,7 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="label_5">
+          <widget class="QLabel" name="label_3">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -288,16 +369,12 @@
             </size>
            </property>
            <property name="text">
-            <string/>
+            <string>Tile Size:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBox_maintainScale">
-           <property name="text">
-            <string>Maintain Original Scale</string>
-           </property>
-          </widget>
+          <widget class="QComboBox" name="tileSize_combobox"/>
          </item>
         </layout>
        </widget>
@@ -353,7 +430,7 @@
             <string>Add and Manage Models</string>
            </property>
            <property name="icon">
-            <iconset resource="icons.qrc">
+            <iconset>
              <normaloff>:/icons32/plus-circle.svg</normaloff>:/icons32/plus-circle.svg</iconset>
            </property>
            <property name="iconSize">

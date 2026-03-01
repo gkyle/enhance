@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacegksxeT.ui'
+## Form generated from reading UI file 'interfacepCqqSq.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.4.2
 ##
@@ -15,11 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QCheckBox, QFrame,
-    QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-    QLayout, QMainWindow, QProgressBar, QPushButton,
-    QScrollArea, QSizePolicy, QSlider, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QGridLayout,
+    QHBoxLayout, QLabel, QLayout, QMainWindow,
+    QProgressBar, QPushButton, QScrollArea, QSizePolicy,
+    QSlider, QSpacerItem, QVBoxLayout, QWidget)
 import icons_rc
 
 class Ui_MainWindow(object):
@@ -353,14 +352,14 @@ class Ui_MainWindow(object):
 
         self.frame_sidebar = QFrame(self.frame1)
         self.frame_sidebar.setObjectName(u"frame_sidebar")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Maximum)
+        sizePolicy5 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
         sizePolicy5.setHorizontalStretch(0)
         sizePolicy5.setVerticalStretch(0)
         sizePolicy5.setHeightForWidth(self.frame_sidebar.sizePolicy().hasHeightForWidth())
         self.frame_sidebar.setSizePolicy(sizePolicy5)
         self.frame_sidebar.setMinimumSize(QSize(244, 0))
         self.frame_sidebar.setMaximumSize(QSize(100, 16777215))
-        self.frame_sidebar.setFrameShape(QFrame.StyledPanel)
+        self.frame_sidebar.setFrameShape(QFrame.NoFrame)
         self.frame_sidebar.setFrameShadow(QFrame.Plain)
         self.verticalLayout_3 = QVBoxLayout(self.frame_sidebar)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
@@ -383,20 +382,10 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.line_8)
 
-        self.pushButton_run = QPushButton(self.frame_sidebar)
-        self.pushButton_run.setObjectName(u"pushButton_run")
+        self.pushButton_modelManager = QPushButton(self.frame_sidebar)
+        self.pushButton_modelManager.setObjectName(u"pushButton_modelManager")
 
-        self.verticalLayout_3.addWidget(self.pushButton_run)
-
-        self.pushButton_denoise = QPushButton(self.frame_sidebar)
-        self.pushButton_denoise.setObjectName(u"pushButton_denoise")
-
-        self.verticalLayout_3.addWidget(self.pushButton_denoise)
-
-        self.pushButton_upscale = QPushButton(self.frame_sidebar)
-        self.pushButton_upscale.setObjectName(u"pushButton_upscale")
-
-        self.verticalLayout_3.addWidget(self.pushButton_upscale)
+        self.verticalLayout_3.addWidget(self.pushButton_modelManager)
 
         self.line = QFrame(self.frame_sidebar)
         self.line.setObjectName(u"line")
@@ -406,44 +395,58 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.line)
 
-        self.pushButton_modelManager = QPushButton(self.frame_sidebar)
-        self.pushButton_modelManager.setObjectName(u"pushButton_modelManager")
+        self.frame_label_info = QFrame(self.frame_sidebar)
+        self.frame_label_info.setObjectName(u"frame_label_info")
+        self.frame_label_info.setFrameShape(QFrame.NoFrame)
+        self.frame_label_info.setFrameShadow(QFrame.Raised)
+        self.layout_label_info = QVBoxLayout(self.frame_label_info)
+        self.layout_label_info.setSpacing(0)
+        self.layout_label_info.setObjectName(u"layout_label_info")
+        self.layout_label_info.setContentsMargins(0, 12, 0, 0)
+        self.label_7 = QLabel(self.frame_label_info)
+        self.label_7.setObjectName(u"label_7")
+        font5 = QFont()
+        font5.setBold(True)
+        self.label_7.setFont(font5)
 
-        self.verticalLayout_3.addWidget(self.pushButton_modelManager)
+        self.layout_label_info.addWidget(self.label_7)
 
-        self.line_3 = QFrame(self.frame_sidebar)
-        self.line_3.setObjectName(u"line_3")
-        self.line_3.setStyleSheet(u"color: rgb(92, 92, 92);")
-        self.line_3.setFrameShadow(QFrame.Plain)
-        self.line_3.setFrameShape(QFrame.HLine)
+        self.line_9 = QFrame(self.frame_label_info)
+        self.line_9.setObjectName(u"line_9")
+        self.line_9.setFrameShadow(QFrame.Plain)
+        self.line_9.setFrameShape(QFrame.HLine)
 
-        self.verticalLayout_3.addWidget(self.line_3)
+        self.layout_label_info.addWidget(self.line_9)
 
-        self.group_base = QGroupBox(self.frame_sidebar)
+
+        self.verticalLayout_3.addWidget(self.frame_label_info)
+
+        self.frame_info_base = QFrame(self.frame_sidebar)
+        self.frame_info_base.setObjectName(u"frame_info_base")
+        self.frame_info_base.setFrameShape(QFrame.NoFrame)
+        self.frame_info_base.setFrameShadow(QFrame.Plain)
+        self.verticalLayout_11 = QVBoxLayout(self.frame_info_base)
+        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
+        self.verticalLayout_11.setContentsMargins(0, 0, 0, 0)
+        self.label_13 = QLabel(self.frame_info_base)
+        self.label_13.setObjectName(u"label_13")
+
+        self.verticalLayout_11.addWidget(self.label_13)
+
+        self.label_filename_base = QLabel(self.frame_info_base)
+        self.label_filename_base.setObjectName(u"label_filename_base")
+        self.label_filename_base.setMargin(0)
+
+        self.verticalLayout_11.addWidget(self.label_filename_base)
+
+        self.group_base = QFrame(self.frame_info_base)
         self.group_base.setObjectName(u"group_base")
-        self.group_base.setStyleSheet(u"QGroupBox {\n"
-"border: 1px solid rgb(92, 92, 92);\n"
-"margin-top: 14px;\n"
-"padding-top:10px;\n"
-"}\n"
-"QGroupBox::title {\n"
-"subcontrol-origin: margin;\n"
-"subcontrol-position: top left;\n"
-"left: 8px;\n"
-"padding:0 5px;\n"
-"margin-top:5px;\n"
-"}")
-        self.group_base.setFlat(False)
-        self.group_base.setCheckable(False)
+        self.group_base.setFrameShape(QFrame.NoFrame)
+        self.group_base.setFrameShadow(QFrame.Raised)
         self.verticalLayout_18 = QVBoxLayout(self.group_base)
         self.verticalLayout_18.setSpacing(6)
         self.verticalLayout_18.setObjectName(u"verticalLayout_18")
-        self.verticalLayout_18.setContentsMargins(6, 6, 6, 6)
-        self.label_13 = QLabel(self.group_base)
-        self.label_13.setObjectName(u"label_13")
-
-        self.verticalLayout_18.addWidget(self.label_13)
-
+        self.verticalLayout_18.setContentsMargins(12, 6, 6, 6)
         self.frame_label_filename_base = QFrame(self.group_base)
         self.frame_label_filename_base.setObjectName(u"frame_label_filename_base")
         self.frame_label_filename_base.setFrameShape(QFrame.NoFrame)
@@ -451,12 +454,6 @@ class Ui_MainWindow(object):
         self.horizontalLayout_13 = QHBoxLayout(self.frame_label_filename_base)
         self.horizontalLayout_13.setObjectName(u"horizontalLayout_13")
         self.horizontalLayout_13.setContentsMargins(12, 0, 0, 0)
-        self.label_filename_base = QLabel(self.frame_label_filename_base)
-        self.label_filename_base.setObjectName(u"label_filename_base")
-        self.label_filename_base.setMargin(0)
-
-        self.horizontalLayout_13.addWidget(self.label_filename_base)
-
 
         self.verticalLayout_18.addWidget(self.frame_label_filename_base)
 
@@ -487,11 +484,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_5 = QVBoxLayout(self.frame_subject)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
         self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.label_4 = QLabel(self.frame_subject)
-        self.label_4.setObjectName(u"label_4")
-
-        self.verticalLayout_5.addWidget(self.label_4)
-
         self.frame_label_subjects = QFrame(self.frame_subject)
         self.frame_label_subjects.setObjectName(u"frame_label_subjects")
         self.frame_label_subjects.setFrameShape(QFrame.NoFrame)
@@ -499,73 +491,54 @@ class Ui_MainWindow(object):
         self.horizontalLayout_16 = QHBoxLayout(self.frame_label_subjects)
         self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
         self.horizontalLayout_16.setContentsMargins(12, 0, 0, 0)
-        self.label_subjects = QLabel(self.frame_label_subjects)
-        self.label_subjects.setObjectName(u"label_subjects")
-
-        self.horizontalLayout_16.addWidget(self.label_subjects)
-
 
         self.verticalLayout_5.addWidget(self.frame_label_subjects)
 
 
         self.verticalLayout_18.addWidget(self.frame_subject)
 
+        self.label_4 = QLabel(self.group_base)
+        self.label_4.setObjectName(u"label_4")
 
-        self.verticalLayout_3.addWidget(self.group_base)
+        self.verticalLayout_18.addWidget(self.label_4)
 
-        self.frame_mask = QFrame(self.frame_sidebar)
-        self.frame_mask.setObjectName(u"frame_mask")
-        self.frame_mask.setFrameShape(QFrame.NoFrame)
-        self.frame_mask.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_4 = QVBoxLayout(self.frame_mask)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, 9, 0, 0)
-        self.pushButton_mask = QPushButton(self.frame_mask)
-        self.pushButton_mask.setObjectName(u"pushButton_mask")
+        self.label_subjects = QLabel(self.group_base)
+        self.label_subjects.setObjectName(u"label_subjects")
 
-        self.verticalLayout_4.addWidget(self.pushButton_mask)
-
-        self.checkBox_render_masks = QCheckBox(self.frame_mask)
-        self.checkBox_render_masks.setObjectName(u"checkBox_render_masks")
-
-        self.verticalLayout_4.addWidget(self.checkBox_render_masks)
+        self.verticalLayout_18.addWidget(self.label_subjects)
 
 
-        self.verticalLayout_3.addWidget(self.frame_mask)
+        self.verticalLayout_11.addWidget(self.group_base)
 
-        self.frame_8 = QFrame(self.frame_sidebar)
-        self.frame_8.setObjectName(u"frame_8")
-        self.frame_8.setFrameShape(QFrame.NoFrame)
-        self.frame_8.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_15 = QHBoxLayout(self.frame_8)
-        self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
-        self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
 
-        self.verticalLayout_3.addWidget(self.frame_8)
+        self.verticalLayout_3.addWidget(self.frame_info_base)
 
-        self.group_compare = QGroupBox(self.frame_sidebar)
+        self.frame_info_compare = QFrame(self.frame_sidebar)
+        self.frame_info_compare.setObjectName(u"frame_info_compare")
+        self.frame_info_compare.setFrameShape(QFrame.NoFrame)
+        self.frame_info_compare.setFrameShadow(QFrame.Plain)
+        self.verticalLayout_12 = QVBoxLayout(self.frame_info_compare)
+        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
+        self.verticalLayout_12.setContentsMargins(0, 0, 0, 0)
+        self.label_8 = QLabel(self.frame_info_compare)
+        self.label_8.setObjectName(u"label_8")
+
+        self.verticalLayout_12.addWidget(self.label_8)
+
+        self.label_filename = QLabel(self.frame_info_compare)
+        self.label_filename.setObjectName(u"label_filename")
+        self.label_filename.setMargin(0)
+
+        self.verticalLayout_12.addWidget(self.label_filename)
+
+        self.group_compare = QFrame(self.frame_info_compare)
         self.group_compare.setObjectName(u"group_compare")
-        self.group_compare.setStyleSheet(u"QGroupBox {\n"
-"border: 1px solid rgb(92, 92, 92);\n"
-"margin-top: 14px;\n"
-"padding-top:10px;\n"
-"}\n"
-"QGroupBox::title {\n"
-"subcontrol-origin: margin;\n"
-"subcontrol-position: top left;\n"
-"left: 8px;\n"
-"padding:0 5px;\n"
-"margin-top:5px;\n"
-"}")
+        self.group_compare.setFrameShape(QFrame.NoFrame)
+        self.group_compare.setFrameShadow(QFrame.Raised)
         self.verticalLayout_19 = QVBoxLayout(self.group_compare)
         self.verticalLayout_19.setSpacing(6)
         self.verticalLayout_19.setObjectName(u"verticalLayout_19")
-        self.verticalLayout_19.setContentsMargins(6, 6, 9, 6)
-        self.label_8 = QLabel(self.group_compare)
-        self.label_8.setObjectName(u"label_8")
-
-        self.verticalLayout_19.addWidget(self.label_8)
-
+        self.verticalLayout_19.setContentsMargins(12, 6, 6, 6)
         self.frame_label_filename = QFrame(self.group_compare)
         self.frame_label_filename.setObjectName(u"frame_label_filename")
         self.frame_label_filename.setFrameShape(QFrame.NoFrame)
@@ -573,54 +546,8 @@ class Ui_MainWindow(object):
         self.verticalLayout_10 = QVBoxLayout(self.frame_label_filename)
         self.verticalLayout_10.setObjectName(u"verticalLayout_10")
         self.verticalLayout_10.setContentsMargins(12, 0, 0, 0)
-        self.label_filename = QLabel(self.frame_label_filename)
-        self.label_filename.setObjectName(u"label_filename")
-        self.label_filename.setMargin(0)
-
-        self.verticalLayout_10.addWidget(self.label_filename)
-
 
         self.verticalLayout_19.addWidget(self.frame_label_filename)
-
-        self.label_10 = QLabel(self.group_compare)
-        self.label_10.setObjectName(u"label_10")
-
-        self.verticalLayout_19.addWidget(self.label_10)
-
-        self.frame_label_opname = QFrame(self.group_compare)
-        self.frame_label_opname.setObjectName(u"frame_label_opname")
-        self.frame_label_opname.setFrameShape(QFrame.NoFrame)
-        self.frame_label_opname.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_11 = QVBoxLayout(self.frame_label_opname)
-        self.verticalLayout_11.setObjectName(u"verticalLayout_11")
-        self.verticalLayout_11.setContentsMargins(12, 0, 0, 0)
-        self.label_opname = QLabel(self.frame_label_opname)
-        self.label_opname.setObjectName(u"label_opname")
-
-        self.verticalLayout_11.addWidget(self.label_opname)
-
-
-        self.verticalLayout_19.addWidget(self.frame_label_opname)
-
-        self.label_12 = QLabel(self.group_compare)
-        self.label_12.setObjectName(u"label_12")
-
-        self.verticalLayout_19.addWidget(self.label_12)
-
-        self.frame_label_modelname = QFrame(self.group_compare)
-        self.frame_label_modelname.setObjectName(u"frame_label_modelname")
-        self.frame_label_modelname.setFrameShape(QFrame.NoFrame)
-        self.frame_label_modelname.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_12 = QVBoxLayout(self.frame_label_modelname)
-        self.verticalLayout_12.setObjectName(u"verticalLayout_12")
-        self.verticalLayout_12.setContentsMargins(12, 0, 0, 0)
-        self.label_modelname = QLabel(self.frame_label_modelname)
-        self.label_modelname.setObjectName(u"label_modelname")
-
-        self.verticalLayout_12.addWidget(self.label_modelname)
-
-
-        self.verticalLayout_19.addWidget(self.frame_label_modelname)
 
         self.label_9 = QLabel(self.group_compare)
         self.label_9.setObjectName(u"label_9")
@@ -643,72 +570,101 @@ class Ui_MainWindow(object):
         self.verticalLayout_19.addWidget(self.frame_label_shape)
 
 
-        self.verticalLayout_3.addWidget(self.group_compare)
+        self.verticalLayout_12.addWidget(self.group_compare)
 
-        self.group_postprocess = QGroupBox(self.frame_sidebar)
+
+        self.verticalLayout_3.addWidget(self.frame_info_compare)
+
+        self.frame_label_selection = QFrame(self.frame_sidebar)
+        self.frame_label_selection.setObjectName(u"frame_label_selection")
+        self.frame_label_selection.setFrameShape(QFrame.NoFrame)
+        self.frame_label_selection.setFrameShadow(QFrame.Raised)
+        self.layout_label_selection = QVBoxLayout(self.frame_label_selection)
+        self.layout_label_selection.setSpacing(0)
+        self.layout_label_selection.setObjectName(u"layout_label_selection")
+        self.layout_label_selection.setContentsMargins(0, 12, 0, 0)
+        self.label_10 = QLabel(self.frame_label_selection)
+        self.label_10.setObjectName(u"label_10")
+        self.label_10.setFont(font5)
+
+        self.layout_label_selection.addWidget(self.label_10)
+
+        self.line_7 = QFrame(self.frame_label_selection)
+        self.line_7.setObjectName(u"line_7")
+        self.line_7.setFrameShadow(QFrame.Plain)
+        self.line_7.setFrameShape(QFrame.HLine)
+
+        self.layout_label_selection.addWidget(self.line_7)
+
+
+        self.verticalLayout_3.addWidget(self.frame_label_selection)
+
+        self.frame_mask = QFrame(self.frame_sidebar)
+        self.frame_mask.setObjectName(u"frame_mask")
+        self.frame_mask.setFrameShape(QFrame.NoFrame)
+        self.frame_mask.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_4 = QVBoxLayout(self.frame_mask)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 9, 0, 0)
+        self.pushButton_mask = QPushButton(self.frame_mask)
+        self.pushButton_mask.setObjectName(u"pushButton_mask")
+
+        self.verticalLayout_4.addWidget(self.pushButton_mask)
+
+        self.frame_mask_visibility = QFrame(self.frame_mask)
+        self.frame_mask_visibility.setObjectName(u"frame_mask_visibility")
+        self.frame_mask_visibility.setFrameShape(QFrame.NoFrame)
+        self.frame_mask_visibility.setFrameShadow(QFrame.Raised)
+        self.layout_mask_visibility = QVBoxLayout(self.frame_mask_visibility)
+        self.layout_mask_visibility.setObjectName(u"layout_mask_visibility")
+        self.layout_mask_visibility.setContentsMargins(0, 0, 0, 0)
+
+        self.verticalLayout_4.addWidget(self.frame_mask_visibility)
+
+
+        self.verticalLayout_3.addWidget(self.frame_mask)
+
+        self.frame_8 = QFrame(self.frame_sidebar)
+        self.frame_8.setObjectName(u"frame_8")
+        self.frame_8.setFrameShape(QFrame.NoFrame)
+        self.frame_8.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_15 = QHBoxLayout(self.frame_8)
+        self.horizontalLayout_15.setObjectName(u"horizontalLayout_15")
+        self.horizontalLayout_15.setContentsMargins(0, 0, 0, 0)
+
+        self.verticalLayout_3.addWidget(self.frame_8)
+
+        self.frame_label_operations = QFrame(self.frame_sidebar)
+        self.frame_label_operations.setObjectName(u"frame_label_operations")
+        self.frame_label_operations.setFrameShape(QFrame.NoFrame)
+        self.frame_label_operations.setFrameShadow(QFrame.Raised)
+        self.layout_label_operations = QVBoxLayout(self.frame_label_operations)
+        self.layout_label_operations.setSpacing(0)
+        self.layout_label_operations.setObjectName(u"layout_label_operations")
+        self.layout_label_operations.setContentsMargins(0, 12, 0, 0)
+        self.label_11 = QLabel(self.frame_label_operations)
+        self.label_11.setObjectName(u"label_11")
+        self.label_11.setFont(font5)
+
+        self.layout_label_operations.addWidget(self.label_11)
+
+        self.line_3 = QFrame(self.frame_label_operations)
+        self.line_3.setObjectName(u"line_3")
+        self.line_3.setFrameShadow(QFrame.Plain)
+        self.line_3.setFrameShape(QFrame.HLine)
+
+        self.layout_label_operations.addWidget(self.line_3)
+
+
+        self.verticalLayout_3.addWidget(self.frame_label_operations)
+
+        self.group_postprocess = QFrame(self.frame_sidebar)
         self.group_postprocess.setObjectName(u"group_postprocess")
-        self.group_postprocess.setStyleSheet(u"QGroupBox {\n"
-"border: 1px solid rgb(92, 92, 92);\n"
-"margin-top: 14px;\n"
-"padding-top:10px;\n"
-"}\n"
-"QGroupBox::title {\n"
-"subcontrol-origin: margin;\n"
-"subcontrol-position: top left;\n"
-"left: 8px;\n"
-"padding:0 5px;\n"
-"margin-top:5px;\n"
-"}")
+        self.group_postprocess.setFrameShape(QFrame.NoFrame)
+        self.group_postprocess.setFrameShadow(QFrame.Raised)
         self.verticalLayout_20 = QVBoxLayout(self.group_postprocess)
         self.verticalLayout_20.setObjectName(u"verticalLayout_20")
-        self.verticalLayout_20.setContentsMargins(6, 6, 6, 6)
-        self.frame_blur = QFrame(self.group_postprocess)
-        self.frame_blur.setObjectName(u"frame_blur")
-        self.frame_blur.setFrameShape(QFrame.NoFrame)
-        self.frame_blur.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_71 = QVBoxLayout(self.frame_blur)
-        self.verticalLayout_71.setSpacing(6)
-        self.verticalLayout_71.setObjectName(u"verticalLayout_71")
-        self.verticalLayout_71.setContentsMargins(0, 0, 0, 9)
-        self.label_6 = QLabel(self.frame_blur)
-        self.label_6.setObjectName(u"label_6")
-
-        self.verticalLayout_71.addWidget(self.label_6)
-
-        self.frame_7 = QFrame(self.frame_blur)
-        self.frame_7.setObjectName(u"frame_7")
-        self.frame_7.setFrameShape(QFrame.NoFrame)
-        self.frame_7.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_6 = QHBoxLayout(self.frame_7)
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.horizontalLayout_6.setContentsMargins(12, 0, 0, 0)
-        self.label_blur_amt = QLabel(self.frame_7)
-        self.label_blur_amt.setObjectName(u"label_blur_amt")
-        self.label_blur_amt.setMinimumSize(QSize(30, 0))
-
-        self.horizontalLayout_6.addWidget(self.label_blur_amt)
-
-        self.horizontalSlider_blur = QSlider(self.frame_7)
-        self.horizontalSlider_blur.setObjectName(u"horizontalSlider_blur")
-        self.horizontalSlider_blur.setOrientation(Qt.Horizontal)
-        self.horizontalSlider_blur.setTickPosition(QSlider.TicksBothSides)
-
-        self.horizontalLayout_6.addWidget(self.horizontalSlider_blur)
-
-
-        self.verticalLayout_71.addWidget(self.frame_7)
-
-        self.line_2 = QFrame(self.frame_blur)
-        self.line_2.setObjectName(u"line_2")
-        self.line_2.setStyleSheet(u"color: rgb(92, 92, 92);")
-        self.line_2.setFrameShadow(QFrame.Plain)
-        self.line_2.setFrameShape(QFrame.HLine)
-
-        self.verticalLayout_71.addWidget(self.line_2)
-
-
-        self.verticalLayout_20.addWidget(self.frame_blur)
-
+        self.verticalLayout_20.setContentsMargins(0, 0, 0, 0)
         self.frame_scale = QFrame(self.group_postprocess)
         self.frame_scale.setObjectName(u"frame_scale")
         self.frame_scale.setFrameShape(QFrame.NoFrame)
@@ -785,27 +741,83 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_9.addWidget(self.frame_5)
 
-        self.line_6 = QFrame(self.frame_blend)
+        self.pushButton_postprocess_apply = QPushButton(self.frame_blend)
+        self.pushButton_postprocess_apply.setObjectName(u"pushButton_postprocess_apply")
+
+        self.verticalLayout_9.addWidget(self.pushButton_postprocess_apply)
+
+
+        self.verticalLayout_20.addWidget(self.frame_blend)
+
+
+        self.verticalLayout_3.addWidget(self.group_postprocess)
+
+        self.line_6 = QFrame(self.frame_sidebar)
         self.line_6.setObjectName(u"line_6")
         self.line_6.setStyleSheet(u"color: rgb(92, 92, 92);")
         self.line_6.setFrameShadow(QFrame.Plain)
         self.line_6.setFrameShape(QFrame.HLine)
 
-        self.verticalLayout_9.addWidget(self.line_6)
+        self.verticalLayout_3.addWidget(self.line_6)
+
+        self.frame_11 = QFrame(self.frame_sidebar)
+        self.frame_11.setObjectName(u"frame_11")
+        self.frame_11.setFrameShape(QFrame.NoFrame)
+        self.frame_11.setFrameShadow(QFrame.Plain)
+        self.verticalLayout_17 = QVBoxLayout(self.frame_11)
+        self.verticalLayout_17.setObjectName(u"verticalLayout_17")
+        self.verticalLayout_17.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_run = QPushButton(self.frame_11)
+        self.pushButton_run.setObjectName(u"pushButton_run")
+
+        self.verticalLayout_17.addWidget(self.pushButton_run)
+
+        self.pushButton_denoise = QPushButton(self.frame_11)
+        self.pushButton_denoise.setObjectName(u"pushButton_denoise")
+
+        self.verticalLayout_17.addWidget(self.pushButton_denoise)
+
+        self.pushButton_upscale = QPushButton(self.frame_11)
+        self.pushButton_upscale.setObjectName(u"pushButton_upscale")
+
+        self.verticalLayout_17.addWidget(self.pushButton_upscale)
 
 
-        self.verticalLayout_20.addWidget(self.frame_blend)
+        self.verticalLayout_3.addWidget(self.frame_11)
 
-        self.pushButton_postprocess_apply = QPushButton(self.group_postprocess)
-        self.pushButton_postprocess_apply.setObjectName(u"pushButton_postprocess_apply")
+        self.line_2 = QFrame(self.frame_sidebar)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setFrameShape(QFrame.HLine)
+        self.line_2.setFrameShadow(QFrame.Sunken)
 
-        self.verticalLayout_20.addWidget(self.pushButton_postprocess_apply)
+        self.verticalLayout_3.addWidget(self.line_2)
+
+        self.frame_7 = QFrame(self.frame_sidebar)
+        self.frame_7.setObjectName(u"frame_7")
+        self.frame_7.setFrameShape(QFrame.NoFrame)
+        self.frame_7.setFrameShadow(QFrame.Plain)
+        self.verticalLayout_16 = QVBoxLayout(self.frame_7)
+        self.verticalLayout_16.setObjectName(u"verticalLayout_16")
+        self.verticalLayout_16.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_saveFile = QPushButton(self.frame_7)
+        self.pushButton_saveFile.setObjectName(u"pushButton_saveFile")
+
+        self.verticalLayout_16.addWidget(self.pushButton_saveFile)
 
 
-        self.verticalLayout_3.addWidget(self.group_postprocess)
+        self.verticalLayout_3.addWidget(self.frame_7)
+
+        self.pushButton_delete = QPushButton(self.frame_sidebar)
+        self.pushButton_delete.setObjectName(u"pushButton_delete")
+
+        self.verticalLayout_3.addWidget(self.pushButton_delete)
+
+        self.verticalSpacer_sidebar = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout_3.addItem(self.verticalSpacer_sidebar)
 
 
-        self.horizontalLayout.addWidget(self.frame_sidebar, 0, Qt.AlignTop)
+        self.horizontalLayout.addWidget(self.frame_sidebar)
 
 
         self.verticalLayout_2.addWidget(self.frame1)
@@ -836,10 +848,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
         self.label = QLabel(self.frame_10)
         self.label.setObjectName(u"label")
-        font5 = QFont()
-        font5.setPointSize(12)
-        font5.setBold(True)
-        self.label.setFont(font5)
+        font6 = QFont()
+        font6.setPointSize(12)
+        font6.setBold(True)
+        self.label.setFont(font6)
 
         self.horizontalLayout_12.addWidget(self.label)
 
@@ -960,36 +972,31 @@ class Ui_MainWindow(object):
         self.canvas_main.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"Open", None))
         self.pushButton_clear.setText(QCoreApplication.translate("MainWindow", u"Clear", None))
-        self.pushButton_run.setText(QCoreApplication.translate("MainWindow", u"Sharpen", None))
-        self.pushButton_denoise.setText(QCoreApplication.translate("MainWindow", u"Denoise", None))
-        self.pushButton_upscale.setText(QCoreApplication.translate("MainWindow", u"Upscale", None))
         self.pushButton_modelManager.setText(QCoreApplication.translate("MainWindow", u"Model Manager", None))
-        self.group_base.setTitle(QCoreApplication.translate("MainWindow", u"Base File", None))
-        self.label_13.setText(QCoreApplication.translate("MainWindow", u"Filename:", None))
+        self.label_7.setText(QCoreApplication.translate("MainWindow", u"IMAGE INFO", None))
+        self.label_13.setText(QCoreApplication.translate("MainWindow", u"Input file:", None))
         self.label_filename_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
         self.label_14.setText(QCoreApplication.translate("MainWindow", u"Shape:", None))
         self.label_shape_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p/></body></html>", None))
         self.label_4.setText(QCoreApplication.translate("MainWindow", u"Subjects:", None))
         self.label_subjects.setText("")
-        self.pushButton_mask.setText(QCoreApplication.translate("MainWindow", u"Auto Mask", None))
-        self.checkBox_render_masks.setText(QCoreApplication.translate("MainWindow", u"Render Masks", None))
-        self.group_compare.setTitle(QCoreApplication.translate("MainWindow", u"Compare File", None))
-        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Filename:", None))
+        self.label_8.setText(QCoreApplication.translate("MainWindow", u"Enhanced File:", None))
         self.label_filename.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
-        self.label_10.setText(QCoreApplication.translate("MainWindow", u"Operation:", None))
-        self.label_opname.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
-        self.label_12.setText(QCoreApplication.translate("MainWindow", u"Model:", None))
-        self.label_modelname.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"Shape:", None))
         self.label_shape.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p/></body></html>", None))
-        self.group_postprocess.setTitle(QCoreApplication.translate("MainWindow", u"Post Processing", None))
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Blur:", None))
-        self.label_blur_amt.setText(QCoreApplication.translate("MainWindow", u"0", None))
+        self.label_10.setText(QCoreApplication.translate("MainWindow", u"SELECTION", None))
+        self.pushButton_mask.setText(QCoreApplication.translate("MainWindow", u"Auto Mask", None))
+        self.label_11.setText(QCoreApplication.translate("MainWindow", u"OPERATIONS", None))
         self.label_5.setText(QCoreApplication.translate("MainWindow", u"Downscale:", None))
         self.label_scale.setText("")
         self.label_blend.setText(QCoreApplication.translate("MainWindow", u"Blend Original Image:", None))
         self.label_blend_amt.setText(QCoreApplication.translate("MainWindow", u"0%", None))
         self.pushButton_postprocess_apply.setText(QCoreApplication.translate("MainWindow", u"Apply", None))
+        self.pushButton_run.setText(QCoreApplication.translate("MainWindow", u"Sharpen", None))
+        self.pushButton_denoise.setText(QCoreApplication.translate("MainWindow", u"Denoise", None))
+        self.pushButton_upscale.setText(QCoreApplication.translate("MainWindow", u"Upscale", None))
+        self.pushButton_saveFile.setText(QCoreApplication.translate("MainWindow", u"Save File", None))
+        self.pushButton_delete.setText(QCoreApplication.translate("MainWindow", u"Delete File", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"Files", None))
         self.label_files_count.setText("")
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"text", None))

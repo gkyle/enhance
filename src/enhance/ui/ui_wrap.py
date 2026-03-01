@@ -1,7 +1,7 @@
 import os
 import re
 import shutil
-from typing import Optional
+from typing import Optional, List
 from PySide6.QtGui import QGuiApplication, QFontMetrics
 from PySide6.QtCore import QThreadPool, QTimer, QPoint, Qt
 from PySide6.QtWidgets import (
@@ -11,20 +11,25 @@ from PySide6.QtWidgets import (
     QDialog,
     QMenu,
     QMessageBox,
+    QVBoxLayout,
 )
 from functools import partial
+import logging
 
-from enhance.app import App, Operation
+logger = logging.getLogger(__name__)
+
+from enhance.app import App
 from enhance.lib.file import (
-    BlendOperation,
-    DownscaleOperation,
     File,
     InputFile,
     Label,
     OutputFile,
+    Operation,
+    AppliedOperation,
 )
 from enhance.ui.canvasLabel import CanvasLabel
 from enhance.ui.filestrip import FileButton, FileStrip
+from enhance.ui.operation_widget import OperationWidget
 from enhance.ui.progress import ProgressBarUpdater
 from enhance.ui.selectionManager import SAVE_STATE_CHANGED, SelectionManager
 from enhance.ui.signals import AsyncWorker, WorkerHistory, getSignals
@@ -33,6 +38,7 @@ from enhance.ui.ui_dialog_model_wrap import DialogModel
 from enhance.ui.ui_dialog_taskqueue_wrap import DialogTaskQueue
 from enhance.ui.ui_interface import Ui_MainWindow
 from enhance.ui.common import RenderMode, ZoomLevel
+from enhance.ui.mask_visibility_list import MaskVisibilityList
 
 
 class MainWindow(QMainWindow):
@@ -94,9 +100,30 @@ class Ui_AppWindow(Ui_MainWindow):
             self.canvas_main, CanvasLabel(self.selectionManager)
         )
 
+        # Track operation widgets for the operations list
+        self.operationWidgets: List[OperationWidget] = []
+        self.currentCompareFile: OutputFile = None
+
+        # Set up the operations container within group_postprocess
+        self._setupOperationsContainer()
+
         # Hide optional panels
+        self.group_base.hide()
+        self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
+        self.pushButton_saveFile.hide()
+        self.pushButton_delete.hide()
+
+        # Make filename labels clickable to toggle detail frames
+        self.label_filename_base.setCursor(Qt.PointingHandCursor)
+        self.label_filename_base.mousePressEvent = (
+            lambda _: self._toggleFrameVisibility(self.group_base)
+        )
+        self.label_filename.setCursor(Qt.PointingHandCursor)
+        self.label_filename.mousePressEvent = lambda _: self._toggleFrameVisibility(
+            self.group_compare
+        )
 
         # Bind events
         self.pushButton_cancelOp.clicked.connect(self.cancelOp)
@@ -109,6 +136,12 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_modelManager.clicked.connect(lambda: self.showModelManager())
         self.pushButton_zoom.clicked.connect(self.showZoomMenu)
         self.pushButton_taskQueue.clicked.connect(self.showTaskQueue)
+        self.pushButton_saveFile.clicked.connect(
+            lambda: self.saveFile(self.currentCompareFile, None)
+        )
+        self.pushButton_delete.clicked.connect(
+            lambda: self.removeFile(self.currentCompareFile, None)
+        )
         self.pushButton_single.clicked.connect(
             lambda: self.canvas_main.setRenderMode(RenderMode.Single)
         )
@@ -118,18 +151,22 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_quad.clicked.connect(
             lambda: self.canvas_main.setRenderMode(RenderMode.Grid)
         )
-        self.checkBox_render_masks.stateChanged.connect(
-            lambda state: self.canvas_main.setShowMasks(state != 0)
-        )
 
-        self.horizontalSlider_blend.valueChanged.connect(self.onChangeBlendAmount)
-        self.pushButton_postprocess_apply.clicked.connect(self.applyPostProcess)
+        self.maskVisibilityList = MaskVisibilityList()
+        self.frame_mask_visibility.layout().addWidget(self.maskVisibilityList)
+        self.maskVisibilityList.visibilityChanged.connect(
+            lambda indices: self.canvas_main.setVisibleMasks(indices)
+        )
 
         self.signals.incrementProgress.connect(self.incrementProgressBar)
         self.signals.removeFile.connect(self.removeFile)
         self.signals.saveFile.connect(self.saveFile)
         self.signals.changeZoom.connect(self.changeZoom)
         self.signals.selectCompareFile.connect(self.renderPostProcess)
+        self.signals.createOutputFile.connect(self.createOutputFile)
+        self.signals.updateOperationWidgetMasks.connect(
+            self._updateOperationWidgetMasks
+        )
 
         self.fileStrip = FileStrip(
             self.frame_inputFile,
@@ -155,11 +192,23 @@ class Ui_AppWindow(Ui_MainWindow):
 
         self.updateGPUStats()
 
+    def _toggleFrameVisibility(self, frame):
+        frame.setVisible(not frame.isVisible())
+
     def clear(self):
         self.app.setBaseFile(None)
         self.app.clearFileList()
         self.signals.drawFileList.emit(None)
         self.selectionManager.clear()
+        self._clearOperationWidgets()
+        self.currentCompareFile = None
+        self.maskVisibilityList.set_masks([])
+        self.group_base.hide()
+        self.frame_info_compare.hide()
+        self.group_compare.hide()
+        self.group_postprocess.hide()
+        self.pushButton_saveFile.hide()
+        self.pushButton_delete.hide()
 
     def showOpenDialog(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -169,6 +218,15 @@ class Ui_AppWindow(Ui_MainWindow):
             file = InputFile(path)
             self.app.setBaseFile(path)
             self.app.clearFileList()
+            self._clearOperationWidgets()
+            self.currentCompareFile = None
+            self.maskVisibilityList.set_masks([])
+            self.group_base.hide()
+            self.frame_info_compare.hide()
+            self.group_compare.hide()
+            self.group_postprocess.hide()
+            self.pushButton_saveFile.hide()
+            self.pushButton_delete.hide()
             self.signals.selectBaseFile.emit(file, True)
             self.signals.drawFileList.emit(file)
             self.renderBaseFile()
@@ -178,11 +236,15 @@ class Ui_AppWindow(Ui_MainWindow):
         dialog = DialogModel(self.app, [operation])
         result = dialog.exec()
         if result == QDialog.Accepted:
+            # Hide masks before running operation
+            self.maskVisibilityList.set_all_visible(False)
+
             selectedItems = dialog.ui.listWidget.selectedItems()
             tileSize = int(dialog.ui.tileSize_combobox.currentText())
             tilePadding = int(dialog.ui.tilePadding_combobox.currentText())
             gpuId = dialog.ui.device_combobox.currentData()
             maintainScale = dialog.ui.checkBox_maintainScale.isChecked()
+            selectedMasks = dialog.ui.get_selected_masks()
 
             desc = "Sharpen"
             if operation == Operation.Upscale:
@@ -191,25 +253,43 @@ class Ui_AppWindow(Ui_MainWindow):
                 desc = "Denoise"
 
             def f(selectedModel):
-                file = self.selectionManager.getBaseFile()
-                if file is not None:
-                    progressUpdater = ProgressBarUpdater(
-                        self.progressBar, self.label_progressBar, total=1, desc=desc
-                    )
-                    result = self.app.runModel(
-                        file,
-                        selectedModel,
-                        progressUpdater.tick,
-                        tileSize,
-                        tilePadding,
-                        maintainScale,
-                        gpuId,
-                    )
-                    if result is None:
+                baseFile = self.selectionManager.getBaseFile()
+                compareFile = self.selectionManager.getCompareFile(0)
+
+                if baseFile is None:
+                    return
+
+                progressUpdater = ProgressBarUpdater(
+                    self.progressBar, self.label_progressBar, total=1, desc=desc
+                )
+
+                # If no OutputFile is selected, create one from the base file first.
+                # This ensures the file exists in the UI before the operation starts,
+                # allowing additional operations to be chained onto it.
+                if compareFile is None or not isinstance(compareFile, OutputFile):
+                    compareFile = self.app.createOutputFile(baseFile)
+                    if compareFile is None:
                         return
-                    self.signals.appendFile.emit(result)
-                    self.signals.selectCompareFile.emit(result)
-                    self.signals.taskCompleted.emit()
+                    self.app.rawFiles.append(compareFile)
+                    self.signals.appendFile.emit(compareFile)
+                    self.signals.selectCompareFile.emit(compareFile)
+
+                result = self.app.runModelOnExisting(
+                    compareFile,
+                    selectedModel,
+                    progressUpdater.tick,
+                    tileSize,
+                    tilePadding,
+                    maintainScale,
+                    gpuId,
+                    operation,
+                    masks=selectedMasks if selectedMasks else None,
+                )
+                if result is None:
+                    return
+                # Update the file button to reflect changes
+                self.signals.selectCompareFile.emit(result)
+                self.signals.taskCompleted.emit()
 
             for selectedItem in selectedItems:
                 selectedModel = selectedItem.text()
@@ -248,7 +328,7 @@ class Ui_AppWindow(Ui_MainWindow):
                 )
                 self.app.runAutoMask(file, progressUpdater.tick)
                 self.signals.showFiles.emit(False)
-                self.checkBox_render_masks.setChecked(True)
+                self.signals.updateOperationWidgetMasks.emit()
                 self.signals.taskCompleted.emit()
 
         worker = AsyncWorker(partial(f), label=desc)
@@ -306,6 +386,29 @@ class Ui_AppWindow(Ui_MainWindow):
         self.app.removeFile(file)
         self.selectionManager.removeFile(file)
         self.fileStrip.removeButton(file)
+
+        # Update sidebar if we removed the current compare file
+        if file == self.currentCompareFile:
+            self.currentCompareFile = None
+            nextCompare = self.selectionManager.getCompareFile(0)
+            self.renderPostProcess(nextCompare)
+            # Switch to single view if no compare file is selected
+            if nextCompare is None:
+                self.canvas_main.setRenderMode(RenderMode.Single)
+
+    def createOutputFile(self):
+        """Create a new OutputFile from the current base file"""
+        baseFile = self.selectionManager.getBaseFile()
+        if baseFile is None:
+            return
+
+        # Create a new OutputFile with the base file's image as starting point
+        outputFile = self.app.createOutputFile(baseFile)
+        if outputFile is not None:
+            self.app.rawFiles.append(outputFile)
+            self.signals.appendFile.emit(outputFile)
+            self.selectionManager.selectCompare(outputFile)
+            self.signals.selectCompareFile.emit(outputFile)
 
     def saveFile(self, file: OutputFile, button: FileButton):
         if file is not None:
@@ -390,84 +493,231 @@ class Ui_AppWindow(Ui_MainWindow):
                     maybeElide=True,
                 )
 
+    def _setupOperationsContainer(self):
+        """Set up the container for dynamically-created operation widgets."""
+        # Clear the existing postprocess group contents and replace with a vertical layout
+        # Hide the old static controls
+        self.frame_scale.hide()
+        self.frame_blend.hide()
+        self.pushButton_postprocess_apply.hide()
+
+        # Create a container frame for operation widgets
+        self.operationsContainer = QWidget(self.group_postprocess)
+        self.operationsContainerLayout = QVBoxLayout(self.operationsContainer)
+        self.operationsContainerLayout.setContentsMargins(0, 0, 0, 0)
+        self.operationsContainerLayout.setSpacing(4)
+
+        # Add the container to the postprocess group layout
+        self.verticalLayout_20.insertWidget(0, self.operationsContainer)
+
+        # Set up debounce timer for strength changes
+        self.strengthDebounceTimer = QTimer()
+        self.strengthDebounceTimer.setSingleShot(True)
+        self.strengthDebounceTimer.setInterval(500)
+        self.strengthDebounceTimer.timeout.connect(self._applyStrengthChanges)
+
+    def _clearOperationWidgets(self):
+        """Clear all operation widgets from the container."""
+        for widget in self.operationWidgets:
+            widget.deleteLater()
+        self.operationWidgets.clear()
+
+    def _createOperationWidgets(self, compareFile: OutputFile):
+        """Create operation widgets for each operation in the file."""
+        self._clearOperationWidgets()
+
+        # Get available masks from the base file
+        availableMasks = []
+        if self.app.baseFile and hasattr(self.app.baseFile, "masks"):
+            availableMasks = self.app.baseFile.masks
+
+        for op in compareFile.operations:
+            widget = OperationWidget(op, availableMasks, self.operationsContainer)
+            widget.strengthChanged.connect(self._onOperationStrengthChanged)
+            widget.masksChanged.connect(self._onOperationMasksChanged)
+            self.operationsContainerLayout.addWidget(widget)
+            self.operationWidgets.append(widget)
+
+    def _updateOperationWidgetMasks(self):
+        """Update available masks on all operation widgets after mask generation."""
+        if not self.app.baseFile or not hasattr(self.app.baseFile, "masks"):
+            return
+
+        availableMasks = self.app.baseFile.masks
+        for widget in self.operationWidgets:
+            widget.update_available_masks(availableMasks)
+
+        # Also update the visibility list
+        self._updateMaskVisibilityList()
+
+    def _updateMaskVisibilityList(self):
+        if not self.app.baseFile or not hasattr(self.app.baseFile, "masks"):
+            self.maskVisibilityList.set_masks([])
+            return
+
+        self.maskVisibilityList.set_masks(self.app.baseFile.masks)
+        # Show all masks by default when first generated
+        self.maskVisibilityList.set_all_visible(True)
+
+    def _onOperationStrengthChanged(self, operation: AppliedOperation, strength: float):
+        """Handle strength change from an operation widget - debounced."""
+        # Restart the debounce timer on each change
+        self.strengthDebounceTimer.start()
+
+    def _onOperationMasksChanged(
+        self, operation: AppliedOperation, masks: list
+    ):
+        """When masks change, we need to re-run the operation from scratch since
+        the mask affects which pixels are processed by the model.
+        """
+        # Update the operation's masks
+        operation.masks = masks
+
+        # Re-run this operation and all following operations
+        self._rerunOperationChain(operation)
+
+    def _applyStrengthChanges(self):
+        """Apply strength changes after debounce period."""
+        if self.currentCompareFile is None:
+            return
+
+        compareFile = self.currentCompareFile
+        if not isinstance(compareFile, OutputFile):
+            return
+
+        # Find the earliest operation whose strength changed
+        earliestChangedIndex = None
+        for i, widget in enumerate(self.operationWidgets):
+            op = widget.operation
+            if op.supportsStrength():
+                newStrength = widget.get_strength()
+                if op.strength != newStrength:
+                    op.strength = newStrength
+                    if earliestChangedIndex is None:
+                        earliestChangedIndex = i
+
+        if earliestChangedIndex is None:
+            return
+
+        # If there are subsequent operations, re-run them through the model
+        # since their input has changed
+        nextIndex = earliestChangedIndex + 1
+        if nextIndex < len(compareFile.operations):
+            self._rerunOperationChain(compareFile.operations[nextIndex])
+        else:
+            # Only the last operation changed - just re-blend, no model re-run needed
+            def applyStrength():
+                compareFile.reapplyStrength(compareFile.operations[earliestChangedIndex])
+
+                # Update UI
+                self.signals.selectCompareFile.emit(compareFile)
+                self.signals.updateIndicator.emit(compareFile, SAVE_STATE_CHANGED)
+                self.signals.taskCompleted.emit()
+
+            worker = AsyncWorker(
+                applyStrength,
+                label="Applying strength",
+                device=self.app.gpuInfo.getPreferredDevice(),
+            )
+            self.op_queue.start(worker)
+
+    def _rerunOperationChain(self, startOperation: AppliedOperation):
+        """Re-run operations starting from the given operation."""
+        if self.currentCompareFile is None or not isinstance(
+            self.currentCompareFile, OutputFile
+        ):
+            return
+
+        compareFile = self.currentCompareFile
+        opIndex = compareFile.getOperationIndex(startOperation)
+        if opIndex < 0:
+            logger.warning("Operation not found in file")
+            return
+
+        # Prepare: remove ops from startIndex onward and reset file state
+        opsToRerun = self.app.prepareRerunChain(compareFile, opIndex)
+
+        if not opsToRerun:
+            return
+
+        # Queue each operation as a separate job
+        for i, op in enumerate(opsToRerun):
+            isLast = (i == len(opsToRerun) - 1)
+            desc = f"{op.operation_type.value.capitalize()} (re-run)"
+
+            def f(op=op, isLast=isLast, desc=desc):
+                def rerunJob():
+                    progressUpdater = ProgressBarUpdater(
+                        self.progressBar,
+                        self.label_progressBar,
+                        total=1,
+                        desc=desc,
+                    )
+
+                    success = self.app.rerunSingleOperation(
+                        compareFile,
+                        op,
+                        progressCallback=progressUpdater.tick,
+                    )
+
+                    if not success:
+                        logger.error(f"Failed to re-run operation: {op.operation_type}")
+                        return
+
+                    if isLast:
+                        self.signals.selectCompareFile.emit(compareFile)
+                    self.signals.taskCompleted.emit()
+                return rerunJob
+
+            worker = AsyncWorker(
+                f(),
+                label=f"{desc}: {op.model}",
+                device=self.app.gpuInfo.getPreferredDevice(),
+            )
+            self.op_queue.start(worker)
+
     def renderPostProcess(self, compareFile: OutputFile):
+        self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
-        self.group_postprocess.hide()
+        self.pushButton_saveFile.hide()
+        self.pushButton_delete.hide()
+
         if compareFile is None:
             compareFile = self.selectionManager.getCompareFile(0)
-        if compareFile is not None:
-            if (
-                type(compareFile) == OutputFile
-                and compareFile.operation == Operation.Sharpen
-            ):
+
+        self.currentCompareFile = compareFile
+
+        if compareFile is not None and isinstance(compareFile, OutputFile):
+            # Always show save/delete buttons for OutputFiles
+            self.pushButton_saveFile.show()
+            self.pushButton_delete.show()
+
+            if compareFile.operations:
+                # Update the compare file info panel
+                firstOp = compareFile.getFirstOperation()
                 self.drawLabelText(
                     self.label_filename, compareFile.basename, maybeElide=True
-                )
-                self.drawLabelText(self.label_opname, compareFile.operation.value)
-                self.drawLabelText(
-                    self.label_modelname, compareFile.model, maybeElide=True
                 )
 
                 compareImg = compareFile.loadUnchanged()
                 self.drawLabelShape(self.label_shape, compareImg)
 
-                self.horizontalSlider_blend.setValue(0)
+                # Create operation widgets for all operations
+                self._createOperationWidgets(compareFile)
 
-                hasScaleOp = False
-                for postop in compareFile.postops:
-                    if isinstance(postop, DownscaleOperation):
-                        hasScaleOp = True
-                        scale = str(int(1 / postop.scale)) + "X"
-                        self.drawLabelText(self.label_scale, scale)
-                    if isinstance(postop, BlendOperation):
-                        factor = postop.factor
-                        self.horizontalSlider_blend.setValue(factor * 100)
-
-                self.frame_blur.hide()
-                if not hasScaleOp:
-                    self.frame_scale.hide()
-                else:
-                    self.frame_scale.show()
-                self.frame_blend.show()
-
-                self.group_compare.show()
+                self.frame_info_compare.show()
                 self.group_postprocess.show()
-
-    def onChangeBlendAmount(self, value):
-        self.label_blend_amt.setText(str(value) + "%")
-
-    # TODO: Move implementation to op
-    def applyPostProcess(self):
-        compareFile = self.selectionManager.getCompareFile(0)
-        if compareFile is not None:
-            if (
-                type(compareFile) == OutputFile
-                and compareFile.operation == Operation.Sharpen
-            ):
-                blendFactor = self.horizontalSlider_blend.value() / 100
-
-                hasBlendOp = False
-                for postop in compareFile.postops:
-                    if isinstance(postop, BlendOperation):
-                        postop.factor = blendFactor
-                        hasBlendOp = True
-                if not hasBlendOp:
-                    compareFile.postops.append(BlendOperation(blendFactor))
-
-                compareFile.applyPostProcessAndSave()
-
-                self.fileStrip.getButton(compareFile).updateTextLabel()
-                self.signals.showFiles.emit(False)
-                self.signals.updateIndicator.emit(compareFile, SAVE_STATE_CHANGED)
 
     def drawLabelText(self, label, text, maybeElide=False):
         if maybeElide:
             metrics = QFontMetrics(label.font())
             clippedText = metrics.elidedText(text, Qt.TextElideMode.ElideMiddle, 200)
             label.setText(clippedText)
+            label.setToolTip(text)
         else:
             label.setText(text)
+            label.setToolTip("")
         label.setStyleSheet("color: #aaa;")
 
     def drawLabelShape(self, label, img):

@@ -40,6 +40,7 @@ class FileStrip:
         self.app = app
         self.maxVisibleButtons = maxVisibleButtons
         self.selectionManager = selectionManager
+        self.addButton: QPushButton = None  # The "+" button for creating new output files
 
         self.scroll = self.frameContainer.findChildren(QScrollArea)[0]
         self.scroll.horizontalScrollBar().valueChanged.connect(
@@ -72,11 +73,30 @@ class FileStrip:
         priority = 10 if doPriority else 0
         emitLater(self.signals.addFileButton.emit, frame, button, doFocus, priority=priority)
 
+    def makeAddButton(self):
+        """Create the '+' button for adding new output files"""
+        if self.addButton is not None:
+            return self.addButton
+        
+        self.addButton = QPushButton("+")
+        self.addButton.setObjectName("addOutputFileButton")
+        self.addButton.setFixedSize(QSize(FILE_BUTTON_SIZE, FILE_BUTTON_SIZE))
+        self.addButton.setStyleSheet(
+            "QPushButton { font-size: 48px; font-weight: bold; padding-bottom: 8px; }"
+            " QToolTip { font-size: 12px; font-weight: normal; }"
+        )
+        self.addButton.setToolTip("Create new output file from current base")
+        self.addButton.clicked.connect(lambda: self.signals.createOutputFile.emit())
+        return self.addButton
+
     def cleanFrame(self, frame):
         for child in frame.findChildren(QLabel):
             child.setParent(None)
             child.deleteLater()
         for child in frame.findChildren(QPushButton):
+            # Preserve the add button; it will be repositioned by ensureAddButtonAtEnd
+            if child == self.addButton:
+                continue
             child.setParent(None)
             child.deleteLater()
         for child in frame.findChildren(QFrame):
@@ -87,6 +107,22 @@ class FileStrip:
         fileList = self.app.getFileList()
         self.fileCountLabel.setText(f"({len(fileList)})")
         self.makeFileButton(self.frameFileList, file, True, True)
+        # Re-add the "+" button at the end
+        self.ensureAddButtonAtEnd()
+
+    def ensureAddButtonAtEnd(self):
+        """Ensure the '+' button is the last item inside the file list."""
+        if self.app.getBaseFile() is None:
+            if self.addButton is not None:
+                self.addButton.setVisible(False)
+            return
+        addBtn = self.makeAddButton()
+        layout = self.frameFileList.layout()
+        # Remove from current position if already in the layout
+        layout.removeWidget(addBtn)
+        # Re-add at the end
+        layout.addWidget(addBtn, 0, Qt.AlignTop)
+        addBtn.setVisible(True)
 
     def drawFileList(self, focusOnFile: File = None):
         self.cleanFrame(self.frameBaseFile)
@@ -110,6 +146,9 @@ class FileStrip:
                 QApplication.processEvents()
             self.makeFileButton(self.frameFileList, file, doFocus, doPriority)
 
+        # Add the "+" button at the end
+        self.ensureAddButtonAtEnd()
+
         if self.maxVisibleButtons > 0:
             self.fitMaxSize()
 
@@ -125,11 +164,21 @@ class FileStrip:
             self.scroll.ensureWidgetVisible(self.buttons[file])
 
     def addFileButton(self, frame: QFrame, button: QPushButton, forceFocus=False):
-        frame.layout().addWidget(button, 0, Qt.AlignTop)
+        layout = frame.layout()
+
+        # Insert before the "+" button if it exists in this frame
+        if frame == self.frameFileList and self.addButton is not None and self.addButton.parent() == frame:
+            idx = layout.indexOf(self.addButton)
+            if idx >= 0:
+                layout.insertWidget(idx, button, 0, Qt.AlignTop)
+            else:
+                layout.addWidget(button, 0, Qt.AlignTop)
+        else:
+            layout.addWidget(button, 0, Qt.AlignTop)
 
         # force frame relayout to adjust to content
-        frame.layout().invalidate()
-        frame.layout().activate()
+        layout.invalidate()
+        layout.activate()
         frame.updateGeometry()
 
     def updateThumbnails(self, frame, _=None):
