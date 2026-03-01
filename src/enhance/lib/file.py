@@ -103,9 +103,9 @@ class Operation(Enum):
 
 
 class AppliedOperation:
-    """Represents an operation applied to an OutputFile"""
+    """Represents a model operation (sharpen/denoise/upscale) applied to an OutputFile"""
 
-    DEFAULT_STRENGTH = 0.8  # 80% strength by default for model operations
+    DEFAULT_STRENGTH = 0.8  # 80% strength by default
 
     def __init__(
         self,
@@ -116,14 +116,12 @@ class AppliedOperation:
         scale: float = None,
         masks: List["Mask"] = None,
     ):
-        self.operation_type = operation_type  # For model operations
-        self.model = model  # For model operations (display name)
-        self.modelPath = (
-            modelPath  # For model operations (original path for re-running)
-        )
-        # Scale factor for model operations (e.g., 0.5 means downscale 2X to maintain original dimensions)
+        self.operation_type = operation_type
+        self.model = model  # Display name
+        self.modelPath = modelPath  # Original path for re-running
+        # Scale factor (e.g., 0.5 means downscale 2X to maintain original dimensions)
         self.scale = scale
-        # Strength for model operations (0.0-1.0, where 1.0 = full effect)
+        # Strength (0.0-1.0, where 1.0 = full effect)
         if strength is None:
             if operation_type in (Operation.Sharpen, Operation.Denoise):
                 self.strength = self.DEFAULT_STRENGTH
@@ -185,7 +183,7 @@ class OutputFile(File):
         self.baseFile = baseFile
         self.origPath = path
 
-        # List of all operations (both model and post-process)
+        # List of model operations applied to this file
         self.operations: List[AppliedOperation] = []
 
     def getFirstOperation(self) -> AppliedOperation:
