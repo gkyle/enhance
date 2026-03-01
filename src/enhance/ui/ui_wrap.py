@@ -112,6 +112,8 @@ class Ui_AppWindow(Ui_MainWindow):
         self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
+        self.pushButton_saveFile.hide()
+        self.pushButton_delete.hide()
 
         # Make filename labels clickable to toggle detail frames
         self.label_filename_base.setCursor(Qt.PointingHandCursor)
@@ -134,6 +136,12 @@ class Ui_AppWindow(Ui_MainWindow):
         self.pushButton_modelManager.clicked.connect(lambda: self.showModelManager())
         self.pushButton_zoom.clicked.connect(self.showZoomMenu)
         self.pushButton_taskQueue.clicked.connect(self.showTaskQueue)
+        self.pushButton_saveFile.clicked.connect(
+            lambda: self.saveFile(self.currentCompareFile, None)
+        )
+        self.pushButton_delete.clicked.connect(
+            lambda: self.removeFile(self.currentCompareFile, None)
+        )
         self.pushButton_single.clicked.connect(
             lambda: self.canvas_main.setRenderMode(RenderMode.Single)
         )
@@ -199,6 +207,8 @@ class Ui_AppWindow(Ui_MainWindow):
         self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
+        self.pushButton_saveFile.hide()
+        self.pushButton_delete.hide()
 
     def showOpenDialog(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -215,6 +225,8 @@ class Ui_AppWindow(Ui_MainWindow):
             self.frame_info_compare.hide()
             self.group_compare.hide()
             self.group_postprocess.hide()
+            self.pushButton_saveFile.hide()
+            self.pushButton_delete.hide()
             self.signals.selectBaseFile.emit(file, True)
             self.signals.drawFileList.emit(file)
             self.renderBaseFile()
@@ -374,6 +386,15 @@ class Ui_AppWindow(Ui_MainWindow):
         self.app.removeFile(file)
         self.selectionManager.removeFile(file)
         self.fileStrip.removeButton(file)
+
+        # Update sidebar if we removed the current compare file
+        if file == self.currentCompareFile:
+            self.currentCompareFile = None
+            nextCompare = self.selectionManager.getCompareFile(0)
+            self.renderPostProcess(nextCompare)
+            # Switch to single view if no compare file is selected
+            if nextCompare is None:
+                self.canvas_main.setRenderMode(RenderMode.Single)
 
     def createOutputFile(self):
         """Create a new OutputFile from the current base file"""
@@ -659,6 +680,8 @@ class Ui_AppWindow(Ui_MainWindow):
         self.frame_info_compare.hide()
         self.group_compare.hide()
         self.group_postprocess.hide()
+        self.pushButton_saveFile.hide()
+        self.pushButton_delete.hide()
 
         if compareFile is None:
             compareFile = self.selectionManager.getCompareFile(0)
@@ -666,6 +689,10 @@ class Ui_AppWindow(Ui_MainWindow):
         self.currentCompareFile = compareFile
 
         if compareFile is not None and isinstance(compareFile, OutputFile):
+            # Always show save/delete buttons for OutputFiles
+            self.pushButton_saveFile.show()
+            self.pushButton_delete.show()
+
             if compareFile.operations:
                 # Update the compare file info panel
                 firstOp = compareFile.getFirstOperation()

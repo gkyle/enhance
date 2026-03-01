@@ -729,10 +729,10 @@
          </layout>
         </widget>
        </item>
-       <item alignment="Qt::AlignTop">
+       <item>
         <widget class="QFrame" name="frame_sidebar">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -824,6 +824,9 @@
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QVBoxLayout" name="layout_label_info">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -845,6 +848,16 @@
                </property>
                <property name="text">
                 <string>IMAGE INFO</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_9">
+               <property name="frameShadow">
+                <enum>QFrame::Plain</enum>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
@@ -1182,6 +1195,9 @@
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QVBoxLayout" name="layout_label_selection">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -1203,6 +1219,16 @@
                </property>
                <property name="text">
                 <string>SELECTION</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_7">
+               <property name="frameShadow">
+                <enum>QFrame::Plain</enum>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
@@ -1297,6 +1323,9 @@
              <enum>QFrame::Raised</enum>
             </property>
             <layout class="QVBoxLayout" name="layout_label_operations">
+             <property name="spacing">
+              <number>0</number>
+             </property>
              <property name="leftMargin">
               <number>0</number>
              </property>
@@ -1318,6 +1347,16 @@
                </property>
                <property name="text">
                 <string>OPERATIONS</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="Line" name="line_3">
+               <property name="frameShadow">
+                <enum>QFrame::Plain</enum>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
@@ -1511,25 +1550,70 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="Line" name="line_6">
-                  <property name="styleSheet">
-                   <string notr="true">color: rgb(92, 92, 92);</string>
-                  </property>
-                  <property name="frameShadow">
-                   <enum>QFrame::Plain</enum>
-                  </property>
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
+                 <widget class="QPushButton" name="pushButton_postprocess_apply">
+                  <property name="text">
+                   <string>Apply</string>
                   </property>
                  </widget>
                 </item>
                </layout>
               </widget>
              </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_6">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(92, 92, 92);</string>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frame_11">
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_17">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
              <item>
-              <widget class="QPushButton" name="pushButton_postprocess_apply">
+              <widget class="QPushButton" name="pushButton_run">
                <property name="text">
-                <string>Apply</string>
+                <string>Sharpen</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_denoise">
+               <property name="text">
+                <string>Denoise</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_upscale">
+               <property name="text">
+                <string>Upscale</string>
                </property>
               </widget>
              </item>
@@ -1537,25 +1621,62 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_run">
-            <property name="text">
-             <string>Sharpen</string>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_denoise">
+           <widget class="QFrame" name="frame_7">
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_16">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="pushButton_saveFile">
+               <property name="text">
+                <string>Save File</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_delete">
             <property name="text">
-             <string>Denoise</string>
+             <string>Delete File</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_upscale">
-            <property name="text">
-             <string>Upscale</string>
+           <spacer name="verticalSpacer_sidebar">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </widget>
