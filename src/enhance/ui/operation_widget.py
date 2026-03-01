@@ -180,7 +180,9 @@ class OperationWidget(QFrame):
 
     def update_available_masks(self, new_masks: List[Mask]):
         """Update the available masks in the mask selector."""
-        if len(new_masks) == len(self.available_masks):
+        new_keys = [m.uniqueLabel for m in new_masks]
+        old_keys = [m.uniqueLabel for m in self.available_masks]
+        if new_keys == old_keys:
             return
 
         self.available_masks = new_masks

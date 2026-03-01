@@ -225,7 +225,7 @@ class App:
 
         return opsToRerun
 
-    # TODO: Hard-coding values for tile size, padding, maintainScale, and device. These may differ from original run.
+    # TODO: Hard-coding values for tile size, padding, maintainScale, and device. These may differ from original run. Persist values from original run in the future.
     def rerunSingleOperation(
         self,
         compareFile: OutputFile,

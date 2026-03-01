@@ -80,19 +80,21 @@ class InputFile(File):
 
     def addMask(self, mask: Mask):
         """Add a mask with a unique label"""
-        # Count existing masks with the same base label
-        count = sum(1 for m in self.masks if m.label == mask.label)
-        if count > 0:
-            mask.uniqueLabel = f"{mask.label}_{count + 1}"
+        # Find existing masks with the same base label
+        existing = [m for m in self.masks if m.label == mask.label]
+        count = len(existing)
+
+        if count == 0:
+            # First mask with this label - no numbering needed yet
+            mask.uniqueLabel = mask.label
+        elif count == 1:
+            # Second mask with this label - rename the first one and number both
+            existing[0].uniqueLabel = f"{mask.label}_1"
+            mask.uniqueLabel = f"{mask.label}_2"
         else:
-            # Check if there's already a mask with this label
-            existing = [m for m in self.masks if m.label == mask.label]
-            if existing:
-                # Rename the first one
-                existing[0].uniqueLabel = f"{mask.label}_1"
-                mask.uniqueLabel = f"{mask.label}_2"
-            else:
-                mask.uniqueLabel = mask.label
+            # Third or later - just number the new one
+            mask.uniqueLabel = f"{mask.label}_{count + 1}"
+
         self.masks.append(mask)
 
 
@@ -290,16 +292,17 @@ class OutputFile(File):
         # Process all operations in sequence
         for op in self.operations:
             if op.rawOutputPath is None or not os.path.exists(op.rawOutputPath):
-                logger.warning(
-                    f"Raw output not found for operation: {op.rawOutputPath}"
+                logger.error(
+                    f"Raw output not found for operation: {op.rawOutputPath}. "
+                    "Cannot rebuild chain."
                 )
-                continue
+                return False
 
             # Load this operation's raw output
             rawImg = cv2.imread(op.rawOutputPath, cv2.IMREAD_UNCHANGED)
             if rawImg is None:
-                logger.warning(f"Could not read raw output: {op.rawOutputPath}")
-                continue
+                logger.error(f"Could not read raw output: {op.rawOutputPath}")
+                return False
 
             # Apply post processing
             blendedImg = self.applyStrengthBlending(rawImg, op, currentImg)

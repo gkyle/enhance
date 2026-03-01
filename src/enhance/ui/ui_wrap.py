@@ -645,7 +645,7 @@ class Ui_AppWindow(Ui_MainWindow):
             isLast = (i == len(opsToRerun) - 1)
             desc = f"{op.operation_type.value.capitalize()} (re-run)"
 
-            def f(op=op, isLast=isLast):
+            def f(op=op, isLast=isLast, desc=desc):
                 def rerunJob():
                     progressUpdater = ProgressBarUpdater(
                         self.progressBar,

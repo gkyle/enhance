@@ -38,6 +38,8 @@ class TileProcessor:
         # Combined mask (binary: 1 = process, 0 = skip)
         self.mask = mask
         self.mask_tensor = None
+        # Precomputed tile occupancy map (True = tile has mask pixels)
+        self.tile_occupancy = None
 
     def preprocess_img(self):
         # img size should be a multiple of tile size
@@ -62,6 +64,8 @@ class TileProcessor:
                 .to(self.device)
             )
             self.mask_tensor = F.pad(mask_t, (x1, x2, y1, y2), "constant", 0)
+            # Precompute tile occupancy map to avoid per-tile reductions
+            self._compute_tile_occupancy()
 
     def postprocess_result(self, img_tensor):
         # remove padding
@@ -135,20 +139,34 @@ class TileProcessor:
 
         return output_img
 
-    def _tile_has_mask_pixels(self, y: int, x: int) -> bool:
-        """Check if a tile contains any mask pixels (optimization to skip empty tiles)."""
+    def _compute_tile_occupancy(self):
+        """Precompute which tiles contain mask pixels (single device sync)."""
         if self.mask_tensor is None:
-            return True  # No mask means process all tiles
+            return
 
         actual_tile_size = self.tileSize - (self.tilePad * 2)
-        y1 = y * actual_tile_size
-        y2 = (y + 1) * actual_tile_size
-        x1 = x * actual_tile_size
-        x2 = (x + 1) * actual_tile_size
+        _, _, h, w = self.mask_tensor.shape
+        xtiles = math.ceil(w / actual_tile_size)
+        ytiles = math.ceil(h / actual_tile_size)
 
-        # Get the mask region for this tile (without padding)
-        mask_region = self.mask_tensor[:, :, y1:y2, x1:x2]
-        return mask_region.sum() > 0
+        # Build occupancy grid on device, then transfer once
+        occupancy = torch.zeros((ytiles, xtiles), dtype=torch.bool, device=self.device)
+        for y in range(ytiles):
+            for x in range(xtiles):
+                y1 = y * actual_tile_size
+                y2 = min((y + 1) * actual_tile_size, h)
+                x1 = x * actual_tile_size
+                x2 = min((x + 1) * actual_tile_size, w)
+                occupancy[y, x] = (self.mask_tensor[:, :, y1:y2, x1:x2] > 0).any()
+
+        # Single device sync: transfer to CPU
+        self.tile_occupancy = occupancy.cpu().numpy()
+
+    def _tile_has_mask_pixels(self, y: int, x: int) -> bool:
+        """Check if a tile contains any mask pixels using precomputed occupancy map."""
+        if self.tile_occupancy is None:
+            return True  # No mask means process all tiles
+        return bool(self.tile_occupancy[y, x])
 
     @torch.no_grad()
     def process_tiles(self):

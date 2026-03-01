@@ -119,9 +119,11 @@ class ModelRunner(Observable):
             masks=masks,
         )
 
-        # Save the raw model output for strength/scale adjustment
+        # Save the raw model output for chain rebuilding
+        outputFile.saveRawModelOutput(output, modelOp)
+
+        # Apply strength blending if supported
         if modelOp.supportsStrength():
-            outputFile.saveRawModelOutput(output, modelOp)
             # Apply strength blending against the input image
             inputImg = cv2.imread(inFile.path, cv2.IMREAD_UNCHANGED)
             output = outputFile.applyStrengthBlending(output, modelOp, inputImg)
@@ -181,9 +183,11 @@ class ModelRunner(Observable):
         # Get the operation we just added
         modelOp = outputFile.operations[-1]
 
-        # Save the raw model output for strength/scale adjustment
+        # Save the raw model output for chain rebuilding
+        outputFile.saveRawModelOutput(output, modelOp)
+
+        # Apply strength blending if supported
         if modelOp.supportsStrength():
-            outputFile.saveRawModelOutput(output, modelOp)
             # Apply strength blending against the previous output (result of prior operations)
             inputImg = cv2.imread(inputPath, cv2.IMREAD_UNCHANGED)
             output = outputFile.applyStrengthBlending(output, modelOp, inputImg)
