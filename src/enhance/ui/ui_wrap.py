@@ -182,7 +182,6 @@ class Ui_AppWindow(Ui_MainWindow):
             self.selectionManager.selectCompare(self.app.getFileList()[i])
 
         self.renderBaseFile()
-        self.frame_subject.setVisible(False)
         if not self.app.doDetect:
             self.frame_mask.setVisible(False)
 

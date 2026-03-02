@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'interfacepCqqSq.ui'
+## Form generated from reading UI file 'interface.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.10.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(1622, 1343)
-        sizePolicy = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
@@ -34,7 +34,7 @@ class Ui_MainWindow(object):
         MainWindow.setBaseSize(QSize(1600, 1200))
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.centralwidget.sizePolicy().hasHeightForWidth())
@@ -43,7 +43,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.toolbar = QFrame(self.centralwidget)
         self.toolbar.setObjectName(u"toolbar")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        sizePolicy2 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.toolbar.sizePolicy().hasHeightForWidth())
@@ -110,7 +110,7 @@ class Ui_MainWindow(object):
         self.pushButton_taskQueue.setMinimumSize(QSize(30, 30))
         self.pushButton_taskQueue.setMaximumSize(QSize(30, 30))
         icon = QIcon()
-        icon.addFile(u":/icons32/chevron-down.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon.addFile(u":/icons32/chevron-down.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_taskQueue.setIcon(icon)
         self.pushButton_taskQueue.setIconSize(QSize(32, 32))
 
@@ -127,7 +127,7 @@ class Ui_MainWindow(object):
         font2.setPointSize(9)
         self.pushButton_cancelOp.setFont(font2)
         icon1 = QIcon()
-        icon1.addFile(u":/icons32/x.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon1.addFile(u":/icons32/x.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_cancelOp.setIcon(icon1)
         self.pushButton_cancelOp.setIconSize(QSize(24, 24))
 
@@ -148,7 +148,7 @@ class Ui_MainWindow(object):
         self.pushButton_single.setObjectName(u"pushButton_single")
         self.pushButton_single.setMinimumSize(QSize(40, 40))
         icon2 = QIcon()
-        icon2.addFile(u":/icons32/square.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon2.addFile(u":/icons32/square.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_single.setIcon(icon2)
         self.pushButton_single.setIconSize(QSize(24, 24))
 
@@ -158,7 +158,7 @@ class Ui_MainWindow(object):
         self.pushButton_split.setObjectName(u"pushButton_split")
         self.pushButton_split.setMinimumSize(QSize(40, 40))
         icon3 = QIcon()
-        icon3.addFile(u":/icons32/columns.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon3.addFile(u":/icons32/columns.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_split.setIcon(icon3)
         self.pushButton_split.setIconSize(QSize(24, 24))
 
@@ -168,7 +168,7 @@ class Ui_MainWindow(object):
         self.pushButton_quad.setObjectName(u"pushButton_quad")
         self.pushButton_quad.setMinimumSize(QSize(40, 40))
         icon4 = QIcon()
-        icon4.addFile(u":/icons32/grid.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon4.addFile(u":/icons32/grid.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_quad.setIcon(icon4)
         self.pushButton_quad.setIconSize(QSize(24, 24))
 
@@ -179,7 +179,7 @@ class Ui_MainWindow(object):
         self.pushButton_zoom.setMinimumSize(QSize(0, 40))
         self.pushButton_zoom.setFont(font)
         icon5 = QIcon()
-        icon5.addFile(u":/icons32/zoom-in.svg", QSize(), QIcon.Normal, QIcon.Off)
+        icon5.addFile(u":/icons32/zoom-in.svg", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         self.pushButton_zoom.setIcon(icon5)
         self.pushButton_zoom.setIconSize(QSize(24, 24))
 
@@ -315,7 +315,7 @@ class Ui_MainWindow(object):
 
         self.frame1 = QFrame(self.centralwidget)
         self.frame1.setObjectName(u"frame1")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(1)
         sizePolicy3.setHeightForWidth(self.frame1.sizePolicy().hasHeightForWidth())
@@ -325,9 +325,15 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QHBoxLayout(self.frame1)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.frame_main = QFrame(self.frame1)
+        self.frame_left = QFrame(self.frame1)
+        self.frame_left.setObjectName(u"frame_left")
+        self.frame_left.setFrameShape(QFrame.StyledPanel)
+        self.frame_left.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_5 = QVBoxLayout(self.frame_left)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.frame_main = QFrame(self.frame_left)
         self.frame_main.setObjectName(u"frame_main")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy4.setHorizontalStretch(1)
         sizePolicy4.setVerticalStretch(1)
         sizePolicy4.setHeightForWidth(self.frame_main.sizePolicy().hasHeightForWidth())
@@ -348,19 +354,155 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.canvas_main)
 
 
-        self.horizontalLayout.addWidget(self.frame_main)
+        self.verticalLayout_5.addWidget(self.frame_main)
 
-        self.frame_sidebar = QFrame(self.frame1)
-        self.frame_sidebar.setObjectName(u"frame_sidebar")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
+        self.frame_filesContainer = QFrame(self.frame_left)
+        self.frame_filesContainer.setObjectName(u"frame_filesContainer")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy5.setHorizontalStretch(100)
         sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(self.frame_sidebar.sizePolicy().hasHeightForWidth())
-        self.frame_sidebar.setSizePolicy(sizePolicy5)
-        self.frame_sidebar.setMinimumSize(QSize(244, 0))
-        self.frame_sidebar.setMaximumSize(QSize(100, 16777215))
-        self.frame_sidebar.setFrameShape(QFrame.NoFrame)
-        self.frame_sidebar.setFrameShadow(QFrame.Plain)
+        sizePolicy5.setHeightForWidth(self.frame_filesContainer.sizePolicy().hasHeightForWidth())
+        self.frame_filesContainer.setSizePolicy(sizePolicy5)
+        self.frame_filesContainer.setMinimumSize(QSize(160, 200))
+        self.frame_filesContainer.setFrameShape(QFrame.NoFrame)
+        self.frame_filesContainer.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_6 = QVBoxLayout(self.frame_filesContainer)
+        self.verticalLayout_6.setSpacing(6)
+        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
+        self.verticalLayout_6.setSizeConstraint(QLayout.SetDefaultConstraint)
+        self.verticalLayout_6.setContentsMargins(6, 0, 6, 0)
+        self.frame_10 = QFrame(self.frame_filesContainer)
+        self.frame_10.setObjectName(u"frame_10")
+        self.frame_10.setMinimumSize(QSize(0, 20))
+        self.frame_10.setMaximumSize(QSize(16777215, 20))
+        self.frame_10.setFrameShape(QFrame.NoFrame)
+        self.frame_10.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_12 = QHBoxLayout(self.frame_10)
+        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
+        self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
+        self.label = QLabel(self.frame_10)
+        self.label.setObjectName(u"label")
+        font5 = QFont()
+        font5.setPointSize(12)
+        font5.setBold(True)
+        self.label.setFont(font5)
+
+        self.horizontalLayout_12.addWidget(self.label)
+
+        self.label_files_count = QLabel(self.frame_10)
+        self.label_files_count.setObjectName(u"label_files_count")
+
+        self.horizontalLayout_12.addWidget(self.label_files_count)
+
+
+        self.verticalLayout_6.addWidget(self.frame_10, 0, Qt.AlignLeft)
+
+        self.frame_6 = QFrame(self.frame_filesContainer)
+        self.frame_6.setObjectName(u"frame_6")
+        self.frame_6.setFrameShape(QFrame.NoFrame)
+        self.frame_6.setFrameShadow(QFrame.Plain)
+        self.horizontalLayout_3 = QHBoxLayout(self.frame_6)
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.frame_inputFile = QFrame(self.frame_6)
+        self.frame_inputFile.setObjectName(u"frame_inputFile")
+        self.frame_inputFile.setMinimumSize(QSize(100, 100))
+        self.frame_inputFile.setFrameShape(QFrame.NoFrame)
+        self.frame_inputFile.setFrameShadow(QFrame.Sunken)
+        self.horizontalLayout_5 = QHBoxLayout(self.frame_inputFile)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
+        self.label_3 = QLabel(self.frame_inputFile)
+        self.label_3.setObjectName(u"label_3")
+
+        self.horizontalLayout_5.addWidget(self.label_3)
+
+
+        self.horizontalLayout_3.addWidget(self.frame_inputFile)
+
+        self.line_4 = QFrame(self.frame_6)
+        self.line_4.setObjectName(u"line_4")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(6)
+        sizePolicy6.setHeightForWidth(self.line_4.sizePolicy().hasHeightForWidth())
+        self.line_4.setSizePolicy(sizePolicy6)
+        self.line_4.setMinimumSize(QSize(8, 160))
+        self.line_4.setMaximumSize(QSize(8, 160))
+        self.line_4.setFrameShape(QFrame.Shape.VLine)
+        self.line_4.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_3.addWidget(self.line_4, 0, Qt.AlignTop)
+
+        self.scrollArea = QScrollArea(self.frame_6)
+        self.scrollArea.setObjectName(u"scrollArea")
+        sizePolicy7 = QSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Fixed)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
+        self.scrollArea.setSizePolicy(sizePolicy7)
+        self.scrollArea.setMinimumSize(QSize(158, 200))
+        self.scrollArea.setFrameShape(QFrame.NoFrame)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scrollArea.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
+        self.scrollArea.setWidgetResizable(True)
+        self.frame_outputFiles_scroll = QWidget()
+        self.frame_outputFiles_scroll.setObjectName(u"frame_outputFiles_scroll")
+        self.frame_outputFiles_scroll.setGeometry(QRect(0, 0, 1202, 200))
+        sizePolicy2.setHeightForWidth(self.frame_outputFiles_scroll.sizePolicy().hasHeightForWidth())
+        self.frame_outputFiles_scroll.setSizePolicy(sizePolicy2)
+        self.frame_outputFiles_scroll.setMinimumSize(QSize(0, 0))
+        self.horizontalLayout1 = QHBoxLayout(self.frame_outputFiles_scroll)
+        self.horizontalLayout1.setSpacing(0)
+        self.horizontalLayout1.setObjectName(u"horizontalLayout1")
+        self.horizontalLayout1.setContentsMargins(0, 0, 0, 0)
+        self.frame_outputFiles = QFrame(self.frame_outputFiles_scroll)
+        self.frame_outputFiles.setObjectName(u"frame_outputFiles")
+        sizePolicy1.setHeightForWidth(self.frame_outputFiles.sizePolicy().hasHeightForWidth())
+        self.frame_outputFiles.setSizePolicy(sizePolicy1)
+        self.frame_outputFiles.setFrameShape(QFrame.NoFrame)
+        self.frame_outputFiles.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.frame_outputFiles)
+        self.horizontalLayout_4.setSpacing(2)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.label_2 = QLabel(self.frame_outputFiles)
+        self.label_2.setObjectName(u"label_2")
+
+        self.horizontalLayout_4.addWidget(self.label_2)
+
+
+        self.horizontalLayout1.addWidget(self.frame_outputFiles, 0, Qt.AlignLeft)
+
+        self.scrollArea.setWidget(self.frame_outputFiles_scroll)
+
+        self.horizontalLayout_3.addWidget(self.scrollArea)
+
+
+        self.verticalLayout_6.addWidget(self.frame_6)
+
+
+        self.verticalLayout_5.addWidget(self.frame_filesContainer)
+
+
+        self.horizontalLayout.addWidget(self.frame_left)
+
+        self.scrollArea_sidebar = QScrollArea(self.frame1)
+        self.scrollArea_sidebar.setObjectName(u"scrollArea_sidebar")
+        sizePolicy8 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        sizePolicy8.setHorizontalStretch(0)
+        sizePolicy8.setVerticalStretch(0)
+        sizePolicy8.setHeightForWidth(self.scrollArea_sidebar.sizePolicy().hasHeightForWidth())
+        self.scrollArea_sidebar.setSizePolicy(sizePolicy8)
+        self.scrollArea_sidebar.setMinimumSize(QSize(244, 0))
+        self.scrollArea_sidebar.setMaximumSize(QSize(260, 16777215))
+        self.scrollArea_sidebar.setFrameShape(QFrame.NoFrame)
+        self.scrollArea_sidebar.setFrameShadow(QFrame.Plain)
+        self.scrollArea_sidebar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea_sidebar.setWidgetResizable(True)
+        self.frame_sidebar = QWidget()
+        self.frame_sidebar.setObjectName(u"frame_sidebar")
         self.verticalLayout_3 = QVBoxLayout(self.frame_sidebar)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(2, 2, 2, 2)
@@ -378,7 +520,7 @@ class Ui_MainWindow(object):
         self.line_8.setObjectName(u"line_8")
         self.line_8.setStyleSheet(u"color: rgb(92, 92, 92);")
         self.line_8.setFrameShadow(QFrame.Plain)
-        self.line_8.setFrameShape(QFrame.HLine)
+        self.line_8.setFrameShape(QFrame.Shape.HLine)
 
         self.verticalLayout_3.addWidget(self.line_8)
 
@@ -391,7 +533,7 @@ class Ui_MainWindow(object):
         self.line.setObjectName(u"line")
         self.line.setStyleSheet(u"color: rgb(92, 92, 92);")
         self.line.setFrameShadow(QFrame.Plain)
-        self.line.setFrameShape(QFrame.HLine)
+        self.line.setFrameShape(QFrame.Shape.HLine)
 
         self.verticalLayout_3.addWidget(self.line)
 
@@ -405,16 +547,16 @@ class Ui_MainWindow(object):
         self.layout_label_info.setContentsMargins(0, 12, 0, 0)
         self.label_7 = QLabel(self.frame_label_info)
         self.label_7.setObjectName(u"label_7")
-        font5 = QFont()
-        font5.setBold(True)
-        self.label_7.setFont(font5)
+        font6 = QFont()
+        font6.setBold(True)
+        self.label_7.setFont(font6)
 
         self.layout_label_info.addWidget(self.label_7)
 
         self.line_9 = QFrame(self.frame_label_info)
         self.line_9.setObjectName(u"line_9")
         self.line_9.setFrameShadow(QFrame.Plain)
-        self.line_9.setFrameShape(QFrame.HLine)
+        self.line_9.setFrameShape(QFrame.Shape.HLine)
 
         self.layout_label_info.addWidget(self.line_9)
 
@@ -476,36 +618,6 @@ class Ui_MainWindow(object):
 
 
         self.verticalLayout_18.addWidget(self.frame_label_shape_base)
-
-        self.frame_subject = QFrame(self.group_base)
-        self.frame_subject.setObjectName(u"frame_subject")
-        self.frame_subject.setFrameShape(QFrame.NoFrame)
-        self.frame_subject.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_5 = QVBoxLayout(self.frame_subject)
-        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.verticalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.frame_label_subjects = QFrame(self.frame_subject)
-        self.frame_label_subjects.setObjectName(u"frame_label_subjects")
-        self.frame_label_subjects.setFrameShape(QFrame.NoFrame)
-        self.frame_label_subjects.setFrameShadow(QFrame.Plain)
-        self.horizontalLayout_16 = QHBoxLayout(self.frame_label_subjects)
-        self.horizontalLayout_16.setObjectName(u"horizontalLayout_16")
-        self.horizontalLayout_16.setContentsMargins(12, 0, 0, 0)
-
-        self.verticalLayout_5.addWidget(self.frame_label_subjects)
-
-
-        self.verticalLayout_18.addWidget(self.frame_subject)
-
-        self.label_4 = QLabel(self.group_base)
-        self.label_4.setObjectName(u"label_4")
-
-        self.verticalLayout_18.addWidget(self.label_4)
-
-        self.label_subjects = QLabel(self.group_base)
-        self.label_subjects.setObjectName(u"label_subjects")
-
-        self.verticalLayout_18.addWidget(self.label_subjects)
 
 
         self.verticalLayout_11.addWidget(self.group_base)
@@ -585,14 +697,14 @@ class Ui_MainWindow(object):
         self.layout_label_selection.setContentsMargins(0, 12, 0, 0)
         self.label_10 = QLabel(self.frame_label_selection)
         self.label_10.setObjectName(u"label_10")
-        self.label_10.setFont(font5)
+        self.label_10.setFont(font6)
 
         self.layout_label_selection.addWidget(self.label_10)
 
         self.line_7 = QFrame(self.frame_label_selection)
         self.line_7.setObjectName(u"line_7")
         self.line_7.setFrameShadow(QFrame.Plain)
-        self.line_7.setFrameShape(QFrame.HLine)
+        self.line_7.setFrameShape(QFrame.Shape.HLine)
 
         self.layout_label_selection.addWidget(self.line_7)
 
@@ -644,14 +756,14 @@ class Ui_MainWindow(object):
         self.layout_label_operations.setContentsMargins(0, 12, 0, 0)
         self.label_11 = QLabel(self.frame_label_operations)
         self.label_11.setObjectName(u"label_11")
-        self.label_11.setFont(font5)
+        self.label_11.setFont(font6)
 
         self.layout_label_operations.addWidget(self.label_11)
 
         self.line_3 = QFrame(self.frame_label_operations)
         self.line_3.setObjectName(u"line_3")
         self.line_3.setFrameShadow(QFrame.Plain)
-        self.line_3.setFrameShape(QFrame.HLine)
+        self.line_3.setFrameShape(QFrame.Shape.HLine)
 
         self.layout_label_operations.addWidget(self.line_3)
 
@@ -698,7 +810,7 @@ class Ui_MainWindow(object):
         self.line_5.setObjectName(u"line_5")
         self.line_5.setStyleSheet(u"color: rgb(92, 92, 92);")
         self.line_5.setFrameShadow(QFrame.Plain)
-        self.line_5.setFrameShape(QFrame.HLine)
+        self.line_5.setFrameShape(QFrame.Shape.HLine)
 
         self.verticalLayout_8.addWidget(self.line_5)
 
@@ -756,7 +868,7 @@ class Ui_MainWindow(object):
         self.line_6.setObjectName(u"line_6")
         self.line_6.setStyleSheet(u"color: rgb(92, 92, 92);")
         self.line_6.setFrameShadow(QFrame.Plain)
-        self.line_6.setFrameShape(QFrame.HLine)
+        self.line_6.setFrameShape(QFrame.Shape.HLine)
 
         self.verticalLayout_3.addWidget(self.line_6)
 
@@ -787,8 +899,8 @@ class Ui_MainWindow(object):
 
         self.line_2 = QFrame(self.frame_sidebar)
         self.line_2.setObjectName(u"line_2")
-        self.line_2.setFrameShape(QFrame.HLine)
-        self.line_2.setFrameShadow(QFrame.Sunken)
+        self.line_2.setFrameShape(QFrame.Shape.HLine)
+        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.verticalLayout_3.addWidget(self.line_2)
 
@@ -812,144 +924,16 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.pushButton_delete)
 
-        self.verticalSpacer_sidebar = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.verticalSpacer_sidebar = QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         self.verticalLayout_3.addItem(self.verticalSpacer_sidebar)
 
+        self.scrollArea_sidebar.setWidget(self.frame_sidebar)
 
-        self.horizontalLayout.addWidget(self.frame_sidebar)
+        self.horizontalLayout.addWidget(self.scrollArea_sidebar)
 
 
         self.verticalLayout_2.addWidget(self.frame1)
-
-        self.frame_filesContainer = QFrame(self.centralwidget)
-        self.frame_filesContainer.setObjectName(u"frame_filesContainer")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        sizePolicy6.setHorizontalStretch(100)
-        sizePolicy6.setVerticalStretch(0)
-        sizePolicy6.setHeightForWidth(self.frame_filesContainer.sizePolicy().hasHeightForWidth())
-        self.frame_filesContainer.setSizePolicy(sizePolicy6)
-        self.frame_filesContainer.setMinimumSize(QSize(160, 200))
-        self.frame_filesContainer.setFrameShape(QFrame.NoFrame)
-        self.frame_filesContainer.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_6 = QVBoxLayout(self.frame_filesContainer)
-        self.verticalLayout_6.setSpacing(6)
-        self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.verticalLayout_6.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.verticalLayout_6.setContentsMargins(6, 0, 6, 0)
-        self.frame_10 = QFrame(self.frame_filesContainer)
-        self.frame_10.setObjectName(u"frame_10")
-        self.frame_10.setMinimumSize(QSize(0, 20))
-        self.frame_10.setMaximumSize(QSize(16777215, 20))
-        self.frame_10.setFrameShape(QFrame.NoFrame)
-        self.frame_10.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_12 = QHBoxLayout(self.frame_10)
-        self.horizontalLayout_12.setObjectName(u"horizontalLayout_12")
-        self.horizontalLayout_12.setContentsMargins(0, 0, 0, 0)
-        self.label = QLabel(self.frame_10)
-        self.label.setObjectName(u"label")
-        font6 = QFont()
-        font6.setPointSize(12)
-        font6.setBold(True)
-        self.label.setFont(font6)
-
-        self.horizontalLayout_12.addWidget(self.label)
-
-        self.label_files_count = QLabel(self.frame_10)
-        self.label_files_count.setObjectName(u"label_files_count")
-
-        self.horizontalLayout_12.addWidget(self.label_files_count)
-
-
-        self.verticalLayout_6.addWidget(self.frame_10, 0, Qt.AlignLeft)
-
-        self.frame_6 = QFrame(self.frame_filesContainer)
-        self.frame_6.setObjectName(u"frame_6")
-        self.frame_6.setFrameShape(QFrame.NoFrame)
-        self.frame_6.setFrameShadow(QFrame.Plain)
-        self.horizontalLayout_3 = QHBoxLayout(self.frame_6)
-        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.frame_inputFile = QFrame(self.frame_6)
-        self.frame_inputFile.setObjectName(u"frame_inputFile")
-        self.frame_inputFile.setMinimumSize(QSize(100, 100))
-        self.frame_inputFile.setFrameShape(QFrame.NoFrame)
-        self.frame_inputFile.setFrameShadow(QFrame.Sunken)
-        self.horizontalLayout_5 = QHBoxLayout(self.frame_inputFile)
-        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.label_3 = QLabel(self.frame_inputFile)
-        self.label_3.setObjectName(u"label_3")
-
-        self.horizontalLayout_5.addWidget(self.label_3)
-
-
-        self.horizontalLayout_3.addWidget(self.frame_inputFile)
-
-        self.line_4 = QFrame(self.frame_6)
-        self.line_4.setObjectName(u"line_4")
-        sizePolicy7 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
-        sizePolicy7.setHorizontalStretch(0)
-        sizePolicy7.setVerticalStretch(6)
-        sizePolicy7.setHeightForWidth(self.line_4.sizePolicy().hasHeightForWidth())
-        self.line_4.setSizePolicy(sizePolicy7)
-        self.line_4.setMinimumSize(QSize(8, 160))
-        self.line_4.setMaximumSize(QSize(8, 160))
-        self.line_4.setFrameShape(QFrame.VLine)
-        self.line_4.setFrameShadow(QFrame.Sunken)
-
-        self.horizontalLayout_3.addWidget(self.line_4, 0, Qt.AlignTop)
-
-        self.scrollArea = QScrollArea(self.frame_6)
-        self.scrollArea.setObjectName(u"scrollArea")
-        sizePolicy8 = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
-        sizePolicy8.setHorizontalStretch(0)
-        sizePolicy8.setVerticalStretch(0)
-        sizePolicy8.setHeightForWidth(self.scrollArea.sizePolicy().hasHeightForWidth())
-        self.scrollArea.setSizePolicy(sizePolicy8)
-        self.scrollArea.setMinimumSize(QSize(158, 200))
-        self.scrollArea.setFrameShape(QFrame.NoFrame)
-        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.scrollArea.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
-        self.scrollArea.setWidgetResizable(True)
-        self.frame_outputFiles_scroll = QWidget()
-        self.frame_outputFiles_scroll.setObjectName(u"frame_outputFiles_scroll")
-        self.frame_outputFiles_scroll.setGeometry(QRect(0, 0, 1472, 200))
-        sizePolicy2.setHeightForWidth(self.frame_outputFiles_scroll.sizePolicy().hasHeightForWidth())
-        self.frame_outputFiles_scroll.setSizePolicy(sizePolicy2)
-        self.frame_outputFiles_scroll.setMinimumSize(QSize(0, 0))
-        self.horizontalLayout1 = QHBoxLayout(self.frame_outputFiles_scroll)
-        self.horizontalLayout1.setSpacing(0)
-        self.horizontalLayout1.setObjectName(u"horizontalLayout1")
-        self.horizontalLayout1.setContentsMargins(0, 0, 0, 0)
-        self.frame_outputFiles = QFrame(self.frame_outputFiles_scroll)
-        self.frame_outputFiles.setObjectName(u"frame_outputFiles")
-        sizePolicy1.setHeightForWidth(self.frame_outputFiles.sizePolicy().hasHeightForWidth())
-        self.frame_outputFiles.setSizePolicy(sizePolicy1)
-        self.frame_outputFiles.setFrameShape(QFrame.NoFrame)
-        self.frame_outputFiles.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_4 = QHBoxLayout(self.frame_outputFiles)
-        self.horizontalLayout_4.setSpacing(2)
-        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
-        self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.label_2 = QLabel(self.frame_outputFiles)
-        self.label_2.setObjectName(u"label_2")
-
-        self.horizontalLayout_4.addWidget(self.label_2)
-
-
-        self.horizontalLayout1.addWidget(self.frame_outputFiles, 0, Qt.AlignLeft)
-
-        self.scrollArea.setWidget(self.frame_outputFiles_scroll)
-
-        self.horizontalLayout_3.addWidget(self.scrollArea)
-
-
-        self.verticalLayout_6.addWidget(self.frame_6)
-
-
-        self.verticalLayout_2.addWidget(self.frame_filesContainer)
 
         MainWindow.setCentralWidget(self.centralwidget)
 
@@ -970,6 +954,10 @@ class Ui_MainWindow(object):
         self.label_gpu.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
         self.label_title.setText(QCoreApplication.translate("MainWindow", u"Enhance AI", None))
         self.canvas_main.setText(QCoreApplication.translate("MainWindow", u"TextLabel", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"Files", None))
+        self.label_files_count.setText("")
+        self.label_3.setText(QCoreApplication.translate("MainWindow", u"text", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"text", None))
         self.pushButton_open.setText(QCoreApplication.translate("MainWindow", u"Open", None))
         self.pushButton_clear.setText(QCoreApplication.translate("MainWindow", u"Clear", None))
         self.pushButton_modelManager.setText(QCoreApplication.translate("MainWindow", u"Model Manager", None))
@@ -978,8 +966,6 @@ class Ui_MainWindow(object):
         self.label_filename_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
         self.label_14.setText(QCoreApplication.translate("MainWindow", u"Shape:", None))
         self.label_shape_base.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p/></body></html>", None))
-        self.label_4.setText(QCoreApplication.translate("MainWindow", u"Subjects:", None))
-        self.label_subjects.setText("")
         self.label_8.setText(QCoreApplication.translate("MainWindow", u"Enhanced File:", None))
         self.label_filename.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p><span style=\" color:#9a9996;\"/></p></body></html>", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"Shape:", None))
@@ -997,9 +983,5 @@ class Ui_MainWindow(object):
         self.pushButton_upscale.setText(QCoreApplication.translate("MainWindow", u"Upscale", None))
         self.pushButton_saveFile.setText(QCoreApplication.translate("MainWindow", u"Save File", None))
         self.pushButton_delete.setText(QCoreApplication.translate("MainWindow", u"Delete File", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"Files", None))
-        self.label_files_count.setText("")
-        self.label_3.setText(QCoreApplication.translate("MainWindow", u"text", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"text", None))
     # retranslateUi
 
