@@ -4,12 +4,13 @@ from huggingface_hub import try_to_load_from_cache
 
 import numpy as np
 
-SAM_TYPE = "facebook/sam2.1-hiera-large"
+SAM_FILENAME = "sam2.1_hiera_large.pt"
+SAM_TYPE = "facebook/" + SAM_FILENAME.replace(".pt", "").replace("_", "-")
 
 
 def _is_model_cached(repo_id):
     """Check if a HuggingFace model is already downloaded in the local cache."""
-    result = try_to_load_from_cache(repo_id, "config.json")
+    result = try_to_load_from_cache(repo_id, SAM_FILENAME)
     return isinstance(result, str)
 
 
