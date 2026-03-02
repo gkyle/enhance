@@ -1,6 +1,5 @@
 import os
 import re
-import shutil
 from typing import Optional, List
 from PySide6.QtGui import QGuiApplication, QFontMetrics
 from PySide6.QtCore import QThreadPool, QTimer, QPoint, Qt
@@ -22,7 +21,6 @@ from enhance.app import App
 from enhance.lib.file import (
     File,
     InputFile,
-    Label,
     OutputFile,
     Operation,
     AppliedOperation,
@@ -158,7 +156,7 @@ class Ui_AppWindow(Ui_MainWindow):
             lambda indices: self.canvas_main.setVisibleMasks(indices)
         )
 
-        self.signals.incrementProgress.connect(self.incrementProgressBar)
+        self.signals.incrementProgress.connect(self.update_progress_bar)
         self.signals.removeFile.connect(self.removeFile)
         self.signals.saveFile.connect(self.saveFile)
         self.signals.changeZoom.connect(self.changeZoom)
@@ -184,11 +182,9 @@ class Ui_AppWindow(Ui_MainWindow):
             self.selectionManager.selectCompare(self.app.getFileList()[i])
 
         self.renderBaseFile()
-        if self.app.doDetect:
-            self.runDetectSubjects()
-        else:
+        self.frame_subject.setVisible(False)
+        if not self.app.doDetect:
             self.frame_mask.setVisible(False)
-            self.frame_subject.setVisible(False)
 
         self.updateGPUStats()
 
@@ -230,7 +226,6 @@ class Ui_AppWindow(Ui_MainWindow):
             self.signals.selectBaseFile.emit(file, True)
             self.signals.drawFileList.emit(file)
             self.renderBaseFile()
-            self.runDetectSubjects()
 
     def showModelDialog(self, operation):
         dialog = DialogModel(self.app, [operation])
@@ -338,44 +333,36 @@ class Ui_AppWindow(Ui_MainWindow):
         dialog = DialogModelManager(self.app)
         result = dialog.exec()
 
-    def runDetectSubjects(self):
-        file = self.selectionManager.getBaseFile()
-        desc = "Detecting Subjects"
-
-        def f():
-            if file is not None:
-                progressUpdater = ProgressBarUpdater(
-                    self.progressBar,
-                    self.label_progressBar,
-                    total=1,
-                    desc=desc,
-                )
-                result = self.app.runDetectSubjects(file, progressUpdater.tick)
-                if result is not None:
-                    for idx, label in enumerate(result["labels"]):
-                        box = result["bboxes"][idx]
-                        file.labels.append(Label(label, box))
-                self.renderBaseFile()
-                self.signals.showFiles.emit(False)
-                self.signals.taskCompleted.emit()
-
-        worker = AsyncWorker(partial(f), label=desc)
-        self.op_queue.start(worker)
-
     def cancelOp(self):
         self.app.interruptOperation()
 
-    def incrementProgressBar(
+    def update_progress_bar(
         self,
-        progressUpdater: ProgressBarUpdater,
+        progress_updater: ProgressBarUpdater,
         total: int,
         increment: int,
         count: int,
         done: bool,
         data: Optional[File],
+        status_message: Optional[str] = None,
     ):
-        progressUpdater.total = total
-        progressUpdater.update(increment)
+        """Update the progress bar based on Observable notifications.
+
+        Either a status message or progress count/total. If data is provided
+        and is a File, also show that file in the UI.
+        """
+        if status_message:
+            progress_updater.qlabel.setText(status_message)
+            progress_updater.qpbar.setRange(0, 0)  # Indeterminate progress
+            return
+
+        # Restore determinate progress bar if it was indeterminate
+        if progress_updater.qpbar.maximum() == 0:
+            progress_updater.qpbar.setRange(0, 100)
+
+        # Update progress using count/total from Observable directly
+        progress_updater.set_progress(count, total)
+
         if data is not None:
             if isinstance(data, File):
                 self.showFile(data)
@@ -485,13 +472,6 @@ class Ui_AppWindow(Ui_MainWindow):
 
             baseImg = file.loadUnchanged()
             self.drawLabelShape(self.label_shape_base, baseImg)
-
-            if file.labels is not None:
-                self.drawLabelText(
-                    self.label_subjects,
-                    ", ".join([label.label for label in file.labels]),
-                    maybeElide=True,
-                )
 
     def _setupOperationsContainer(self):
         """Set up the container for dynamically-created operation widgets."""

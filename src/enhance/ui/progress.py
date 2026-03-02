@@ -20,11 +20,14 @@ class ProgressBarUpdater(tqdm):
             self.desc = kwargs['desc']
             self.qlabel.setText(self.desc)
 
-    def update(self, n=1):
-        super().update(n)
+    def set_progress(self, count, total):
+        if not total or total == 0:
+            return
+        self.total = total
+        self.n = count
         self.qlabel.setText(self.desc)
-        self.qpbar.setValue(self.n / self.total * 100)
-        f = self.format_meter(self.n, self.total, self._time() - self.start_t,
+        self.qpbar.setValue(count / total * 100)
+        f = self.format_meter(count, total, self._time() - self.start_t,
                               bar_format="{n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}{postfix}]")
         self.qpbar.setFormat(f"{f}")
 

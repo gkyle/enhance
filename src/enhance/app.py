@@ -29,7 +29,6 @@ modelRunner = deferred_import("enhance.op.model_runner")
 DO_DETECT = False
 try:
     import enhance.op.masks as generate_masks
-    import enhance.op.florence as detect_subjects
 
     DO_DETECT = True
 except ImportError as e:
@@ -180,16 +179,6 @@ class App:
             self.activeOperation = generateMasksOp
             success = generateMasksOp.run(file)
             generateMasksOp.removeObserver(progressBar)
-
-    def runDetectSubjects(self, file: InputFile, progressBar):
-        if self.doDetect:
-            device = self.gpuInfo.getPreferredDevice()
-            detectSubjects = detect_subjects.GenerateLabels(device)
-            detectSubjects.addObserver(progressBar)
-            self.activeOperation = detectSubjects
-            result = detectSubjects.detect(file)
-            detectSubjects.removeObserver(progressBar)
-            return result
 
     def interruptOperation(self):
         if self.activeOperation:

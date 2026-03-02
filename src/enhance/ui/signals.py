@@ -54,7 +54,7 @@ class Singleton(type):
 
 class Signals(QObject):
     startProgress: Signal = Signal(int, str)
-    incrementProgress: Signal = Signal(object, int, int, int, bool, object)
+    incrementProgress: Signal = Signal(object, int, int, int, bool, object, object)
 
     showFiles: Signal = Signal(bool)
     setRenderMode: Signal = Signal(RenderMode)

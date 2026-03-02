@@ -1,18 +1,31 @@
 from sam2.build_sam import build_sam2_hf
 from sam2.sam2_image_predictor import SAM2ImagePredictor
+from huggingface_hub import try_to_load_from_cache
 
 import numpy as np
 
 SAM_TYPE = "facebook/sam2.1-hiera-large"
 
 
+def _is_model_cached(repo_id):
+    """Check if a HuggingFace model is already downloaded in the local cache."""
+    result = try_to_load_from_cache(repo_id, "config.json")
+    return isinstance(result, str)
+
+
 class GenerateMasks:
-    def __init__(self, device):
+    def __init__(self, device, observable=None):
         self.device = device
+        self.observable = observable
 
     def run(self, image, input_boxes, labels):
+        if self.observable:
+            if not _is_model_cached(SAM_TYPE):
+                self.observable.set_status("Downloading SAM2 model (first run)")
         sam2_model = build_sam2_hf(SAM_TYPE, device=self.device)
         sam2_predictor = SAM2ImagePredictor(sam2_model)
+        if self.observable:
+            self.observable.set_status(None)
 
         masks = []
         scores = []

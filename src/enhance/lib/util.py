@@ -10,9 +10,15 @@ class Observable():
     def __init__(self):
         self.job: Job = None
         self.observers = []
+        self.status_message = None
+
+    def set_status(self, message):
+        self.status_message = message
+        self.notifyObservers()
 
     def startJob(self, total):
         self.job = Job(total)
+        self.status_message = None
         self.notifyObservers()
 
     def updateJob(self, increment, data=None):
@@ -26,11 +32,12 @@ class Observable():
     def notifyObservers(self, increment=0, data=None):
         for observer in self.observers:
             observer(
-                self.job.total,
+                self.job.total if self.job else 0,
                 increment,
-                self.job.count,
-                self.job.done,
-                data)
+                self.job.count if self.job else 0,
+                self.job.done if self.job else False,
+                data,
+                self.status_message)
 
     def requestInterrupt(self):
         self.job.interrupt = True
