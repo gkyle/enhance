@@ -1,6 +1,21 @@
 ## Overview
 
-Enhance AI is a desktop application for sharpening, denoising, and upscaling images using community contributed AI models.
+Enhance AI is a desktop application for photographers that sharpens, denoises, and upscales photographs using community-contributed image enhancement models. It can be used standalone or integrated into a Lightroom workflow.
+
+Most general-purpose AI image enhancers try to work for *every kind of image*. But in practice, enhancement models often perform best when trained on very specific subjects.
+
+The core idea behind **Enhance AI** is: **Use specialized image enhancement models for specific subjects.**
+
+For example:
+- Birds
+- Insects
+- Flowers
+- Aircraft
+- Architecture
+
+When a model is trained on a narrow subject domain, it can learn the textures, edges, and structures that are typical for that subject. This often produces significantly better results than a general-purpose model. Good results can often be achieved with a few thousand training images and a consumer GPU. This makes it possible for the community to build high-quality models for many specific domains.
+
+Enhance AI focuses on model discovery, management, and inference, making it easy to apply these models to your images.
 
 <img width="1812" height="1505" alt="Screenshot 2025-08-29 140627" src="https://github.com/user-attachments/assets/b459cced-266e-48d8-8871-eed1fa5bdcfa" />
 
@@ -10,14 +25,10 @@ Windows, MacOS, Linux
 
 The application will work with discrete GPUs or on CPU. Model performance is significantly improved when running with a discrete GPU.
 
-TODO: MacOS is supported, but help is needed to:
-- Validate “mps” compatibility.
-- Tune Lightroom plug-in
-
-TODO: Validate ROCM support and provide an relevant install instructions.
+TODO: Validate hardware support for Intel and AMD GPUs.
 
 ## Installation and Usage
-Clone this repository or download the zip and uncompress on your system.
+Clone this repository or [download the zip](https://github.com/gkyle/enhance/archive/refs/heads/main.zip) and uncompress on your system.
 
 Navigate to the download location and run the appropriate command for your operating system.
 
@@ -31,7 +42,7 @@ On Windows:
 
 Setup will create a sandboxed virtual Python environment and download required packages. It will attempt to determine if a compatible GPU is available on your system. For NVidia users, the CUDA Toolkit must be installed. If drivers or CUDA toolkit installation change after install, changes will be detected the next time the command is run.
 
-## Lightroom Integration
+## Lightroom Integration (Optional)
 
 Install and run the application from the install location once. This is needed to capture and store the install location for Lightroom.
 Open Lightroom. Navigate to File > Plug-in Manager.
