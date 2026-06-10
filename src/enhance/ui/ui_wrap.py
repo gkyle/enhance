@@ -20,7 +20,6 @@ logger = logging.getLogger(__name__)
 from enhance.app import App
 from enhance.lib.file import (
     File,
-    InputFile,
     OutputFile,
     Operation,
     AppliedOperation,
@@ -210,8 +209,7 @@ class Ui_AppWindow(Ui_MainWindow):
             filter="Image Files (*.jpg *.jpeg *.tif *.tiff, *.png)"
         )
         if path is not None and len(path) > 0:
-            file = InputFile(path)
-            self.app.setBaseFile(path)
+            file = self.app.setBaseFile(path)
             self.app.clearFileList()
             self._clearOperationWidgets()
             self.currentCompareFile = None
