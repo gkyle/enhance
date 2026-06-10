@@ -168,18 +168,41 @@ class TileProcessor:
             return True  # No mask means process all tiles
         return bool(self.tile_occupancy[y, x])
 
+    def _blend_ramp_1d(self, pre: int, core: int, post: int) -> torch.Tensor:
+        """Build a 1D blend weight that ramps up over `pre` samples, stays at 1.0
+        across the `core`, then ramps down over `post` samples.
+
+        The ramps span the tile overlap so that adjacent tiles cross-fade instead
+        of meeting at a hard seam. Endpoints are kept slightly above 0 to avoid
+        zero-weight pixels during normalization.
+        """
+        parts = []
+        if pre > 0:
+            parts.append(
+                torch.linspace(1.0 / (pre + 1), pre / (pre + 1), pre, device=self.device)
+            )
+        parts.append(torch.ones(core, device=self.device))
+        if post > 0:
+            parts.append(
+                torch.linspace(post / (post + 1), 1.0 / (post + 1), post, device=self.device)
+            )
+        return torch.cat(parts)
+
     @torch.no_grad()
     def process_tiles(self):
         actual_tile_size = self.tileSize - (self.tilePad * 2)
         scaled_tile_size = actual_tile_size * self.scale
         scaled_tile_pad = self.tilePad * self.scale
         b, c, h, w = self.img_tensor.shape
+        out_h, out_w = h * self.scale, w * self.scale
         xtiles = math.ceil(w / actual_tile_size)
         ytiles = math.ceil(h / actual_tile_size)
         if not self.observer is None:
             self.observer.startJob(xtiles * ytiles)
 
-        output_tensor = torch.zeros((1, 3, h*self.scale, w*self.scale), dtype=torch.float32).to(self.device)
+        # Accumulation buffers for weighted (feathered) tile blending.
+        output_accum = torch.zeros((1, 3, out_h, out_w), dtype=torch.float32, device=self.device)
+        weight_accum = torch.zeros((1, 1, out_h, out_w), dtype=torch.float32, device=self.device)
 
         # If we have a mask, also keep a copy of the original scaled up for non-masked regions
         if self.mask_tensor is not None:
@@ -200,46 +223,66 @@ class TileProcessor:
                 if self.observer is not None and self.observer.shouldInterrupt():
                     return None
 
-                # Skip tiles with no mask pixels (optimization)
-                if not self._tile_has_mask_pixels(y, x):
-                    # Copy original pixels for this tile region
-                    if self.mask_tensor is not None:
-                        px = x * scaled_tile_size
-                        py = y * scaled_tile_size
-                        trimmed_x = min(scaled_tile_size, output_tensor.shape[3] - px)
-                        trimmed_y = min(scaled_tile_size, output_tensor.shape[2] - py)
-                        output_tensor[
-                            :, :, py : py + trimmed_y, px : px + trimmed_x
-                        ] = original_scaled[
-                            :, :, py : py + trimmed_y, px : px + trimmed_x
-                        ]
-                    if self.observer is not None:
-                        self.observer.updateJob(1)
-                    continue
+                is_skip = not self._tile_has_mask_pixels(y, x)
 
-                # Get tile, padded to tile_size + tile_pad
-                tile = self.preprocess_tile(y, x)
-                processed_tile = self.model(tile)
-                # Remove tile padding
-                processed_tile = processed_tile[:, :,
-                                                scaled_tile_pad:scaled_tile_pad+scaled_tile_size,
-                                                scaled_tile_pad:scaled_tile_pad+scaled_tile_size]
+                # Extend the kept region into the overlap on sides that have a
+                # neighbour, so tiles can be cross-faded together. Sides on the
+                # image border stop at the tile core (the pad there is only
+                # reflected padding, not real image data).
+                left_ext = scaled_tile_pad if x > 0 else 0
+                right_ext = scaled_tile_pad if x < xtiles - 1 else 0
+                top_ext = scaled_tile_pad if y > 0 else 0
+                bottom_ext = scaled_tile_pad if y < ytiles - 1 else 0
 
-                px = x * scaled_tile_size
-                py = y * scaled_tile_size
+                # Core placement in the output image.
+                px_core = x * scaled_tile_size
+                py_core = y * scaled_tile_size
 
-                # Trim tiles that exceed the image boundary (right and bottom edges)
-                trimmed_scaled_tile_size_x = scaled_tile_size
-                trimmed_scaled_tile_size_y = scaled_tile_size
-                if px + scaled_tile_size > output_tensor.shape[3]:
-                    trimmed_scaled_tile_size_x = output_tensor.shape[3] - px
-                if py + scaled_tile_size > output_tensor.shape[2]:
-                    trimmed_scaled_tile_size_y = output_tensor.shape[2] - py
-                output_tensor[:, :, py:py+trimmed_scaled_tile_size_y, px:px+trimmed_scaled_tile_size_x] = \
-                    processed_tile[:, :, 0:trimmed_scaled_tile_size_y, 0:trimmed_scaled_tile_size_x]
+                # Destination region in the output image (core + overlap).
+                dst_x0 = px_core - left_ext
+                dst_x1 = px_core + scaled_tile_size + right_ext
+                dst_y0 = py_core - top_ext
+                dst_y1 = py_core + scaled_tile_size + bottom_ext
+
+                # Clamp to the output bounds (last row/column may overhang).
+                cx0, cx1 = max(dst_x0, 0), min(dst_x1, out_w)
+                cy0, cy1 = max(dst_y0, 0), min(dst_y1, out_h)
+
+                # Blend weight window for the (unclamped) kept region.
+                wx = self._blend_ramp_1d(left_ext, scaled_tile_size, right_ext)
+                wy = self._blend_ramp_1d(top_ext, scaled_tile_size, bottom_ext)
+                # Crop the weight window to match the clamped destination.
+                wx = wx[(cx0 - dst_x0):wx.shape[0] - (dst_x1 - cx1)]
+                wy = wy[(cy0 - dst_y0):wy.shape[0] - (dst_y1 - cy1)]
+                weight2d = wy[:, None] * wx[None, :]
+
+                if is_skip:
+                    # Non-masked tile: contribute the upscaled original so the
+                    # buffers stay fully covered; the final mask blend restores
+                    # exact original pixels for these regions.
+                    source_region = original_scaled[:, :, cy0:cy1, cx0:cx1]
+                else:
+                    # Get tile, padded to tile_size + tile_pad
+                    tile = self.preprocess_tile(y, x)
+                    processed_tile = self.model(tile)
+                    # Slice the kept region (core + overlap) from the processed
+                    # tile, in processed-tile coordinates.
+                    src_x0 = scaled_tile_pad - left_ext + (cx0 - dst_x0)
+                    src_y0 = scaled_tile_pad - top_ext + (cy0 - dst_y0)
+                    source_region = processed_tile[
+                        :, :,
+                        src_y0:src_y0 + (cy1 - cy0),
+                        src_x0:src_x0 + (cx1 - cx0),
+                    ]
+
+                output_accum[:, :, cy0:cy1, cx0:cx1] += source_region * weight2d
+                weight_accum[:, :, cy0:cy1, cx0:cx1] += weight2d
 
                 if self.observer is not None:
                     self.observer.updateJob(1)
+
+        # Normalize the accumulated, feathered tiles.
+        output_tensor = output_accum / weight_accum.clamp_min(1e-8)
 
         # Apply mask blending: only keep model output within masked regions
         if self.mask_tensor is not None:
