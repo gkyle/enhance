@@ -58,6 +58,12 @@ class RunRequest(BaseModel):
     tilePadding: int = 32
     maintainScale: bool = True
     device: Optional[str] = None  # None -> cpu
+    masks: Optional[List["MaskSelection"]] = None
+
+
+class MaskSelection(BaseModel):
+    index: int
+    inverted: bool = False
 
 
 class RunResponse(BaseModel):
@@ -68,3 +74,30 @@ class StrengthRequest(BaseModel):
     fileId: str
     opIndex: int
     strength: float  # 0..1
+
+
+class MaskInfo(BaseModel):
+    index: int
+    label: str
+    uniqueLabel: str
+    score: Optional[float] = None
+    box: List[float] = []  # [x1, y1, x2, y2]
+    overlayUrl: Optional[str] = None
+
+
+class TaskInfo(BaseModel):
+    id: int
+    label: str
+    device: Optional[str] = None
+    status: str
+    scheduleTime: float
+    latency: Optional[float] = None
+
+
+class AutoMaskRequest(BaseModel):
+    fileId: str = "base"
+
+
+# Resolve the forward reference RunRequest -> MaskSelection.
+RunRequest.model_rebuild()
+

@@ -30,6 +30,11 @@
       this._byId = new Map(); // id -> canonical FileInfo
       this._listeners = [];
       this._fileListeners = [];
+      // Detected masks on the base file, with their overlay bitmaps and which
+      // are currently drawn on the canvas.
+      this.masks = []; // [{index,label,uniqueLabel,box,overlayUrl,bitmap}]
+      this.visibleMaskIndices = new Set();
+      this._maskListeners = [];
     }
 
     onChange(fn) {
@@ -41,12 +46,21 @@
       this._fileListeners.push(fn);
     }
 
+    // Fired when the mask list or their visibility changes.
+    onMasksChange(fn) {
+      this._maskListeners.push(fn);
+    }
+
     _notify() {
       this._listeners.forEach((fn) => fn(this));
     }
 
     _notifyFiles() {
       this._fileListeners.forEach((fn) => fn(this));
+    }
+
+    _notifyMasks() {
+      this._maskListeners.forEach((fn) => fn(this));
     }
 
     // Return the canonical FileInfo for an id, updating it in place if it already
@@ -150,14 +164,55 @@
       this._notifyFiles();
     }
 
+    // Load mask metadata (from GET /masks) and decode each overlay bitmap so the
+    // canvas can composite visible ones over the base image.
+    async setMasks(maskInfos) {
+      const masks = [];
+      for (const info of maskInfos || []) {
+        let bitmap = null;
+        if (info.overlayUrl) {
+          try {
+            const res = await fetch(window.api.assetUrl(info.overlayUrl));
+            bitmap = await createImageBitmap(await res.blob());
+          } catch (e) {
+            bitmap = null;
+          }
+        }
+        masks.push({ ...info, bitmap });
+      }
+      this.masks = masks;
+      // Hide all by default (matches the Qt automask flow).
+      this.visibleMaskIndices = new Set();
+      this._notifyMasks();
+      this._notify();
+    }
+
+    setMaskVisible(index, visible) {
+      if (visible) this.visibleMaskIndices.add(index);
+      else this.visibleMaskIndices.delete(index);
+      this._notifyMasks();
+      this._notify();
+    }
+
+    setAllMasksVisible(visible) {
+      this.visibleMaskIndices = visible
+        ? new Set(this.masks.map((m) => m.index))
+        : new Set();
+      this._notifyMasks();
+      this._notify();
+    }
+
     clear() {
       this.base = null;
       this.compares = [null, null, null];
       this.active = null;
       this.renderMode = RenderMode.Single;
       this._byId.clear();
+      this.masks = [];
+      this.visibleMaskIndices = new Set();
       this._notify();
       this._notifyFiles();
+      this._notifyMasks();
     }
   }
 

@@ -13,12 +13,24 @@ import os
 from typing import Optional, Tuple
 
 import cv2
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
 # Cache directory for generated previews, served via the /cache static mount.
 PREVIEW_CACHE_DIR = os.path.join(os.getcwd(), ".preview_cache")
 CACHE_URL_PREFIX = "/cache"
+
+# RGB colors used to tint mask overlays, cycled by mask index. These match the
+# canvas.js MASK_COLORS palette so an overlay's fill matches its box/label color.
+MASK_COLORS = [
+    (66, 135, 245),   # blue
+    (80, 200, 120),   # green
+    (231, 76, 60),    # red
+    (52, 152, 219),   # light blue
+    (155, 89, 182),   # purple
+    (212, 188, 60),   # yellow
+]
 
 
 def ensure_cache_dir() -> str:
@@ -85,3 +97,46 @@ def clear_preview_cache() -> None:
             os.remove(os.path.join(PREVIEW_CACHE_DIR, name))
         except OSError as e:  # pragma: no cover - defensive
             logger.warning("Failed to remove preview %s: %s", name, e)
+
+
+def generate_mask_overlay(
+    file_id: str,
+    version: int,
+    index: int,
+    mask_array,
+) -> Tuple[str, int, int]:
+    """Render a boolean mask as a translucent colored RGBA PNG.
+
+    Returns (url, width, height). The overlay matches the mask array's pixel
+    dimensions (the full-res image size), so the renderer can draw it using the
+    same transform as the base preview. `version` invalidates the cache when
+    masks are regenerated. Mirrors CanvasLabel.applyMasks' color fill.
+    """
+    ensure_cache_dir()
+    name = f"mask_{file_id}_{version}_{index}.png"
+    out_path = os.path.join(PREVIEW_CACHE_DIR, name)
+
+    arr = np.asarray(mask_array)
+    if arr.ndim != 2:
+        arr = np.squeeze(arr)
+    h, w = arr.shape[:2]
+
+    if not os.path.exists(out_path):
+        color = MASK_COLORS[index % len(MASK_COLORS)]
+        r, g, b = color
+        # cv2 writes 4-channel arrays as BGRA, so fill in BGRA order to make the
+        # browser read back the intended RGB (matching the canvas box color).
+        rgba = np.zeros((h, w, 4), dtype=np.uint8)
+        sel = arr.astype(bool)
+        rgba[sel, 0] = b
+        rgba[sel, 1] = g
+        rgba[sel, 2] = r
+        rgba[sel, 3] = 110  # ~0.43 alpha
+        cv2.imwrite(out_path, rgba)
+
+    return f"{CACHE_URL_PREFIX}/{name}", w, h
+
+
+def mask_color(index: int) -> Tuple[int, int, int]:
+    """RGB color for a mask index (matches the overlay tint)."""
+    return MASK_COLORS[index % len(MASK_COLORS)]

@@ -1,5 +1,5 @@
 // Model-select modal — ports DialogModel (installed models filtered by operation,
-// tile size/padding, device, maintain-scale). Masks are deferred to Phase 5.
+// tile size/padding, device, maintain-scale, and optional mask restriction).
 
 (function () {
   const TILE_SIZES = [64, 128, 256, 512, 1024];
@@ -45,6 +45,15 @@
         ? modelKeys.map((k) => `<option value="${k}">${k}</option>`).join("")
         : "";
 
+      // Masks detected on the base file (Phase 5): allow restricting the run.
+      const masks = (window.selectionState && window.selectionState.masks) || [];
+      const maskOpts = masks
+        .map(
+          (m) =>
+            `<option value="${m.index}">${m.uniqueLabel}</option>`
+        )
+        .join("");
+
       overlay.innerHTML = `
         <div class="modal">
           <h2>${operation[0].toUpperCase() + operation.slice(1)}</h2>
@@ -73,6 +82,17 @@
               Maintain scale
             </label>
           </div>
+          ${
+            masks.length
+              ? `<label>Restrict to masks (optional)
+                   <select id="ms-masks" multiple size="4">${maskOpts}</select>
+                 </label>
+                 <label class="checkbox">
+                   <input type="checkbox" id="ms-mask-invert" />
+                   Apply outside selected masks
+                 </label>`
+              : ""
+          }
           <div class="modal-actions">
             <button id="ms-cancel">Cancel</button>
             <button id="ms-ok" class="primary"${
@@ -100,6 +120,14 @@
             overlay.querySelector("#ms-models").selectedOptions
           ).map((o) => o.value);
           if (selected.length === 0) return;
+          const maskSel = overlay.querySelector("#ms-masks");
+          const invert = overlay.querySelector("#ms-mask-invert");
+          const masks = maskSel
+            ? Array.from(maskSel.selectedOptions).map((o) => ({
+                index: parseInt(o.value, 10),
+                inverted: !!(invert && invert.checked),
+              }))
+            : [];
           close({
             models: selected,
             operation,
@@ -107,6 +135,7 @@
             tilePadding: parseInt(overlay.querySelector("#ms-pad").value, 10),
             device: overlay.querySelector("#ms-device").value,
             maintainScale: overlay.querySelector("#ms-scale").checked,
+            masks,
           });
         });
       }

@@ -11,6 +11,11 @@
     (listeners[type] = listeners[type] || []).push(fn);
   }
 
+  function off(type, fn) {
+    if (!listeners[type]) return;
+    listeners[type] = listeners[type].filter((f) => f !== fn);
+  }
+
   function emit(type, payload) {
     (listeners[type] || []).forEach((fn) => fn(payload));
   }
@@ -60,6 +65,7 @@
   window.api = {
     backend,
     on,
+    off,
     getGpu: () => getJson("/gpu"),
     getModels: (installed) =>
       getJson(installed ? "/models?installed=true" : "/models"),
@@ -77,6 +83,11 @@
     setStrength: (fileId, opIndex, strength) =>
       postJson("/operation/strength", { fileId, opIndex, strength }),
     deleteFile: (fileId) => deleteJson(`/file/${fileId}`),
+    refreshModels: () => postJson("/models/refresh", {}),
+    installModel: (key) => postJson("/models/install", { path: key }),
+    getTasks: () => getJson("/tasks"),
+    getMasks: (fileId) => getJson(`/masks/${fileId}`),
+    autoMask: (fileId) => postJson("/automask", { fileId }),
     interrupt: () => postJson("/interrupt", {}),
     assetUrl,
     connectWebSocket,

@@ -11,6 +11,9 @@
     sharpen: document.getElementById("btnSharpen"),
     denoise: document.getElementById("btnDenoise"),
     upscale: document.getElementById("btnUpscale"),
+    automask: document.getElementById("btnAutomask"),
+    modelManager: document.getElementById("btnModelManager"),
+    taskQueue: document.getElementById("btnTaskQueue"),
     single: document.getElementById("btnSingle"),
     split: document.getElementById("btnSplit"),
     grid: document.getElementById("btnGrid"),
@@ -22,6 +25,9 @@
     compareInfo: document.getElementById("compareInfo"),
     canvas: document.getElementById("canvas"),
     opsList: document.getElementById("opsList"),
+    maskHeader: document.getElementById("maskHeader"),
+    maskList: document.getElementById("maskList"),
+    maskToggleAll: document.getElementById("btnMaskToggleAll"),
     filestrip: document.getElementById("filestripInner"),
     progress: document.getElementById("progress"),
     progressLabel: document.getElementById("progressLabel"),
@@ -38,6 +44,66 @@
   const ops = new window.OperationsPanel(els.opsList, state);
   ops.render();
 
+  // ----- mask visibility panel (ports MaskVisibilityList; default all hidden) -----
+  function renderMaskPanel() {
+    const masks = state.masks || [];
+    els.maskHeader.classList.toggle("hidden", masks.length === 0);
+    if (masks.length === 0) {
+      els.maskList.innerHTML = "";
+      return;
+    }
+    els.maskList.innerHTML = "";
+    for (const m of masks) {
+      const row = document.createElement("label");
+      row.className = "mask-row";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = state.visibleMaskIndices.has(m.index);
+      cb.addEventListener("change", () => {
+        state.setMaskVisible(m.index, cb.checked);
+        updateToggleAllLabel();
+      });
+      const swatch = document.createElement("span");
+      swatch.className = "mask-swatch";
+      swatch.style.background = maskColor(m.index);
+      const label = document.createElement("span");
+      label.className = "mask-row-label";
+      label.textContent = `${m.uniqueLabel}  (${Math.round((m.score || 0) * 100)}%)`;
+      row.appendChild(cb);
+      row.appendChild(swatch);
+      row.appendChild(label);
+      els.maskList.appendChild(row);
+    }
+    updateToggleAllLabel();
+  }
+
+  function updateToggleAllLabel() {
+    const masks = state.masks || [];
+    const allOn = masks.length > 0 && masks.every((m) => state.visibleMaskIndices.has(m.index));
+    els.maskToggleAll.textContent = allOn ? "Hide all" : "Show all";
+  }
+
+  function maskColor(index) {
+    const colors = [
+      "rgb(66,135,245)",
+      "rgb(80,200,120)",
+      "rgb(231,76,60)",
+      "rgb(52,152,219)",
+      "rgb(155,89,182)",
+      "rgb(212,188,60)",
+    ];
+    return colors[index % colors.length];
+  }
+
+  els.maskToggleAll.addEventListener("click", () => {
+    const masks = state.masks || [];
+    const allOn = masks.length > 0 && masks.every((m) => state.visibleMaskIndices.has(m.index));
+    state.setAllMasksVisible(!allOn);
+    renderMaskPanel();
+  });
+
+  state.onMasksChange(renderMaskPanel);
+
   function setModeButtons(mode) {
     [els.single, els.split, els.grid].forEach((b) => b.classList.remove("active"));
     if (mode === RenderMode.Single) els.single.classList.add("active");
@@ -46,7 +112,7 @@
   }
 
   function enableViewerControls() {
-    [els.add, els.sharpen, els.denoise, els.upscale, els.single, els.split, els.grid, els.zoom].forEach(
+    [els.add, els.sharpen, els.denoise, els.upscale, els.automask, els.single, els.split, els.grid, els.zoom].forEach(
       (b) => (b.disabled = false)
     );
     els.placeholder.style.display = "none";
@@ -103,6 +169,7 @@
     els.filename.textContent = info.basename || path;
     els.filename.classList.remove("muted");
     await state.setBase(info);
+    await state.setMasks([]);
     enableViewerControls();
     updateCompareInfo();
   });
@@ -152,6 +219,7 @@
   // (matching the Qt behavior of re-running on the current compare file).
   const activeJobs = new Set();
   const jobResolvers = new Map();
+  const autoMaskJobs = new Set();
   let autoCompareFirst = false;
 
   function showProgress(label, indeterminate) {
@@ -177,6 +245,7 @@
           tilePadding: params.tilePadding,
           maintainScale: params.maintainScale,
           device: params.device === "cpu" ? null : params.device,
+          masks: params.masks && params.masks.length ? params.masks : null,
         })
         .then(({ jobId }) => {
           activeJobs.add(jobId);
@@ -213,8 +282,27 @@
   els.upscale.addEventListener("click", () => runOperation("upscale"));
   els.cancel.addEventListener("click", () => window.api.interrupt().catch(() => {}));
 
+  els.modelManager.addEventListener("click", () => window.openModelManager());
+  els.taskQueue.addEventListener("click", () => window.openTaskQueue());
+
+  // Auto-detect masks on the base image (Florence + SAM); results push back over
+  // the "masksUpdated" websocket event and populate the mask visibility panel.
+  els.automask.addEventListener("click", async () => {
+    if (!state.base) return;
+    els.automask.disabled = true;
+    showProgress("Detecting masks…", true);
+    try {
+      const { jobId } = await window.api.autoMask("base");
+      autoMaskJobs.add(jobId);
+    } catch (e) {
+      els.compareInfo.textContent = `Auto mask failed: ${e.message || e}`;
+      hideProgress();
+      els.automask.disabled = false;
+    }
+  });
+
   window.api.on("progress", (p) => {
-    if (!activeJobs.has(p.jobId)) return;
+    if (!activeJobs.has(p.jobId) && !autoMaskJobs.has(p.jobId)) return;
     if (p.statusMessage) {
       showProgress(p.statusMessage, true);
     } else if (p.total) {
@@ -260,6 +348,20 @@
       r.reject(new Error(payload.message));
     }
     if (activeJobs.size === 0) hideProgress();
+  });
+
+  // Auto-mask completion: ingest detected masks (default all hidden) and clear
+  // the detection progress. Payload carries { jobId, fileId, masks }.
+  window.api.on("masksUpdated", async (payload) => {
+    if (payload.jobId != null) autoMaskJobs.delete(payload.jobId);
+    els.automask.disabled = false;
+    try {
+      const masks = payload.masks || (await window.api.getMasks(payload.fileId || "base"));
+      await state.setMasks(masks);
+    } catch (e) {
+      els.compareInfo.textContent = `Load masks failed: ${e.message || e}`;
+    }
+    if (activeJobs.size === 0 && autoMaskJobs.size === 0) hideProgress();
   });
 
   // ----- GPU stats -----

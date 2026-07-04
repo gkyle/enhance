@@ -20,6 +20,11 @@
       <button id="btnUpscale" disabled>Upscale</button>
 
       <span class="sep"></span>
+      <button id="btnAutomask" disabled>Auto Mask</button>
+      <button id="btnModelManager">Models…</button>
+      <button id="btnTaskQueue">Tasks…</button>
+
+      <span class="sep"></span>
       <div class="modes">
         <button id="btnSingle" class="mode active" disabled>Single</button>
         <button id="btnSplit" class="mode" disabled>Split</button>
@@ -47,6 +52,11 @@
       <aside id="opsPanel">
         <div class="ops-header">Operations</div>
         <div id="opsList"></div>
+        <div class="ops-header mask-header hidden" id="maskHeader">
+          Masks
+          <button id="btnMaskToggleAll" class="mask-toggle-all">Show all</button>
+        </div>
+        <div id="maskList" class="mask-list"></div>
       </aside>
       <section id="viewerMain">
         <canvas id="canvas"></canvas>
@@ -73,6 +83,8 @@
     <script src="filestrip.js"></script>
     <script src="operations.js"></script>
     <script src="dialogs/modelSelect.js"></script>
+    <script src="dialogs/modelManager.js"></script>
+    <script src="dialogs/taskQueue.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

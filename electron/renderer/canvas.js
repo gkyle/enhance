@@ -5,6 +5,16 @@
 (function () {
   const RenderMode = window.RenderMode;
 
+  // Box/label colors keyed by mask index (RGB), matching the server overlay tint.
+  const MASK_COLORS = [
+    "rgb(66,135,245)",
+    "rgb(80,200,120)",
+    "rgb(231,76,60)",
+    "rgb(52,152,219)",
+    "rgb(155,89,182)",
+    "rgb(212,188,60)",
+  ];
+
   class Viewer {
     constructor(canvas, state) {
       this.canvas = canvas;
@@ -22,6 +32,7 @@
       this.fraction = 0.5;
 
       state.onChange(() => this.onStateChange());
+      if (state.onMasksChange) state.onMasksChange(() => this.paint());
       this._bindEvents();
       window.addEventListener("resize", () => this._resizeAndPaint());
       this._resizeBackingStore();
@@ -180,15 +191,55 @@
       const eff = this.effZoom(file);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
+      const drawX = originX + this.posX;
+      const drawY = originY + this.posY;
       ctx.drawImage(
         file.bitmap,
-        originX + this.posX,
-        originY + this.posY,
+        drawX,
+        drawY,
         file.previewWidth * eff,
         file.previewHeight * eff
       );
+      // Mask overlays only apply to the base image (masks are detected on it).
+      if (file === this.base()) {
+        this._drawMasks(file, eff, drawX, drawY);
+      }
       this._drawLabel(file, clipX, clipY, clipW, clipH);
       ctx.restore();
+    }
+
+    // Draw visible mask overlays (translucent fill bitmaps), bounding boxes, and
+    // labels using the same transform as the base image (ports applyMasks). The
+    // overlay spans the whole image, so it's stretched to the base's preview size
+    // (its own bitmap resolution may differ from the preview, e.g. when SAM emits
+    // a lower-res mask — using bitmap.width would shrink it into the corner).
+    _drawMasks(file, eff, drawX, drawY) {
+      const masks = this.state.masks || [];
+      if (!masks.length) return;
+      const ctx = this.ctx;
+      const drawW = file.previewWidth * eff;
+      const drawH = file.previewHeight * eff;
+      for (const m of masks) {
+        if (!this.state.visibleMaskIndices.has(m.index)) continue;
+        if (m.bitmap) {
+          ctx.drawImage(m.bitmap, drawX, drawY, drawW, drawH);
+        }
+        if (m.box && m.box.length === 4) {
+          const color = MASK_COLORS[m.index % MASK_COLORS.length];
+          const x1 = drawX + m.box[0] * eff;
+          const y1 = drawY + m.box[1] * eff;
+          const x2 = drawX + m.box[2] * eff;
+          const y2 = drawY + m.box[3] * eff;
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+          ctx.font = "14px Arial";
+          ctx.fillStyle = "rgba(255,255,255,0.95)";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "bottom";
+          ctx.fillText(m.uniqueLabel, x1, y1 - 4);
+        }
+      }
     }
 
     _drawLabel(file, x, y, w, h) {

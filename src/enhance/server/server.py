@@ -23,14 +23,17 @@ from enhance.server import preview as preview_mod
 from enhance.server.events import gpu_stats_loop, hub
 from enhance.server.jobs import job_queue
 from enhance.server.schemas import (
+    AutoMaskRequest,
     FileInfo,
     GpuStats,
+    MaskInfo,
     OperationInfo,
     PreviewResponse,
     RunRequest,
     RunResponse,
     SetBaseFileRequest,
     StrengthRequest,
+    TaskInfo,
 )
 from enhance.server.static import mount_cache
 
@@ -68,9 +71,14 @@ async def lifespan(app: FastAPI):
     app.state.files: Dict[str, File] = {}
     app.state.file_counter = 0
     app.state.job_counter = 0
+    # Per-file mask version, bumped on automask so overlay caches invalidate.
+    app.state.mask_version: Dict[str, int] = {}
     if app.state.app.getBaseFile() is not None:
         app.state.files["base"] = app.state.app.getBaseFile()
 
+    job_queue.on_change = lambda: hub.broadcast_threadsafe(
+        {"type": "tasksUpdated", "payload": job_queue.snapshot()}
+    )
     job_queue.start()
     hub.bind_loop(asyncio.get_running_loop())
     stats_task = asyncio.create_task(gpu_stats_loop(lambda: _gpu_stats(app)))
@@ -213,6 +221,7 @@ def run_model(req: RunRequest) -> RunResponse:
     job_id = f"job{app.state.job_counter}"
     label = f"{req.operation.capitalize()}: {req.modelKey}"
     device = req.device or "cpu"
+    selected_masks = _resolve_masks(req.masks)
 
     def work() -> None:
         forwarder = ProgressForwarder(job_id)
@@ -248,7 +257,7 @@ def run_model(req: RunRequest) -> RunResponse:
                 req.maintainScale,
                 device,
                 operation,
-                masks=None,
+                masks=selected_masks or None,
             )
         except Exception as e:
             logger.exception("Run failed")
@@ -305,6 +314,64 @@ def delete_file(file_id: str) -> dict:
     return {"status": "ok"}
 
 
+@app.post("/models/refresh")
+def refresh_models() -> dict:
+    """Refresh the model list from the remote config (network)."""
+    app.state.app.refreshModelList()
+    return app.state.app.getModels()
+
+
+@app.post("/models/install")
+def install_model(req: SetBaseFileRequest) -> dict:
+    """Install (download) a model by its key; `path` carries the model key."""
+    app.state.app.fetchModel(req.path)
+    return app.state.app.getModels()
+
+
+@app.get("/tasks", response_model=list[TaskInfo])
+def get_tasks() -> list[TaskInfo]:
+    return [TaskInfo(**t) for t in job_queue.snapshot()]
+
+
+@app.get("/masks/{file_id}", response_model=list[MaskInfo])
+def get_masks(file_id: str) -> list[MaskInfo]:
+    file = app.state.files.get(file_id)
+    if file is None:
+        raise HTTPException(status_code=404, detail="Unknown file id")
+    return _mask_infos(file_id, file)
+
+
+@app.post("/automask", response_model=RunResponse)
+def automask(req: AutoMaskRequest) -> RunResponse:
+    target = app.state.files.get(req.fileId)
+    if not isinstance(target, InputFile):
+        raise HTTPException(status_code=400, detail="Automask requires an input file")
+    if not app.state.app.doDetect:
+        raise HTTPException(status_code=400, detail="Mask detection is disabled")
+
+    app.state.job_counter += 1
+    job_id = f"job{app.state.job_counter}"
+
+    def work() -> None:
+        forwarder = ProgressForwarder(job_id)
+        try:
+            app.state.app.runAutoMask(target, forwarder)
+        except Exception as e:
+            logger.exception("Automask failed")
+            hub.broadcast_threadsafe(
+                {"type": "runError", "payload": {"jobId": job_id, "message": str(e)}}
+            )
+            raise
+        app.state.mask_version[req.fileId] = app.state.mask_version.get(req.fileId, 0) + 1
+        masks = [m.model_dump() for m in _mask_infos(req.fileId, target)]
+        hub.broadcast_threadsafe(
+            {"type": "masksUpdated", "payload": {"jobId": job_id, "fileId": req.fileId, "masks": masks}}
+        )
+
+    job_queue.submit(work, label="Generating Masks", device=app.state.app.gpuInfo.getPreferredDevice())
+    return RunResponse(jobId=job_id)
+
+
 @app.post("/interrupt")
 def interrupt() -> dict:
     app.state.app.interruptOperation()
@@ -324,6 +391,48 @@ async def ws_endpoint(ws: WebSocket) -> None:
         hub.disconnect(ws)
     except Exception:
         hub.disconnect(ws)
+
+
+def _resolve_masks(selections):
+    """Resolve mask selections (index + inverted) against the base file's masks."""
+    if not selections:
+        return []
+    base = app.state.app.getBaseFile()
+    if base is None or not getattr(base, "masks", None):
+        return []
+    resolved = []
+    for sel in selections:
+        if 0 <= sel.index < len(base.masks):
+            mask = base.masks[sel.index]
+            mask.inverted = sel.inverted
+            resolved.append(mask)
+    return resolved
+
+
+def _mask_infos(file_id: str, file: File) -> list[MaskInfo]:
+    masks = getattr(file, "masks", None) or []
+    version = app.state.mask_version.get(file_id, 0)
+    infos: list[MaskInfo] = []
+    for idx, mask in enumerate(masks):
+        overlay_url = None
+        try:
+            overlay_url, _, _ = preview_mod.generate_mask_overlay(
+                file_id, version, idx, mask.mask
+            )
+        except Exception:  # pragma: no cover - defensive
+            logger.exception("Failed to render mask overlay %d", idx)
+        box = list(mask.box) if mask.box is not None else []
+        infos.append(
+            MaskInfo(
+                index=idx,
+                label=mask.label,
+                uniqueLabel=mask.uniqueLabel,
+                score=float(mask.score) if mask.score is not None else None,
+                box=[float(v) for v in box],
+                overlayUrl=overlay_url,
+            )
+        )
+    return infos
 
 
 def _file_info(file_id: str, file: File) -> FileInfo:
