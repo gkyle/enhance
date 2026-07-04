@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' http://127.0.0.1:* data:; connect-src http://127.0.0.1:* ws://127.0.0.1:*; style-src 'self' 'unsafe-inline';"
+    />
+    <title>Enhance AI (Electron experiment)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header id="topbar">
+      <button id="btnOpen">Open Image…</button>
+      <span id="filename" class="muted">No image loaded</span>
+      <span id="gpu" class="gpu muted">GPU: —</span>
+    </header>
+
+    <main id="viewer">
+      <img id="preview" alt="" />
+      <div id="placeholder" class="muted">Open an image to preview</div>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
