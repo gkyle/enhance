@@ -3,4 +3,5 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("native", {
   openImage: () => ipcRenderer.invoke("dialog:openImage"),
+  saveImage: (defaultName) => ipcRenderer.invoke("dialog:saveImage", defaultName),
 });

@@ -83,6 +83,9 @@
     setStrength: (fileId, opIndex, strength) =>
       postJson("/operation/strength", { fileId, opIndex, strength }),
     deleteFile: (fileId) => deleteJson(`/file/${fileId}`),
+    saveFile: (fileId, targetPath) =>
+      postJson(`/file/${fileId}/save`, { targetPath }),
+    hasUnsaved: () => getJson("/has-unsaved"),
     refreshModels: () => postJson("/models/refresh", {}),
     installModel: (key) => postJson("/models/install", { path: key }),
     getTasks: () => getJson("/tasks"),

@@ -151,6 +151,17 @@
     }
   };
 
+  strip.onSave = async (file) => {
+    const target = await window.native.saveImage(file.basename);
+    if (!target) return;
+    try {
+      const info = await window.api.saveFile(file.id, target);
+      await state.updateFile(info);
+    } catch (e) {
+      els.compareInfo.textContent = `Save failed: ${e.message || e}`;
+    }
+  };
+
   ops.onStrengthChange = async (fileId, opIndex, strength) => {
     try {
       const info = await window.api.setStrength(fileId, opIndex, strength);

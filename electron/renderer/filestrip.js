@@ -13,6 +13,7 @@
       this.state = state;
       this.onSelect = null; // (fileInfo) => void
       this.onDelete = null; // (fileInfo) => void
+      this.onSave = null; // (fileInfo) => void
       this._els = new Map(); // id -> { root, img, badges }
       state.onFilesChange(() => this.render());
     }
@@ -89,6 +90,18 @@
             if (this.onDelete) this.onDelete(file);
           });
           root.appendChild(del);
+
+          if (!file.saved) {
+            const save = document.createElement("button");
+            save.className = "file-save";
+            save.textContent = "💾";
+            save.title = "Save…";
+            save.addEventListener("click", (e) => {
+              e.stopPropagation();
+              if (this.onSave) this.onSave(file);
+            });
+            root.appendChild(save);
+          }
         }
 
         root.addEventListener("click", () => {

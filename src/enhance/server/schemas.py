@@ -76,6 +76,10 @@ class StrengthRequest(BaseModel):
     strength: float  # 0..1
 
 
+class SaveFileRequest(BaseModel):
+    targetPath: str
+
+
 class MaskInfo(BaseModel):
     index: int
     label: str

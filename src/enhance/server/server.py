@@ -11,6 +11,7 @@ import asyncio
 import contextlib
 import logging
 import os
+import shutil
 import sys
 from contextlib import asynccontextmanager
 from typing import Dict
@@ -31,6 +32,7 @@ from enhance.server.schemas import (
     PreviewResponse,
     RunRequest,
     RunResponse,
+    SaveFileRequest,
     SetBaseFileRequest,
     StrengthRequest,
     TaskInfo,
@@ -312,6 +314,32 @@ def delete_file(file_id: str) -> dict:
     except ValueError:
         pass
     return {"status": "ok"}
+
+
+@app.post("/file/{file_id}/save", response_model=FileInfo)
+def save_file(file_id: str, req: SaveFileRequest) -> FileInfo:
+    """Copy an output file's rendered image to a user-chosen path (native Save)."""
+    file = app.state.files.get(file_id)
+    if file is None:
+        raise HTTPException(status_code=404, detail="Unknown file id")
+    if not isinstance(file, OutputFile) or file.path is None:
+        raise HTTPException(status_code=400, detail="Only output files can be saved")
+
+    target_dir = os.path.dirname(req.targetPath)
+    if target_dir and not os.path.isdir(target_dir):
+        raise HTTPException(status_code=400, detail="Target directory does not exist")
+    try:
+        shutil.copyfile(file.path, req.targetPath)
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"Save failed: {e}")
+    file.saved = True
+    return _file_info(file_id, file)
+
+
+@app.get("/has-unsaved")
+def has_unsaved() -> dict:
+    """Whether any output file has unsaved changes (drives the quit guard)."""
+    return {"unsaved": app.state.app.hasUnsavedChanges()}
 
 
 @app.post("/models/refresh")
