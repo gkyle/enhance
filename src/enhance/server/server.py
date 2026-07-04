@@ -10,6 +10,7 @@ Run with:  uvicorn enhance.server.server:app --host 127.0.0.1 --port 8420
 import asyncio
 import contextlib
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 from typing import Dict
@@ -17,7 +18,7 @@ from typing import Dict
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from enhance.lib.file import File
+from enhance.lib.file import File, InputFile, Operation
 from enhance.server import preview as preview_mod
 from enhance.server.events import gpu_stats_loop, hub
 from enhance.server.jobs import job_queue
@@ -25,6 +26,8 @@ from enhance.server.schemas import (
     FileInfo,
     GpuStats,
     PreviewResponse,
+    RunRequest,
+    RunResponse,
     SetBaseFileRequest,
 )
 from enhance.server.static import mount_cache
@@ -61,6 +64,8 @@ async def lifespan(app: FastAPI):
     app.state.app = _build_app()
     # Registry of file id -> File so the renderer can reference files by id.
     app.state.files: Dict[str, File] = {}
+    app.state.file_counter = 0
+    app.state.job_counter = 0
     if app.state.app.getBaseFile() is not None:
         app.state.files["base"] = app.state.app.getBaseFile()
 
@@ -105,16 +110,45 @@ def get_models(installed: bool = False) -> dict:
     return app.state.app.getModels(installed=installed)
 
 
+@app.get("/devices")
+def get_devices() -> list[dict]:
+    """Available inference devices: cpu plus any detected GPUs."""
+    devices = [{"id": "cpu", "name": "CPU"}]
+    for gpu_id, name in app.state.app.gpuInfo.getGpuNames():
+        devices.append({"id": gpu_id, "name": f"{name} ({gpu_id})"})
+    return devices
+
+
 @app.post("/file/base", response_model=FileInfo)
 def set_base_file(req: SetBaseFileRequest) -> FileInfo:
-    import os
-
     if not os.path.exists(req.path):
         raise HTTPException(status_code=404, detail="File not found")
 
     file = app.state.app.setBaseFile(req.path)
     app.state.files["base"] = file
     return _file_info("base", file)
+
+
+@app.post("/file/append", response_model=FileInfo)
+def append_file(req: SetBaseFileRequest) -> FileInfo:
+    """Register an additional image the renderer can use as a compare file.
+
+    Viewer-only concept for now; the operation pipeline (Phase 3+) manages its
+    own output files via `App`.
+    """
+    if not os.path.exists(req.path):
+        raise HTTPException(status_code=404, detail="File not found")
+
+    file = InputFile(req.path)
+    app.state.file_counter += 1
+    fid = f"f{app.state.file_counter}"
+    app.state.files[fid] = file
+    return _file_info(fid, file)
+
+
+@app.get("/files", response_model=list[FileInfo])
+def list_files() -> list[FileInfo]:
+    return [_file_info(fid, f) for fid, f in app.state.files.items()]
 
 
 @app.get("/preview/{file_id}", response_model=PreviewResponse)
@@ -128,6 +162,101 @@ def get_preview(file_id: str, w: int | None = None, h: int | None = None) -> Pre
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return PreviewResponse(url=url, width=pw, height=ph)
+
+
+_OPERATIONS = {
+    "sharpen": Operation.Sharpen,
+    "denoise": Operation.Denoise,
+    "upscale": Operation.Upscale,
+}
+
+
+class ProgressForwarder:
+    """Observer forwarding `Observable` notifications to the WebSocket hub.
+
+    Matches the `Observable.notifyObservers` callback signature and replaces the
+    Qt `ProgressBarUpdater.tick`. Runs on the job worker thread, so it uses the
+    threadsafe broadcast.
+    """
+
+    def __init__(self, job_id: str) -> None:
+        self.job_id = job_id
+
+    def __call__(self, total, increment, count, done, data, status_message):
+        hub.broadcast_threadsafe(
+            {
+                "type": "progress",
+                "payload": {
+                    "jobId": self.job_id,
+                    "total": total,
+                    "count": count,
+                    "done": bool(done),
+                    "statusMessage": status_message,
+                },
+            }
+        )
+
+
+@app.post("/run", response_model=RunResponse)
+def run_model(req: RunRequest) -> RunResponse:
+    base_file = app.state.files.get(req.fileId)
+    if base_file is None or base_file.path is None:
+        raise HTTPException(status_code=404, detail="Unknown file id")
+
+    operation = _OPERATIONS.get(req.operation.lower())
+    if operation is None:
+        raise HTTPException(status_code=400, detail=f"Unknown operation: {req.operation}")
+
+    app.state.job_counter += 1
+    job_id = f"job{app.state.job_counter}"
+    label = f"{req.operation.capitalize()}: {req.modelKey}"
+    device = req.device or "cpu"
+
+    def work() -> None:
+        forwarder = ProgressForwarder(job_id)
+        try:
+            output = app.state.app.runModel(
+                base_file,
+                req.modelKey,
+                forwarder,
+                req.tileSize,
+                req.tilePadding,
+                req.maintainScale,
+                device,
+                operation,
+                masks=None,
+            )
+        except Exception as e:
+            logger.exception("Run failed")
+            hub.broadcast_threadsafe(
+                {"type": "runError", "payload": {"jobId": job_id, "message": str(e)}}
+            )
+            raise
+
+        if output is None:
+            hub.broadcast_threadsafe(
+                {"type": "runError", "payload": {"jobId": job_id, "message": "No output produced"}}
+            )
+            return
+
+        app.state.file_counter += 1
+        fid = f"o{app.state.file_counter}"
+        app.state.files[fid] = output
+        hub.broadcast_threadsafe(
+            {
+                "type": "runComplete",
+                "payload": {"jobId": job_id, "file": _file_info(fid, output).model_dump()},
+            }
+        )
+
+    job_queue.submit(work, label=label, device=device)
+    return RunResponse(jobId=job_id)
+
+
+@app.post("/interrupt")
+def interrupt() -> dict:
+    app.state.app.interruptOperation()
+    return {"status": "ok"}
 
 
 @app.websocket("/ws")

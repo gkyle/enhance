@@ -55,9 +55,15 @@
     backend,
     on,
     getGpu: () => getJson("/gpu"),
-    getModels: () => getJson("/models"),
+    getModels: (installed) =>
+      getJson(installed ? "/models?installed=true" : "/models"),
+    getDevices: () => getJson("/devices"),
     setBaseFile: (path) => postJson("/file/base", { path }),
+    appendFile: (path) => postJson("/file/append", { path }),
+    listFiles: () => getJson("/files"),
     getPreview: (fileId) => getJson(`/preview/${fileId}`),
+    runModel: (req) => postJson("/run", req),
+    interrupt: () => postJson("/interrupt", {}),
     assetUrl,
     connectWebSocket,
   };

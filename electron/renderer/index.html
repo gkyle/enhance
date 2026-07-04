@@ -4,24 +4,63 @@
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' http://127.0.0.1:* data:; connect-src http://127.0.0.1:* ws://127.0.0.1:*; style-src 'self' 'unsafe-inline';"
+      content="default-src 'self'; img-src 'self' http://127.0.0.1:* data: blob:; connect-src http://127.0.0.1:* ws://127.0.0.1:*; style-src 'self' 'unsafe-inline';"
     />
     <title>Enhance AI (Electron experiment)</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header id="topbar">
-      <button id="btnOpen">Open Image…</button>
+      <button id="btnOpen">Open Base…</button>
+      <button id="btnAdd" disabled>Add Compare…</button>
+
+      <span class="sep"></span>
+      <button id="btnSharpen" disabled>Sharpen</button>
+      <button id="btnDenoise" disabled>Denoise</button>
+      <button id="btnUpscale" disabled>Upscale</button>
+
+      <span class="sep"></span>
+      <div class="modes">
+        <button id="btnSingle" class="mode active" disabled>Single</button>
+        <button id="btnSplit" class="mode" disabled>Split</button>
+        <button id="btnGrid" class="mode" disabled>Grid</button>
+      </div>
+
+      <span class="sep"></span>
+      <div class="zoom">
+        <button id="btnZoom" disabled>—</button>
+        <div id="zoomMenu" class="menu hidden">
+          <button data-zoom="FIT">Fit</button>
+          <button data-zoom="FIT_WIDTH">Fit Width</button>
+          <button data-zoom="FIT_HEIGHT">Fit Height</button>
+          <button data-zoom="100%">100%</button>
+          <button data-zoom="200%">200%</button>
+          <button data-zoom="400%">400%</button>
+        </div>
+      </div>
+
       <span id="filename" class="muted">No image loaded</span>
       <span id="gpu" class="gpu muted">GPU: —</span>
     </header>
 
     <main id="viewer">
-      <img id="preview" alt="" />
-      <div id="placeholder" class="muted">Open an image to preview</div>
+      <canvas id="canvas"></canvas>
+      <div id="placeholder" class="muted">Open a base image to preview</div>
     </main>
 
+    <footer id="statusbar">
+      <div id="progress" class="progress hidden">
+        <span id="progressLabel"></span>
+        <div class="progress-track"><div id="progressBar"></div></div>
+        <button id="btnCancel">Cancel</button>
+      </div>
+      <span id="compareInfo" class="muted"></span>
+    </footer>
+
     <script src="api.js"></script>
+    <script src="state.js"></script>
+    <script src="canvas.js"></script>
+    <script src="dialogs/modelSelect.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

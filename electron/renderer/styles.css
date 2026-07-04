@@ -28,7 +28,7 @@ body {
 #topbar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   padding: 8px 12px;
   background: var(--panel);
   border-bottom: 1px solid #2c2c2c;
@@ -43,8 +43,64 @@ body {
   cursor: pointer;
 }
 
-#topbar button:hover {
+#topbar button:hover:not(:disabled) {
   background: #5c5c5c;
+}
+
+#topbar button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.sep {
+  width: 1px;
+  align-self: stretch;
+  background: #2c2c2c;
+  margin: 0 4px;
+}
+
+.modes {
+  display: flex;
+  gap: 2px;
+}
+
+.mode.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.zoom {
+  position: relative;
+}
+
+#btnZoom {
+  min-width: 64px;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid #2c2c2c;
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 120px;
+}
+
+.menu button {
+  border: none;
+  border-radius: 0;
+  text-align: left;
+}
+
+.menu.hidden {
+  display: none;
 }
 
 .muted {
@@ -59,20 +115,161 @@ body {
 #viewer {
   flex: 1;
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   overflow: hidden;
 }
 
-#preview {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: none;
+#canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 #placeholder {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+#statusbar {
+  padding: 5px 12px;
+  background: var(--panel);
+  border-top: 1px solid #2c2c2c;
+  font-size: 12px;
+  min-height: 26px;
+}
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.progress.hidden {
+  display: none;
+}
+
+.progress-track {
+  flex: 1;
+  height: 8px;
+  background: #2c2c2c;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+#progressBar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.15s linear;
+}
+
+#progressBar.indeterminate {
+  width: 40%;
+  animation: indet 1.1s ease-in-out infinite;
+}
+
+@keyframes indet {
+  0% {
+    margin-left: -40%;
+  }
+  100% {
+    margin-left: 100%;
+  }
+}
+
+/* ----- modal ----- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--panel);
+  border: 1px solid #2c2c2c;
+  border-radius: 6px;
+  padding: 18px 20px;
+  min-width: 420px;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.modal select,
+.modal input {
+  background: #2f2f2f;
+  color: var(--text);
+  border: 1px solid #2c2c2c;
+  border-radius: 3px;
+  padding: 4px 6px;
+}
+
+.modal select[multiple] {
+  min-height: 120px;
+}
+
+.modal-row {
+  display: flex;
+  gap: 16px;
+}
+
+.modal-row label {
+  flex: 1;
+}
+
+label.checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  align-self: flex-end;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.modal-actions button,
+#btnCancel {
+  background: #505050;
+  color: var(--text);
+  border: 1px solid #2c2c2c;
+  padding: 5px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.modal-actions button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
 }

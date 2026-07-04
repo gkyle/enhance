@@ -35,3 +35,17 @@ class PreviewResponse(BaseModel):
     url: str
     width: int
     height: int
+
+
+class RunRequest(BaseModel):
+    fileId: str = "base"
+    modelKey: str
+    operation: str = "sharpen"  # sharpen | denoise | upscale
+    tileSize: int = 512
+    tilePadding: int = 32
+    maintainScale: bool = True
+    device: Optional[str] = None  # None -> cpu
+
+
+class RunResponse(BaseModel):
+    jobId: str
