@@ -2,23 +2,44 @@ import subprocess
 import re
 import sys
 import platform
+import time
 
 def get_cuda_version():
+    # nvidia-smi prints the header (containing "CUDA Version") immediately, then
+    # can hang while enumerating the process table on some drivers. Stream its
+    # output and stop as soon as we find the version, so we neither hang nor wait
+    # out a fixed timeout.
     try:
-        result = subprocess.run(['nvidia-smi'], capture_output=True, text=True, check=True)
-        output = result.stdout
-        cuda_version_match = re.search(r' CUDA Version: \s*([\d.]+)', output)
-        if cuda_version_match:
-            return cuda_version_match.group(1)
-        else:
-            print("CUDA version not found. Is CUDA Toolkit installed?", file=sys.stderr)
-            return None
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing nvidia-smi: {e}", file=sys.stderr)
-        return None
+        proc = subprocess.Popen(
+            ['nvidia-smi'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
     except FileNotFoundError:
         print("nvidia-smi command not found. Is the NVIDIA driver installed?", file=sys.stderr)
         return None
+
+    version = None
+    try:
+        deadline = time.monotonic() + 15
+        for line in proc.stdout:
+            match = re.search(r' CUDA Version: \s*([\d.]+)', line)
+            if match:
+                version = match.group(1)
+                break
+            if time.monotonic() > deadline:
+                break
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+
+    if version is None:
+        print("CUDA version not found. Is CUDA Toolkit installed?", file=sys.stderr)
+    return version
 
 def has_mps_support():
     """Check if Apple Silicon MPS is available."""

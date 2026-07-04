@@ -9,6 +9,14 @@ const http = require("http");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 
+// Optional base image to load at startup: the first non-flag CLI argument.
+// (In dev, `electron . <image>` yields it in process.argv after the "." entry.)
+function startupImagePath() {
+  const args = process.argv.slice(2).filter((a) => a && !a.startsWith("-") && a !== ".");
+  if (args.length === 0) return null;
+  return path.resolve(process.cwd(), args[0]);
+}
+
 let backendProcess = null;
 let backendPort = null;
 let mainWindow = null;
@@ -93,8 +101,12 @@ async function createWindow() {
     },
   });
 
-  // Pass the backend origin to the renderer via query string.
-  const url = `file://${path.join(__dirname, "renderer", "index.html")}?backend=http://127.0.0.1:${backendPort}`;
+  // Pass the backend origin (and optional startup image) to the renderer.
+  let url = `file://${path.join(__dirname, "renderer", "index.html")}?backend=http://127.0.0.1:${backendPort}`;
+  const startup = startupImagePath();
+  if (startup) {
+    url += `&startup=${encodeURIComponent(startup)}`;
+  }
   mainWindow.loadURL(url);
 
   // Unsaved-changes quit guard (ports the Qt closeEvent QMessageBox). Ask the

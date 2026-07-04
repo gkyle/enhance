@@ -173,9 +173,7 @@
   };
 
   // ----- open / add -----
-  els.open.addEventListener("click", async () => {
-    const path = await window.native.openImage();
-    if (!path) return;
+  async function loadBase(path) {
     const info = await window.api.setBaseFile(path);
     els.filename.textContent = info.basename || path;
     els.filename.classList.remove("muted");
@@ -183,6 +181,13 @@
     await state.setMasks([]);
     enableViewerControls();
     updateCompareInfo();
+    return info;
+  }
+
+  els.open.addEventListener("click", async () => {
+    const path = await window.native.openImage();
+    if (!path) return;
+    await loadBase(path);
   });
 
   els.add.addEventListener("click", async () => {
@@ -393,4 +398,12 @@
   window.api.on("gpuStats", renderGpu);
   window.api.connectWebSocket();
   window.api.getGpu().then(renderGpu).catch(() => {});
+
+  // ----- startup base image (passed via ?startup= from main.js) -----
+  const startupPath = new URLSearchParams(window.location.search).get("startup");
+  if (startupPath) {
+    loadBase(startupPath).catch((e) => {
+      els.compareInfo.textContent = `Could not load ${startupPath}: ${e.message || e}`;
+    });
+  }
 })();
