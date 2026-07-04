@@ -20,6 +20,9 @@ dependencies = [
     "sam2>=1.1.0",
     "transformers>=4.57.3,<5",
     "timm>=1.0.22",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "websockets>=13.0",
 ]
 
 [project.optional-dependencies]
