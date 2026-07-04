@@ -18,17 +18,19 @@ from typing import Dict
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
-from enhance.lib.file import File, InputFile, Operation
+from enhance.lib.file import File, InputFile, Operation, OutputFile
 from enhance.server import preview as preview_mod
 from enhance.server.events import gpu_stats_loop, hub
 from enhance.server.jobs import job_queue
 from enhance.server.schemas import (
     FileInfo,
     GpuStats,
+    OperationInfo,
     PreviewResponse,
     RunRequest,
     RunResponse,
     SetBaseFileRequest,
+    StrengthRequest,
 )
 from enhance.server.static import mount_cache
 
@@ -199,8 +201,8 @@ class ProgressForwarder:
 
 @app.post("/run", response_model=RunResponse)
 def run_model(req: RunRequest) -> RunResponse:
-    base_file = app.state.files.get(req.fileId)
-    if base_file is None or base_file.path is None:
+    target = app.state.files.get(req.fileId)
+    if target is None or target.path is None:
         raise HTTPException(status_code=404, detail="Unknown file id")
 
     operation = _OPERATIONS.get(req.operation.lower())
@@ -214,9 +216,31 @@ def run_model(req: RunRequest) -> RunResponse:
 
     def work() -> None:
         forwarder = ProgressForwarder(job_id)
+
+        # Determine the output file to run on. Operations chain onto an existing
+        # OutputFile; running on an InputFile (base or external) first creates a
+        # fresh OutputFile copy, mirroring the Qt createOutputFile flow.
+        if isinstance(target, OutputFile):
+            output = target
+            out_id = req.fileId
+        else:
+            output = app.state.app.createOutputFile(target)
+            if output is None:
+                hub.broadcast_threadsafe(
+                    {"type": "runError", "payload": {"jobId": job_id, "message": "Could not create output file"}}
+                )
+                return
+            app.state.app.rawFiles.append(output)
+            app.state.file_counter += 1
+            out_id = f"o{app.state.file_counter}"
+            app.state.files[out_id] = output
+            hub.broadcast_threadsafe(
+                {"type": "fileAppended", "payload": _file_info(out_id, output).model_dump()}
+            )
+
         try:
-            output = app.state.app.runModel(
-                base_file,
+            result = app.state.app.runModelOnExisting(
+                output,
                 req.modelKey,
                 forwarder,
                 req.tileSize,
@@ -233,24 +257,52 @@ def run_model(req: RunRequest) -> RunResponse:
             )
             raise
 
-        if output is None:
+        if result is None:
             hub.broadcast_threadsafe(
                 {"type": "runError", "payload": {"jobId": job_id, "message": "No output produced"}}
             )
             return
 
-        app.state.file_counter += 1
-        fid = f"o{app.state.file_counter}"
-        app.state.files[fid] = output
         hub.broadcast_threadsafe(
             {
                 "type": "runComplete",
-                "payload": {"jobId": job_id, "file": _file_info(fid, output).model_dump()},
+                "payload": {"jobId": job_id, "file": _file_info(out_id, output).model_dump()},
             }
         )
 
     job_queue.submit(work, label=label, device=device)
     return RunResponse(jobId=job_id)
+
+
+@app.post("/operation/strength", response_model=FileInfo)
+def set_strength(req: StrengthRequest) -> FileInfo:
+    """Adjust one operation's strength and re-blend the chain (no model rerun)."""
+    file = app.state.files.get(req.fileId)
+    if not isinstance(file, OutputFile):
+        raise HTTPException(status_code=404, detail="Not an output file")
+    if req.opIndex < 0 or req.opIndex >= len(file.operations):
+        raise HTTPException(status_code=400, detail="Invalid operation index")
+
+    op = file.operations[req.opIndex]
+    if not op.supportsStrength():
+        raise HTTPException(status_code=400, detail="Operation has no strength")
+
+    op.strength = max(0.0, min(1.0, req.strength))
+    if not file.reapplyStrength(op):
+        raise HTTPException(status_code=500, detail="Failed to re-apply strength")
+    return _file_info(req.fileId, file)
+
+
+@app.delete("/file/{file_id}")
+def delete_file(file_id: str) -> dict:
+    file = app.state.files.pop(file_id, None)
+    if file is None:
+        raise HTTPException(status_code=404, detail="Unknown file id")
+    try:
+        app.state.app.removeFile(file)
+    except ValueError:
+        pass
+    return {"status": "ok"}
 
 
 @app.post("/interrupt")
@@ -280,11 +332,37 @@ def _file_info(file_id: str, file: File) -> FileInfo:
     if img is not None:
         height, width = img.shape[:2]
         bit_depth = int("".join(ch for ch in img.dtype.name if ch.isdigit()) or 0)
+
+    if file_id == "base":
+        kind = "base"
+    elif isinstance(file, OutputFile):
+        kind = "output"
+    else:
+        kind = "input"
+
+    operations: list[OperationInfo] = []
+    if isinstance(file, OutputFile):
+        for idx, op in enumerate(file.operations):
+            operations.append(
+                OperationInfo(
+                    index=idx,
+                    operationType=op.operation_type.value if op.operation_type else None,
+                    model=op.model,
+                    strength=op.strength if op.supportsStrength() else None,
+                    supportsStrength=op.supportsStrength(),
+                    scale=op.scale,
+                    maskLabels=[m.uniqueLabel for m in op.masks],
+                )
+            )
+
     return FileInfo(
         id=file_id,
+        kind=kind,
         basename=file.basename,
         path=file.path,
         width=width,
         height=height,
         bitDepth=bit_depth,
+        saved=getattr(file, "saved", False),
+        operations=operations,
     )

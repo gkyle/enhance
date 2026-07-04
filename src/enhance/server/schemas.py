@@ -5,7 +5,7 @@ These mirror the metadata the Qt UI read directly off `File` / `Operation` /
 here; they are delivered as preview images from the static cache mount.
 """
 
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -22,13 +22,26 @@ class SetBaseFileRequest(BaseModel):
     path: str
 
 
+class OperationInfo(BaseModel):
+    index: int
+    operationType: Optional[str] = None  # sharpen | denoise | upscale
+    model: Optional[str] = None
+    strength: Optional[float] = None  # 0..1, None if not applicable
+    supportsStrength: bool = False
+    scale: Optional[float] = None
+    maskLabels: List[str] = []
+
+
 class FileInfo(BaseModel):
     id: str
+    kind: str = "input"  # base | input | output
     basename: Optional[str] = None
     path: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
     bitDepth: Optional[int] = None
+    saved: bool = False
+    operations: List[OperationInfo] = []
 
 
 class PreviewResponse(BaseModel):
@@ -49,3 +62,9 @@ class RunRequest(BaseModel):
 
 class RunResponse(BaseModel):
     jobId: str
+
+
+class StrengthRequest(BaseModel):
+    fileId: str
+    opIndex: int
+    strength: float  # 0..1

@@ -44,9 +44,19 @@
     </header>
 
     <main id="viewer">
-      <canvas id="canvas"></canvas>
-      <div id="placeholder" class="muted">Open a base image to preview</div>
+      <aside id="opsPanel">
+        <div class="ops-header">Operations</div>
+        <div id="opsList"></div>
+      </aside>
+      <section id="viewerMain">
+        <canvas id="canvas"></canvas>
+        <div id="placeholder" class="muted">Open a base image to preview</div>
+      </section>
     </main>
+
+    <section id="filestrip">
+      <div id="filestripInner"></div>
+    </section>
 
     <footer id="statusbar">
       <div id="progress" class="progress hidden">
@@ -60,6 +70,8 @@
     <script src="api.js"></script>
     <script src="state.js"></script>
     <script src="canvas.js"></script>
+    <script src="filestrip.js"></script>
+    <script src="operations.js"></script>
     <script src="dialogs/modelSelect.js"></script>
     <script src="app.js"></script>
   </body>

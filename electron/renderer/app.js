@@ -21,6 +21,8 @@
     placeholder: document.getElementById("placeholder"),
     compareInfo: document.getElementById("compareInfo"),
     canvas: document.getElementById("canvas"),
+    opsList: document.getElementById("opsList"),
+    filestrip: document.getElementById("filestripInner"),
     progress: document.getElementById("progress"),
     progressLabel: document.getElementById("progressLabel"),
     progressBar: document.getElementById("progressBar"),
@@ -31,6 +33,10 @@
   viewer.onZoomChange = (z) => {
     els.zoom.textContent = `${Math.round(z * 100)}%`;
   };
+
+  const strip = new window.FileStrip(els.filestrip, state);
+  const ops = new window.OperationsPanel(els.opsList, state);
+  ops.render();
 
   function setModeButtons(mode) {
     [els.single, els.split, els.grid].forEach((b) => b.classList.remove("active"));
@@ -54,6 +60,40 @@
       ? `Compare — ${names.join("   ")}`
       : "";
   }
+
+  // ----- file strip + operations panel -----
+  strip.onSelect = async (file) => {
+    if (file.kind === "base") {
+      state.setActive(file);
+      return;
+    }
+    // Output/input files: view side-by-side and target for further operations.
+    await state.addCompare(file);
+    state.setActive(file);
+    setModeButtons(RenderMode.Split);
+    state.setRenderMode(RenderMode.Split);
+    updateCompareInfo();
+  };
+
+  strip.onDelete = async (file) => {
+    await window.api.deleteFile(file.id).catch(() => {});
+    state.removeFile(file.id);
+    updateCompareInfo();
+    if (!state.compares.some(Boolean)) {
+      setModeButtons(RenderMode.Single);
+      state.setRenderMode(RenderMode.Single);
+    }
+  };
+
+  ops.onStrengthChange = async (fileId, opIndex, strength) => {
+    try {
+      const info = await window.api.setStrength(fileId, opIndex, strength);
+      await state.updateFile(info);
+      updateCompareInfo();
+    } catch (e) {
+      els.compareInfo.textContent = `Strength failed: ${e.message || e}`;
+    }
+  };
 
   // ----- open / add -----
   els.open.addEventListener("click", async () => {
@@ -107,10 +147,12 @@
   document.addEventListener("click", () => els.zoomMenu.classList.add("hidden"));
 
   // ----- run pipeline -----
-  // Queue of pending jobIds for this batch, and a flag to auto-compare the first
-  // completed output (matches the Qt "switch to side-by-side on completion").
-  const pendingJobs = new Set();
-  let autoCompareDone = false;
+  // Track in-flight jobs and resolve each one when its runComplete/runError
+  // arrives, so multiple selected models chain onto the same output file
+  // (matching the Qt behavior of re-running on the current compare file).
+  const activeJobs = new Set();
+  const jobResolvers = new Map();
+  let autoCompareFirst = false;
 
   function showProgress(label, indeterminate) {
     els.progress.classList.remove("hidden");
@@ -124,26 +166,46 @@
     els.progress.classList.add("hidden");
   }
 
+  function runOneModel(targetId, modelKey, params) {
+    return new Promise((resolve, reject) => {
+      window.api
+        .runModel({
+          fileId: targetId,
+          modelKey,
+          operation: params.operation,
+          tileSize: params.tileSize,
+          tilePadding: params.tilePadding,
+          maintainScale: params.maintainScale,
+          device: params.device === "cpu" ? null : params.device,
+        })
+        .then(({ jobId }) => {
+          activeJobs.add(jobId);
+          jobResolvers.set(jobId, { resolve, reject });
+        })
+        .catch(reject);
+    });
+  }
+
   async function runOperation(operation) {
     if (!state.base) return;
     const params = await window.openModelDialog(operation);
-    if (!params) return;
+    if (!params || !params.models.length) return;
 
-    autoCompareDone = false;
-    // Run each selected model in sequence (backend job queue serializes them).
-    for (const modelKey of params.models) {
-      const { jobId } = await window.api.runModel({
-        fileId: "base",
-        modelKey,
-        operation: params.operation,
-        tileSize: params.tileSize,
-        tilePadding: params.tilePadding,
-        maintainScale: params.maintainScale,
-        device: params.device === "cpu" ? null : params.device,
-      });
-      pendingJobs.add(jobId);
-    }
+    autoCompareFirst = true;
+    // Chain onto the active file; running on the base creates a fresh output.
+    let targetId = state.active ? state.active.id : "base";
     showProgress(`${operation} queued…`, true);
+
+    for (const modelKey of params.models) {
+      try {
+        const file = await runOneModel(targetId, modelKey, params);
+        targetId = file.id; // subsequent models chain onto the produced output
+      } catch (e) {
+        els.compareInfo.textContent = `Run failed: ${e.message || e}`;
+        break;
+      }
+    }
+    if (activeJobs.size === 0) hideProgress();
   }
 
   els.sharpen.addEventListener("click", () => runOperation("sharpen"));
@@ -152,7 +214,7 @@
   els.cancel.addEventListener("click", () => window.api.interrupt().catch(() => {}));
 
   window.api.on("progress", (p) => {
-    if (!pendingJobs.has(p.jobId)) return;
+    if (!activeJobs.has(p.jobId)) return;
     if (p.statusMessage) {
       showProgress(p.statusMessage, true);
     } else if (p.total) {
@@ -163,23 +225,41 @@
     }
   });
 
+  // A fresh output file was created for a base run: show it in the strip and
+  // make it the active target so chained models append to it.
+  window.api.on("fileAppended", (info) => {
+    state.setActive(info);
+  });
+
   window.api.on("runComplete", async (payload) => {
-    pendingJobs.delete(payload.jobId);
-    // Add the output as a compare file; switch to side-by-side for the first one.
-    const idx = await state.addCompare(payload.file);
-    if (idx === 0 && !autoCompareDone) {
-      autoCompareDone = true;
+    activeJobs.delete(payload.jobId);
+    const canonical = await state.updateFile(payload.file);
+    await state.addCompare(canonical);
+    state.setActive(canonical);
+    if (autoCompareFirst) {
+      autoCompareFirst = false;
       setModeButtons(RenderMode.Split);
       state.setRenderMode(RenderMode.Split);
     }
     updateCompareInfo();
-    if (pendingJobs.size === 0) hideProgress();
+
+    const r = jobResolvers.get(payload.jobId);
+    if (r) {
+      jobResolvers.delete(payload.jobId);
+      r.resolve(canonical);
+    }
+    if (activeJobs.size === 0) hideProgress();
   });
 
   window.api.on("runError", (payload) => {
-    pendingJobs.delete(payload.jobId);
+    activeJobs.delete(payload.jobId);
     els.compareInfo.textContent = `Run failed: ${payload.message}`;
-    if (pendingJobs.size === 0) hideProgress();
+    const r = jobResolvers.get(payload.jobId);
+    if (r) {
+      jobResolvers.delete(payload.jobId);
+      r.reject(new Error(payload.message));
+    }
+    if (activeJobs.size === 0) hideProgress();
   });
 
   // ----- GPU stats -----

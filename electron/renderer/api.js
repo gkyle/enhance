@@ -31,6 +31,12 @@
     return res.json();
   }
 
+  async function deleteJson(path) {
+    const res = await fetch(backend + path, { method: "DELETE" });
+    if (!res.ok) throw new Error(`${path} -> ${res.status}`);
+    return res.json();
+  }
+
   function connectWebSocket() {
     const wsUrl = backend.replace(/^http/, "ws") + "/ws";
     const ws = new WebSocket(wsUrl);
@@ -61,8 +67,16 @@
     setBaseFile: (path) => postJson("/file/base", { path }),
     appendFile: (path) => postJson("/file/append", { path }),
     listFiles: () => getJson("/files"),
-    getPreview: (fileId) => getJson(`/preview/${fileId}`),
+    getPreview: (fileId, w, h) => {
+      const q = [];
+      if (w) q.push(`w=${w}`);
+      if (h) q.push(`h=${h}`);
+      return getJson(`/preview/${fileId}${q.length ? "?" + q.join("&") : ""}`);
+    },
     runModel: (req) => postJson("/run", req),
+    setStrength: (fileId, opIndex, strength) =>
+      postJson("/operation/strength", { fileId, opIndex, strength }),
+    deleteFile: (fileId) => deleteJson(`/file/${fileId}`),
     interrupt: () => postJson("/interrupt", {}),
     assetUrl,
     connectWebSocket,

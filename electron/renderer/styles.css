@@ -114,7 +114,95 @@ body {
 
 #viewer {
   flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#opsPanel {
+  width: 220px;
+  flex: 0 0 220px;
+  background: var(--panel);
+  border-right: 1px solid #2c2c2c;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.ops-header {
+  padding: 8px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #2c2c2c;
+}
+
+#opsList {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ops-hint {
+  font-size: 12px;
+  padding: 4px;
+}
+
+.op-card {
+  background: #333;
+  border: 1px solid #5c5c5c;
+  border-radius: 4px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.op-title {
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.op-model {
+  font-size: 11px;
+  color: #9a9996;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.op-scale {
+  font-size: 11px;
+  color: #9a9996;
+}
+
+.op-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.op-strength-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #aaa;
+}
+
+.op-strength input[type="range"] {
+  width: 100%;
+}
+
+.op-masks {
+  font-size: 11px;
+  color: #9a9996;
+}
+
+#viewerMain {
   position: relative;
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
 }
 
@@ -130,6 +218,110 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+/* ----- file strip ----- */
+#filestrip {
+  flex: 0 0 auto;
+  background: var(--panel);
+  border-top: 1px solid #2c2c2c;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+#filestripInner {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  min-height: 130px;
+}
+
+.file-btn {
+  position: relative;
+  width: 96px;
+  flex: 0 0 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  background: #333;
+  border: 1px solid #2c2c2c;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.file-btn.active {
+  border-color: var(--accent);
+}
+
+.file-btn:hover {
+  background: #3a3a3a;
+}
+
+.file-thumb {
+  width: 86px;
+  height: 86px;
+  object-fit: contain;
+  background: #222;
+  border-radius: 2px;
+}
+
+.file-badges {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: flex;
+  gap: 3px;
+}
+
+.badge {
+  font-size: 10px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: #fff;
+  background: #555;
+}
+
+.badge.base {
+  background: #666;
+}
+
+.badge.cmp {
+  background: var(--accent);
+}
+
+.badge.unsaved {
+  background: #c0392b;
+  padding: 2px 5px;
+}
+
+.file-label {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.file-btn:hover .file-del {
+  opacity: 1;
 }
 
 #statusbar {
