@@ -9,6 +9,7 @@ Run with:  uvicorn enhance.server.server:app --host 127.0.0.1 --port 8420
 
 import asyncio
 import contextlib
+import copy
 import logging
 import os
 import shutil
@@ -28,6 +29,7 @@ from enhance.server.schemas import (
     FileInfo,
     GpuStats,
     MaskInfo,
+    OperationMasksRequest,
     OperationInfo,
     PreviewResponse,
     RunRequest,
@@ -274,6 +276,11 @@ def run_model(req: RunRequest) -> RunResponse:
             )
             return
 
+        op = output.operations[-1] if output.operations else None
+        if op is not None and req.strength is not None and op.supportsStrength():
+            op.strength = max(0.0, min(1.0, req.strength))
+            output.reapplyStrength(op)
+
         hub.broadcast_threadsafe(
             {
                 "type": "runComplete",
@@ -301,6 +308,28 @@ def set_strength(req: StrengthRequest) -> FileInfo:
     op.strength = max(0.0, min(1.0, req.strength))
     if not file.reapplyStrength(op):
         raise HTTPException(status_code=500, detail="Failed to re-apply strength")
+    return _file_info(req.fileId, file)
+
+
+@app.post("/operation/masks", response_model=FileInfo)
+def set_operation_masks(req: OperationMasksRequest) -> FileInfo:
+    """Change an operation's mask selection and rerun it plus later operations."""
+    file = app.state.files.get(req.fileId)
+    if not isinstance(file, OutputFile):
+        raise HTTPException(status_code=404, detail="Not an output file")
+    if req.opIndex < 0 or req.opIndex >= len(file.operations):
+        raise HTTPException(status_code=400, detail="Invalid operation index")
+
+    file.operations[req.opIndex].masks = _resolve_masks(req.masks)
+    ops_to_rerun = app.state.app.prepareRerunChain(file, req.opIndex)
+    if not ops_to_rerun:
+        return _file_info(req.fileId, file)
+
+    forwarder = ProgressForwarder("operation-masks")
+    for op in ops_to_rerun:
+        success = app.state.app.rerunSingleOperation(file, op, progressCallback=forwarder)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to rerun operation")
     return _file_info(req.fileId, file)
 
 
@@ -431,7 +460,7 @@ def _resolve_masks(selections):
     resolved = []
     for sel in selections:
         if 0 <= sel.index < len(base.masks):
-            mask = base.masks[sel.index]
+            mask = copy.copy(base.masks[sel.index])
             mask.inverted = sel.inverted
             resolved.append(mask)
     return resolved
@@ -479,6 +508,8 @@ def _file_info(file_id: str, file: File) -> FileInfo:
 
     operations: list[OperationInfo] = []
     if isinstance(file, OutputFile):
+        base_masks = getattr(app.state.app.getBaseFile(), "masks", []) if app.state.app.getBaseFile() else []
+        mask_index_by_label = {m.uniqueLabel: idx for idx, m in enumerate(base_masks)}
         for idx, op in enumerate(file.operations):
             operations.append(
                 OperationInfo(
@@ -489,6 +520,11 @@ def _file_info(file_id: str, file: File) -> FileInfo:
                     supportsStrength=op.supportsStrength(),
                     scale=op.scale,
                     maskLabels=[m.uniqueLabel for m in op.masks],
+                    masks=[
+                        {"index": mask_index_by_label[m.uniqueLabel], "inverted": bool(m.inverted)}
+                        for m in op.masks
+                        if m.uniqueLabel in mask_index_by_label
+                    ],
                 )
             )
 

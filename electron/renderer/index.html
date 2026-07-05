@@ -6,61 +6,116 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' http://127.0.0.1:* data: blob:; connect-src http://127.0.0.1:* ws://127.0.0.1:*; style-src 'self' 'unsafe-inline';"
     />
-    <title>Enhance AI (Electron experiment)</title>
+    <title>Enhance AI</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header id="topbar">
-      <button id="btnOpen">Open Base…</button>
-
-      <span class="sep"></span>
-      <button id="btnSharpen" disabled>Sharpen</button>
-      <button id="btnDenoise" disabled>Denoise</button>
-      <button id="btnUpscale" disabled>Upscale</button>
-
-      <span class="sep"></span>
-      <button id="btnAutomask" disabled>Auto Mask</button>
-      <button id="btnModelManager">Models…</button>
-      <button id="btnTaskQueue">Tasks…</button>
-
-      <span class="sep"></span>
-      <div class="modes">
-        <button id="btnSingle" class="mode active" disabled>Single</button>
-        <button id="btnSplit" class="mode" disabled>Split</button>
-        <button id="btnGrid" class="mode" disabled>Grid</button>
-      </div>
-
-      <span class="sep"></span>
-      <div class="zoom">
-        <button id="btnZoom" disabled>—</button>
-        <div id="zoomMenu" class="menu hidden">
-          <button data-zoom="FIT">Fit</button>
-          <button data-zoom="FIT_WIDTH">Fit Width</button>
-          <button data-zoom="FIT_HEIGHT">Fit Height</button>
-          <button data-zoom="100%">100%</button>
-          <button data-zoom="200%">200%</button>
-          <button data-zoom="400%">400%</button>
+      <div id="progress" class="progress">
+        <span id="progressLabel" class="muted"></span>
+        <div class="progress-track"><div id="progressBar"></div></div>
+        <div class="task-controls">
+          <button id="btnTaskQueue" title="Tasks" aria-label="Tasks">
+            <svg viewBox="0 0 24 24" class="icon"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </button>
+          <button id="btnCancel" class="hidden" title="Cancel" aria-label="Cancel">
+            <svg viewBox="0 0 24 24" class="icon"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
         </div>
       </div>
 
-      <span id="filename" class="muted">No image loaded</span>
-      <span id="gpu" class="gpu muted">GPU: —</span>
+      <span class="sep"></span>
+
+      <div class="topbar-right">
+        <div class="modes">
+          <button id="btnSingle" class="mode active" disabled title="Single">
+            <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+          </button>
+          <button id="btnSplit" class="mode" disabled title="Split">
+            <svg viewBox="0 0 24 24" class="icon"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"/></svg>
+          </button>
+          <button id="btnGrid" class="mode" disabled title="Grid">
+            <svg viewBox="0 0 24 24" class="icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </button>
+        </div>
+
+        <span class="sep"></span>
+        <div class="zoom">
+          <button id="btnZoom" disabled title="Zoom">
+            <svg viewBox="0 0 24 24" class="icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            <span id="zoomLabel">—</span>
+          </button>
+          <div id="zoomMenu" class="menu hidden">
+            <button data-zoom="FIT">Fit</button>
+            <button data-zoom="FIT_WIDTH">Fit Width</button>
+            <button data-zoom="FIT_HEIGHT">Fit Height</button>
+            <button data-zoom="100%">100%</button>
+            <button data-zoom="200%">200%</button>
+            <button data-zoom="400%">400%</button>
+          </div>
+        </div>
+
+        <span class="sep"></span>
+        <div id="gpu" class="gpu">
+          <div class="gpu-bar" id="gpuUtil">
+            <div class="gpu-bar-fill" id="gpuUtilFill"></div>
+            <span class="gpu-bar-label" id="gpuUtilLabel">GPU: —</span>
+          </div>
+          <div class="gpu-bar" id="gpuMem">
+            <div class="gpu-bar-fill" id="gpuMemFill"></div>
+            <span class="gpu-bar-label" id="gpuMemLabel">Mem: —</span>
+          </div>
+        </div>
+      </div>
     </header>
 
     <main id="viewer">
-      <aside id="opsPanel">
-        <div class="ops-header">Operations</div>
-        <div id="opsList"></div>
-        <div class="ops-header mask-header hidden" id="maskHeader">
-          Masks
-          <button id="btnMaskToggleAll" class="mask-toggle-all">Show all</button>
-        </div>
-        <div id="maskList" class="mask-list"></div>
-      </aside>
       <section id="viewerMain">
         <canvas id="canvas"></canvas>
         <div id="placeholder" class="muted">Open a base image to preview</div>
       </section>
+      <aside id="sidebar">
+        <div class="side-group">
+          <button id="btnOpen">Open</button>
+          <button id="btnClear" disabled>Clear</button>
+          <button id="btnModelManager">Model Manager</button>
+        </div>
+
+        <div class="side-section">
+          <div class="side-header">Image Info</div>
+          <div class="side-info">
+            <span class="info-label">Input file:</span>
+            <span id="filename" class="muted">No image loaded</span>
+          </div>
+        </div>
+
+        <div class="side-section">
+          <div class="side-header">Selection</div>
+          <button id="btnAutomask" disabled>Auto Mask</button>
+          <div class="mask-header hidden" id="maskHeader">
+            Masks
+            <button id="btnMaskToggleAll" class="mask-toggle-all">Show all</button>
+          </div>
+          <div id="maskList" class="mask-list"></div>
+        </div>
+
+        <div class="side-section">
+          <div class="side-header">Operations</div>
+          <div class="side-actions">
+            <button id="btnSharpen" disabled>Sharpen</button>
+            <button id="btnDenoise" disabled>Denoise</button>
+            <button id="btnUpscale" disabled>Upscale</button>
+          </div>
+          <div id="opsList"></div>
+        </div>
+        <div class="side-section hidden" id="compareActions">
+          <div class="side-header">Compare File</div>
+          <div class="side-actions side-actions-stack">
+            <button id="btnSaveCompare">Save File</button>
+            <button id="btnDeleteCompare">Delete File</button>
+          </div>
+        </div>
+      </aside>
     </main>
 
     <section id="filestrip">
@@ -68,11 +123,6 @@
     </section>
 
     <footer id="statusbar">
-      <div id="progress" class="progress hidden">
-        <span id="progressLabel"></span>
-        <div class="progress-track"><div id="progressBar"></div></div>
-        <button id="btnCancel">Cancel</button>
-      </div>
       <span id="compareInfo" class="muted"></span>
     </footer>
 

@@ -30,6 +30,7 @@ class OperationInfo(BaseModel):
     supportsStrength: bool = False
     scale: Optional[float] = None
     maskLabels: List[str] = []
+    masks: List["MaskSelection"] = []
 
 
 class FileInfo(BaseModel):
@@ -59,6 +60,7 @@ class RunRequest(BaseModel):
     maintainScale: bool = True
     device: Optional[str] = None  # None -> cpu
     masks: Optional[List["MaskSelection"]] = None
+    strength: Optional[float] = None
 
 
 class MaskSelection(BaseModel):
@@ -74,6 +76,12 @@ class StrengthRequest(BaseModel):
     fileId: str
     opIndex: int
     strength: float  # 0..1
+
+
+class OperationMasksRequest(BaseModel):
+    fileId: str
+    opIndex: int
+    masks: List["MaskSelection"] = []
 
 
 class SaveFileRequest(BaseModel):
@@ -102,6 +110,7 @@ class AutoMaskRequest(BaseModel):
     fileId: str = "base"
 
 
-# Resolve the forward reference RunRequest -> MaskSelection.
+# Resolve forward references to MaskSelection.
 RunRequest.model_rebuild()
-
+OperationInfo.model_rebuild()
+OperationMasksRequest.model_rebuild()

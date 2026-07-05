@@ -167,7 +167,7 @@
 
     // Load mask metadata (from GET /masks) and decode each overlay bitmap so the
     // canvas can composite visible ones over the base image.
-    async setMasks(maskInfos) {
+    async setMasks(maskInfos, options = {}) {
       const masks = [];
       for (const info of maskInfos || []) {
         let bitmap = null;
@@ -182,8 +182,9 @@
         masks.push({ ...info, bitmap });
       }
       this.masks = masks;
-      // Hide all by default (matches the Qt automask flow).
-      this.visibleMaskIndices = new Set();
+      this.visibleMaskIndices = options.visible
+        ? new Set(masks.map((m) => m.index))
+        : new Set();
       this._notifyMasks();
       this._notify();
     }

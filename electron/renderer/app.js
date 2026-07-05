@@ -7,6 +7,7 @@
 
   const els = {
     open: document.getElementById("btnOpen"),
+    clear: document.getElementById("btnClear"),
     sharpen: document.getElementById("btnSharpen"),
     denoise: document.getElementById("btnDenoise"),
     upscale: document.getElementById("btnUpscale"),
@@ -17,13 +18,23 @@
     split: document.getElementById("btnSplit"),
     grid: document.getElementById("btnGrid"),
     zoom: document.getElementById("btnZoom"),
+    zoomLabel: document.getElementById("zoomLabel"),
     zoomMenu: document.getElementById("zoomMenu"),
     filename: document.getElementById("filename"),
     gpu: document.getElementById("gpu"),
+    gpuUtil: document.getElementById("gpuUtil"),
+    gpuUtilFill: document.getElementById("gpuUtilFill"),
+    gpuUtilLabel: document.getElementById("gpuUtilLabel"),
+    gpuMem: document.getElementById("gpuMem"),
+    gpuMemFill: document.getElementById("gpuMemFill"),
+    gpuMemLabel: document.getElementById("gpuMemLabel"),
     placeholder: document.getElementById("placeholder"),
     compareInfo: document.getElementById("compareInfo"),
     canvas: document.getElementById("canvas"),
     opsList: document.getElementById("opsList"),
+    compareActions: document.getElementById("compareActions"),
+    saveCompare: document.getElementById("btnSaveCompare"),
+    deleteCompare: document.getElementById("btnDeleteCompare"),
     maskHeader: document.getElementById("maskHeader"),
     maskList: document.getElementById("maskList"),
     maskToggleAll: document.getElementById("btnMaskToggleAll"),
@@ -36,12 +47,19 @@
 
   const viewer = new window.Viewer(els.canvas, state);
   viewer.onZoomChange = (z) => {
-    els.zoom.textContent = `${Math.round(z * 100)}%`;
+    els.zoomLabel.textContent = `${Math.round(z * 100)}%`;
   };
 
   const strip = new window.FileStrip(els.filestrip, state);
   const ops = new window.OperationsPanel(els.opsList, state);
   ops.render();
+
+  function renderCompareActions() {
+    const file = state.active;
+    const show = file && file.kind === "output" && !file.saved;
+    els.compareActions.classList.toggle("hidden", !show);
+  }
+  state.onFilesChange(renderCompareActions);
 
   // ----- mask visibility panel (ports MaskVisibilityList; default all hidden) -----
   function renderMaskPanel() {
@@ -111,7 +129,7 @@
   }
 
   function enableViewerControls() {
-    [els.sharpen, els.denoise, els.upscale, els.automask, els.single, els.split, els.grid, els.zoom].forEach(
+    [els.sharpen, els.denoise, els.upscale, els.automask, els.single, els.split, els.grid, els.zoom, els.clear].forEach(
       (b) => (b.disabled = false)
     );
     els.placeholder.style.display = "none";
@@ -140,17 +158,18 @@
     updateCompareInfo();
   };
 
-  strip.onDelete = async (file) => {
+  async function deleteOutputFile(file) {
     await window.api.deleteFile(file.id).catch(() => {});
     state.removeFile(file.id);
     updateCompareInfo();
+    renderCompareActions();
     if (!state.compares.some(Boolean)) {
       setModeButtons(RenderMode.Single);
       state.setRenderMode(RenderMode.Single);
     }
-  };
+  }
 
-  strip.onSave = async (file) => {
+  async function saveOutputFile(file) {
     const target = await window.native.saveImage(file.basename);
     if (!target) return;
     try {
@@ -159,7 +178,18 @@
     } catch (e) {
       els.compareInfo.textContent = `Save failed: ${e.message || e}`;
     }
-  };
+    renderCompareActions();
+  }
+
+  strip.onDelete = deleteOutputFile;
+  strip.onSave = saveOutputFile;
+
+  els.deleteCompare.addEventListener("click", () => {
+    if (state.active && state.active.kind === "output") deleteOutputFile(state.active);
+  });
+  els.saveCompare.addEventListener("click", () => {
+    if (state.active && state.active.kind === "output") saveOutputFile(state.active);
+  });
 
   ops.onStrengthChange = async (fileId, opIndex, strength) => {
     try {
@@ -168,6 +198,20 @@
       updateCompareInfo();
     } catch (e) {
       els.compareInfo.textContent = `Strength failed: ${e.message || e}`;
+    }
+  };
+
+  ops.onMasksChange = async (fileId, opIndex, masks) => {
+    try {
+      showProgress("Updating Masks", true);
+      const info = await window.api.setOperationMasks(fileId, opIndex, masks);
+      const canonical = await state.updateFile(info);
+      state.setActive(canonical);
+      updateCompareInfo();
+    } catch (e) {
+      els.compareInfo.textContent = `Mask update failed: ${e.message || e}`;
+    } finally {
+      hideProgress();
     }
   };
 
@@ -187,6 +231,19 @@
     const path = await window.native.openImage();
     if (!path) return;
     await loadBase(path);
+  });
+
+  // ----- clear -----
+  els.clear.addEventListener("click", () => {
+    state.clear();
+    els.filename.textContent = "No image loaded";
+    els.filename.classList.add("muted");
+    els.compareInfo.textContent = "";
+    setModeButtons(RenderMode.Single);
+    [els.sharpen, els.denoise, els.upscale, els.automask, els.single, els.split, els.grid, els.zoom, els.clear].forEach(
+      (b) => (b.disabled = true)
+    );
+    els.placeholder.style.display = "";
   });
 
   // ----- render modes -----
@@ -224,17 +281,32 @@
   const jobResolvers = new Map();
   const autoMaskJobs = new Set();
   let autoCompareFirst = false;
+  // Operation description shown on the progress label for the whole job
+  // (ports the Qt `desc` on ProgressBarUpdater, e.g. "Sharpen").
+  let currentOpLabel = "";
 
-  function showProgress(label, indeterminate) {
-    els.progress.classList.remove("hidden");
-    els.progressLabel.textContent = label;
+  function setProgressLabel(detail) {
+    els.progressLabel.textContent = detail
+      ? `${currentOpLabel} — ${detail}`
+      : currentOpLabel;
+  }
+
+  function showProgress(opLabel, indeterminate) {
+    currentOpLabel = opLabel;
+    els.cancel.classList.remove("hidden");
+    setProgressLabel("");
     els.progressBar.classList.toggle("indeterminate", !!indeterminate);
     if (indeterminate) els.progressBar.style.width = "";
     else els.progressBar.style.width = "0%";
   }
 
   function hideProgress() {
-    els.progress.classList.add("hidden");
+    // The bar stays visible (idle at 0%); only the job UI is reset.
+    currentOpLabel = "";
+    els.cancel.classList.add("hidden");
+    els.progressLabel.textContent = "";
+    els.progressBar.classList.remove("indeterminate");
+    els.progressBar.style.width = "0%";
   }
 
   function runOneModel(targetId, modelKey, params) {
@@ -249,6 +321,7 @@
           maintainScale: params.maintainScale,
           device: params.device === "cpu" ? null : params.device,
           masks: params.masks && params.masks.length ? params.masks : null,
+          strength: params.strength,
         })
         .then(({ jobId }) => {
           activeJobs.add(jobId);
@@ -266,7 +339,8 @@
     autoCompareFirst = true;
     // Chain onto the active file; running on the base creates a fresh output.
     let targetId = state.active ? state.active.id : "base";
-    showProgress(`${operation} queued…`, true);
+    const opLabel = operation.charAt(0).toUpperCase() + operation.slice(1);
+    showProgress(opLabel, true);
 
     for (const modelKey of params.models) {
       try {
@@ -277,6 +351,7 @@
         break;
       }
     }
+    state.setAllMasksVisible(false);
     if (activeJobs.size === 0) hideProgress();
   }
 
@@ -293,7 +368,7 @@
   els.automask.addEventListener("click", async () => {
     if (!state.base) return;
     els.automask.disabled = true;
-    showProgress("Detecting masks…", true);
+    showProgress("Generating Masks", true);
     try {
       const { jobId } = await window.api.autoMask("base");
       autoMaskJobs.add(jobId);
@@ -307,11 +382,14 @@
   window.api.on("progress", (p) => {
     if (!activeJobs.has(p.jobId) && !autoMaskJobs.has(p.jobId)) return;
     if (p.statusMessage) {
-      showProgress(p.statusMessage, true);
+      els.cancel.classList.remove("hidden");
+      els.progressBar.classList.add("indeterminate");
+      els.progressBar.style.width = "";
+      setProgressLabel(p.statusMessage);
     } else if (p.total) {
-      els.progress.classList.remove("hidden");
+      els.cancel.classList.remove("hidden");
       els.progressBar.classList.remove("indeterminate");
-      els.progressLabel.textContent = `Processing ${p.count}/${p.total}`;
+      setProgressLabel(`${p.count}/${p.total}`);
       els.progressBar.style.width = `${Math.round((p.count / p.total) * 100)}%`;
     }
   });
@@ -327,6 +405,7 @@
     const canonical = await state.updateFile(payload.file);
     await state.addCompare(canonical);
     state.setActive(canonical);
+    state.setAllMasksVisible(false);
     if (autoCompareFirst) {
       autoCompareFirst = false;
       setModeButtons(RenderMode.Split);
@@ -360,7 +439,7 @@
     els.automask.disabled = false;
     try {
       const masks = payload.masks || (await window.api.getMasks(payload.fileId || "base"));
-      await state.setMasks(masks);
+      await state.setMasks(masks, { visible: true });
     } catch (e) {
       els.compareInfo.textContent = `Load masks failed: ${e.message || e}`;
     }
@@ -370,16 +449,31 @@
   // ----- GPU stats -----
   function renderGpu(stats) {
     if (!stats || !stats.present) {
-      els.gpu.textContent = "GPU: none";
+      els.gpuUtil.style.display = "";
+      els.gpuUtilFill.style.width = "0%";
+      els.gpuUtilLabel.textContent = "GPU: none";
+      els.gpuMem.style.display = "none";
       return;
     }
-    const parts = [];
-    if (stats.utilization != null) parts.push(`${Math.round(stats.utilization * 100)}%`);
+
+    if (stats.utilization != null) {
+      const pct = Math.round(stats.utilization * 100);
+      els.gpuUtil.style.display = "";
+      els.gpuUtilFill.style.width = `${pct}%`;
+      els.gpuUtilLabel.textContent = `GPU: ${pct}%`;
+    } else {
+      els.gpuUtil.style.display = "none";
+    }
+
     if (stats.memoryTotalGb != null && stats.memoryAvailableGb != null) {
       const used = stats.memoryTotalGb - stats.memoryAvailableGb;
-      parts.push(`${used.toFixed(1)}/${stats.memoryTotalGb.toFixed(1)}GB`);
+      const pct = Math.round((used / stats.memoryTotalGb) * 100);
+      els.gpuMem.style.display = "";
+      els.gpuMemFill.style.width = `${pct}%`;
+      els.gpuMemLabel.textContent = `Mem: ${pct}%  ${used.toFixed(1)}/${stats.memoryTotalGb.toFixed(1)}GB`;
+    } else {
+      els.gpuMem.style.display = "none";
     }
-    els.gpu.textContent = `GPU: ${parts.join("  ") || stats.preferredDevice}`;
   }
 
   window.api.on("gpuStats", renderGpu);

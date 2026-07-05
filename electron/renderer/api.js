@@ -82,6 +82,8 @@
     runModel: (req) => postJson("/run", req),
     setStrength: (fileId, opIndex, strength) =>
       postJson("/operation/strength", { fileId, opIndex, strength }),
+    setOperationMasks: (fileId, opIndex, masks) =>
+      postJson("/operation/masks", { fileId, opIndex, masks }),
     deleteFile: (fileId) => deleteJson(`/file/${fileId}`),
     saveFile: (fileId, targetPath) =>
       postJson(`/file/${fileId}/save`, { targetPath }),
