@@ -30,6 +30,9 @@
       this.mouseX = 0;
       this.mouseY = 0;
       this.fraction = 0.5;
+      // Id of the base image we've already auto-fit, so we only reset zoom when a
+      // new base loads (not on every state change, e.g. applying a model).
+      this._fittedBaseId = null;
 
       state.onChange(() => this.onStateChange());
       if (state.onMasksChange) state.onMasksChange(() => this.paint());
@@ -154,7 +157,15 @@
 
     // ----- painting -----
     onStateChange() {
-      if (this.base()) this.resetZoom(this.fit());
+      const base = this.base();
+      // Only auto-fit when a new base image is loaded; preserve the user's zoom
+      // across other state changes (applying a model, adding a compare, etc.).
+      if (base && base.id !== this._fittedBaseId) {
+        this._fittedBaseId = base.id;
+        this.resetZoom(this.fit());
+      } else if (!base) {
+        this._fittedBaseId = null;
+      }
       this.paint();
     }
 
@@ -254,7 +265,9 @@
 
     _paintSingle() {
       this.clampImage(1);
-      this._drawImageIn(this.base(), 0, 0, this.width(), this.height(), 0, 0);
+      // Show the selected/active file (Base or any Compare), falling back to base.
+      const file = this.state.active || this.base();
+      this._drawImageIn(file, 0, 0, this.width(), this.height(), 0, 0);
     }
 
     _paintSplit() {

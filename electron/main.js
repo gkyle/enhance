@@ -1,7 +1,7 @@
 // Electron main process: spawns the Python backend and opens the renderer.
 // Experiment scope only — no packaging, health-check/restart, or hardening yet.
 
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, screen, Menu } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
 const net = require("net");
@@ -90,10 +90,16 @@ async function createWindow() {
   backendProcess = spawnBackend(backendPort);
   await waitForBackend(backendPort);
 
+  // Remove the default application menu (File/Edit/View/...).
+  Menu.setApplicationMenu(null);
+
+  // Size the window to 80% of the screen width and 90% of its height, centered.
+  const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
   mainWindow = new BrowserWindow({
-    width: 1280,
-    height: 860,
+    width: Math.round(screenW * 0.8),
+    height: Math.round(screenH * 0.9),
     backgroundColor: "#444444",
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,

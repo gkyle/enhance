@@ -136,6 +136,7 @@
 
     setActive(fileInfo) {
       this.active = fileInfo ? this.ingest(fileInfo) : null;
+      this._notify();
       this._notifyFiles();
     }
 

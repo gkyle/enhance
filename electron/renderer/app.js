@@ -7,7 +7,6 @@
 
   const els = {
     open: document.getElementById("btnOpen"),
-    add: document.getElementById("btnAdd"),
     sharpen: document.getElementById("btnSharpen"),
     denoise: document.getElementById("btnDenoise"),
     upscale: document.getElementById("btnUpscale"),
@@ -112,7 +111,7 @@
   }
 
   function enableViewerControls() {
-    [els.add, els.sharpen, els.denoise, els.upscale, els.automask, els.single, els.split, els.grid, els.zoom].forEach(
+    [els.sharpen, els.denoise, els.upscale, els.automask, els.single, els.split, els.grid, els.zoom].forEach(
       (b) => (b.disabled = false)
     );
     els.placeholder.style.display = "none";
@@ -188,18 +187,6 @@
     const path = await window.native.openImage();
     if (!path) return;
     await loadBase(path);
-  });
-
-  els.add.addEventListener("click", async () => {
-    const path = await window.native.openImage();
-    if (!path) return;
-    const info = await window.api.appendFile(path);
-    const idx = await state.addCompare(info);
-    if (idx < 0) {
-      els.compareInfo.textContent = "Compare slots full (max 3)";
-      return;
-    }
-    updateCompareInfo();
   });
 
   // ----- render modes -----
