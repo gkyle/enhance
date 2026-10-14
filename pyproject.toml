@@ -28,28 +28,32 @@ dependencies = [
 [project.optional-dependencies]
 cpu = [
   "torch>=2.6.0",
-  "torchvision",
+  "torchvision>=0.21.0",
 ]
 cu118 = [
   "torch>=2.6.0",
-  "torchvision",
+  "torchvision>=0.21.0",
 ]
 cu126 = [
   "torch>=2.6.0",
-  "torchvision",
+  "torchvision>=0.21.0",
+]
+cu133 = [
+  "torch>=2.6.0",
+  "torchvision>=0.21.0",
 ]
 mps = [
   "torch>=2.6.0",
-  "torchvision",
+  "torchvision>=0.21.0",
 ]
 
 [tool.uv]
-no-build-isolation = true
 conflicts = [
   [
     { extra = "cpu" },
     { extra = "cu118" },
     { extra = "cu126" },
+    { extra = "cu133" },
     { extra = "mps" },
   ],
 ]
@@ -61,6 +65,7 @@ torch = [
   # TODO: UV fails to resolve path for torch+cu126 on Windows. Use cu124 index.
   { index = "pytorch-cu124", extra = "cu126", marker = "platform_system == 'Windows'" },
   { index = "pytorch-cu126", extra = "cu126", marker = "platform_system != 'Windows'" },
+  { index = "pytorch-cu130", extra = "cu133" },
   { index = "pytorch-cpu", extra = "mps" },
 ]
 
@@ -82,6 +87,11 @@ explicit = true
 [[tool.uv.index]]
 name = "pytorch-cu126"
 url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
 explicit = true
 
 [dependency-groups]
